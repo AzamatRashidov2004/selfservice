@@ -1,0 +1,16 @@
+{
+  "projects": {
+    "default": "sop-generator"
+  },
+  "targets": {
+    "sop-generator": {
+      "hosting": {
+        "selfservice": [
+          "selfservice-react"
+        ]
+      }
+    }
+  },
+  "etags": {},
+  "dataconnectEmulatorConfig": {}
+}
