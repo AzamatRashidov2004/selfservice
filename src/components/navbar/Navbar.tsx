@@ -1,34 +1,54 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom'; // Import Link component
 import './Navbar.css';
-import Popup from '../popup/Popup';
+import Popup from '../Modals/Popup';
+import Notification from '../Modals/Notification';
 import { 
-  createPopupEvent, 
   setupPopupEventListener, 
   handlePopupClose, 
-  getDefaultPopupState, 
-  PopupState 
-} from './Navbar_Util.ts'; // Import utility functions and types
+  getDefaultPopupState,
+  setupNotificationEventListener, 
+  getDefaultNotificationState
+} from './Navbar_Util'; // Import popup utility functions and types
+
+import { 
+  PopupState, 
+  createNotificationEvent, 
+  NotificationState, 
+  createPopupEvent 
+} from '../../utility/Modal_Util';
 
 const Navbar: React.FC = () => {
-  // Initialise popup states
+  // Initialise popup and notification states
   const [popup, setPopup] = useState<PopupState>(getDefaultPopupState());
+  const [notification, setNotification] = useState<NotificationState>(getDefaultNotificationState());
 
   // Use useCallback to memoize the showPopup function
   const showPopup = useCallback((title: string, text: string, buttons: PopupState['buttons'], callback?: (success: boolean) => void) => {
     setPopup({ isVisible: true, title, text, buttons, callback });
   }, []);
 
+  // Use useCallback to memoize the showNotification function
+  const showNotification = useCallback((title: string, text: string, type: NotificationState['type'], notification_time?: number) => {
+    setNotification({ isVisible: true, title, text, type, notification_time });
+  }, []);
 
-  //Setup popup listeners
+  // Setup popup and notification listeners
   useEffect(() => {
-    const cleanupListener = setupPopupEventListener(showPopup);
+    const cleanupPopupListener = setupPopupEventListener(showPopup);
+    const cleanupNotificationListener = setupNotificationEventListener(showNotification);
 
-    // Clean up event listener on component unmount
+    // Clean up event listeners on component unmount
     return () => {
-      cleanupListener();
+      cleanupPopupListener();
+      cleanupNotificationListener();
     };
-  }, [showPopup]);
+  }, [showPopup, showNotification]);
+
+  // Handle notification close
+  const handleNotificationClose = () => {
+    setNotification(prev => ({ ...prev, isVisible: false }));
+  };
 
   return (
     <>
@@ -36,7 +56,7 @@ const Navbar: React.FC = () => {
         <div className="container-fluid">
           {/* Logo Text */}
           <Link className="navbar-brand" to="/">
-            Try Now
+            CVUT CIIRC
           </Link>
 
           {/* Right-aligned buttons */}
@@ -49,6 +69,12 @@ const Navbar: React.FC = () => {
               })}
             >
               Show Popup
+            </button>
+            <button
+              className="btn"
+              onClick={() => createNotificationEvent('Success', 'Item successfully added', 'success', 2000)}
+            >
+              Show Notification
             </button>
             <Link className="btn btn-link custom-link me-2" to="/new-project">
               New
@@ -70,6 +96,16 @@ const Navbar: React.FC = () => {
         buttons={popup.buttons}
         onClose={handlePopupClose(setPopup, popup.callback)}
         isVisible={popup.isVisible}
+      />
+
+      {/* Notification component */}
+      <Notification
+        title={notification.title}
+        text={notification.text}
+        type={notification.type}
+        isVisible={notification.isVisible}
+        onClose={handleNotificationClose}
+        notification_time={notification.notification_time} // Pass notification_time from state
       />
     </>
   );

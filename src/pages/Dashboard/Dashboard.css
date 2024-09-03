@@ -1,0 +1,18 @@
+#root{
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.dashboard-container{
+    margin-top: 90px;
+}
+
+.hover-underline:hover{
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.gray-bg{
+    background-color: #F2F2F2 !important;
+}

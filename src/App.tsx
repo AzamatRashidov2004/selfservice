@@ -1,14 +1,37 @@
-import React from 'react';
+// Import React Routing 
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// Import Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
-import New from './pages/New_Project';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import * as bootstrap from 'bootstrap';
+
+// Import Font Awesome
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
+// Import Pages
+import New from './pages/New-Project/New_Project';
 import Navbar from './components/navbar/Navbar';
+import Dashboard from './pages/Dashboard/Dashboard';
+import Landing_Page from './pages/Landing-Page/Landing_Page';
+import Try_Now from './pages/Try-Now/Try_Now';
+
+// Import css
 import './App.css';
-import Dashboard from './pages/Dashboard';
-import Landing_Page from './pages/Landing_Page';
-import Try_Now from './pages/Try_Now';
 
 const App: React.FC = () => {
+
+  useEffect(() => {
+    // Initialize tooltips for the app
+    const tooltipTriggerList = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(tooltipTriggerEl => {
+      new bootstrap.Tooltip(tooltipTriggerEl, {
+        delay: { show: 300, hide: 0 }  // 300ms delay before showing, 100ms delay before hiding
+      });
+    });
+  }, []);
+
   return (
     <>
       <Router>

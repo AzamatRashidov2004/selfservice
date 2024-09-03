@@ -1,5 +1,5 @@
 import React from 'react';
-import './Popup.css';
+import './Modals.css';
 
 // Define types for button props
 interface ButtonProps {
