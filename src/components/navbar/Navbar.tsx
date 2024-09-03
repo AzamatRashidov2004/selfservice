@@ -1,22 +1,42 @@
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; // Import Link component
-import { useState } from 'react';
 import './Navbar.css';
 import Popup from '../popup/Popup';
 
-function Navbar() {
-  const [popup, setPopup] = useState({
+// Define types for the buttons in the popup
+interface ButtonConfig {
+  text: string;
+  type: 'info' | 'danger' | 'success' | 'primary' | 'secondary';
+}
+
+interface PopupState {
+  isVisible: boolean;
+  title: string;
+  text: string;
+  buttons: {
+    success: ButtonConfig;
+    cancel: ButtonConfig;
+    // Add other button configurations if needed
+  };
+}
+
+const Navbar: React.FC = () => {
+  const [popup, setPopup] = useState<PopupState>({
     isVisible: false,
     title: '',
     text: '',
-    buttons: []
+    buttons: {
+      success: {text: "Yes", type: "primary"},
+      cancel: {text: "No", type: "secondary"}
+    }
   });
 
-  const showPopup = (title, text, buttons) => {
+  const showPopup = (title: string, text: string, buttons: PopupState['buttons']) => {
     setPopup({ isVisible: true, title, text, buttons });
   };
 
   const hidePopup = () => {
-    setPopup({ ...popup, isVisible: false });
+    setPopup(prev => ({ ...prev, isVisible: false }));
   };
 
   return (
@@ -30,7 +50,9 @@ function Navbar() {
 
           {/* Right-aligned buttons */}
           <div className="d-flex ms-auto">
-            <button className='btn'>Show Popup</button>
+            <button className='btn' onClick={() => showPopup('Popup Title', 'Popup Text', { success: { text: 'Okay', type: 'primary' }, cancel: { text: 'Cancel', type: 'secondary' } })}>
+              Show Popup
+            </button>
             <Link className="btn btn-link custom-link me-2" to="/new-project">
               New
             </Link>
