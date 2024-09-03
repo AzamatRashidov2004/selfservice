@@ -1,0 +1,18 @@
+.navbar-container{
+    padding: 10px var(--body-padding);
+}
+  
+.navbar-brand {
+font-weight: bold;
+}
+
+/* Remove underline and set text color for link buttons */
+.custom-link {
+text-decoration: none; /* Remove underline */
+color: #6c757d; /* Secondary color (Bootstrap's .text-secondary) */
+}
+
+.custom-link:hover {
+color: #5a6268; /* Darker shade of secondary color on hover */
+}
+  
