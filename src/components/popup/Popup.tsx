@@ -23,27 +23,25 @@ interface PopupProps {
 // Define the Popup component
 const Popup: React.FC<PopupProps> = ({ title, text, buttons, onClose, isVisible }) => {
   // Destructure buttons
-  const cancelButton = buttons.cancel;
-  const successButton = buttons.success;
-
-  // Return null if popup is not visible
-  if (!isVisible) return null;
+  const { cancel, success } = buttons;
 
   return (
-    <div className={`popup-overlay ${isVisible ? "show" : "hidden"}`}>
-      <div className="popup-container">
+    <div className={`popup-overlay ${isVisible ? '' : 'no-shadow'}`}>
+      <div className={`popup-container ${isVisible ? 'show' : ''}`}>
         <h2 className="popup-title">{title}</h2>
         <p className="popup-text">{text}</p>
         <div className="popup-buttons">
           <button
-            className={`btn btn-${successButton.type} close-button`}
-            onClick={() => onClose(true)}>
-            {successButton.text}
+            className={`btn btn-${cancel.type}`}
+            onClick={() => onClose(false)}
+          >
+            {cancel.text}
           </button>
           <button
-            className={`btn btn-${cancelButton.type} close-button`}
-            onClick={() => onClose(false)}>
-            {cancelButton.text}
+            className={`btn btn-${success.type}`}
+            onClick={() => onClose(true)}
+          >
+            {success.text}
           </button>
         </div>
       </div>

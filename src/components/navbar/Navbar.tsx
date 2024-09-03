@@ -1,56 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom'; // Import Link component
 import './Navbar.css';
 import Popup from '../popup/Popup';
-
-// Define types for the buttons in the popup
-interface ButtonConfig {
-  text: string;
-  type: 'info' | 'danger' | 'success' | 'primary' | 'secondary';
-}
-
-interface PopupState {
-  isVisible: boolean;
-  title: string;
-  text: string;
-  buttons: {
-    success: ButtonConfig;
-    cancel: ButtonConfig;
-    // Add other button configurations if needed
-  };
-}
+import { 
+  createPopupEvent, 
+  setupPopupEventListener, 
+  handlePopupClose, 
+  getDefaultPopupState, 
+  PopupState 
+} from './Navbar_Util.ts'; // Import utility functions and types
 
 const Navbar: React.FC = () => {
-  const [popup, setPopup] = useState<PopupState>({
-    isVisible: false,
-    title: '',
-    text: '',
-    buttons: {
-      success: {text: "Yes", type: "primary"},
-      cancel: {text: "No", type: "secondary"}
-    }
-  });
+  // Initialise popup states
+  const [popup, setPopup] = useState<PopupState>(getDefaultPopupState());
 
-  const showPopup = (title: string, text: string, buttons: PopupState['buttons']) => {
-    setPopup({ isVisible: true, title, text, buttons });
-  };
+  // Use useCallback to memoize the showPopup function
+  const showPopup = useCallback((title: string, text: string, buttons: PopupState['buttons'], callback?: (success: boolean) => void) => {
+    setPopup({ isVisible: true, title, text, buttons, callback });
+  }, []);
 
-  const hidePopup = () => {
-    setPopup(prev => ({ ...prev, isVisible: false }));
-  };
+
+  //Setup popup listeners
+  useEffect(() => {
+    const cleanupListener = setupPopupEventListener(showPopup);
+
+    // Clean up event listener on component unmount
+    return () => {
+      cleanupListener();
+    };
+  }, [showPopup]);
 
   return (
     <>
       <nav className="navbar-container navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <div className="container-fluid">
           {/* Logo Text */}
-          <a className="navbar-brand" href="/">
-            CVUT CIIRC
-          </a>
+          <Link className="navbar-brand" to="/">
+            Try Now
+          </Link>
 
           {/* Right-aligned buttons */}
           <div className="d-flex ms-auto">
-            <button className='btn' onClick={() => showPopup('Popup Title', 'Popup Text', { success: { text: 'Okay', type: 'primary' }, cancel: { text: 'Cancel', type: 'secondary' } })}>
+            <button
+              className="btn"
+              onClick={() => createPopupEvent('Popup Title', 'Popup Text', {
+                success: { text: 'Yes', type: 'primary' },
+                cancel: { text: 'No', type: 'secondary' }
+              })}
+            >
               Show Popup
             </button>
             <Link className="btn btn-link custom-link me-2" to="/new-project">
@@ -65,17 +62,17 @@ const Navbar: React.FC = () => {
           </div>
         </div>
       </nav>
-      
+
       {/* Popup component to inform users about actions */}
       <Popup 
         title={popup.title}
         text={popup.text}
         buttons={popup.buttons}
-        onClose={hidePopup}
+        onClose={handlePopupClose(setPopup, popup.callback)}
         isVisible={popup.isVisible}
       />
     </>
   );
-}
+};
 
 export default Navbar;
