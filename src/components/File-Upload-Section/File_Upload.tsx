@@ -1,5 +1,6 @@
 import React from 'react';
-import "./File_Upload.css"
+import "./File_Upload.css";
+import getFileExstension from "../../utility/File_Exstension";
 
 interface FileUploadSectionProps {
   step: number;
@@ -26,7 +27,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     const selectedFile = event.target.files?.[0] || null;
 
     if (selectedFile) {
-      const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
+      const fileExtension = getFileExstension(selectedFile.name);
 
       // Check if the file is .xlsx or .csv AKA analytical app
       if (fileExtension === 'xlsx' || fileExtension === 'csv') {

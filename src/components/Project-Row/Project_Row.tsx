@@ -1,5 +1,6 @@
 import React from 'react';
-import { createPopupEvent } from '../../utility/Modal_Util';
+import { createPopupEvent, createNotificationEvent } from '../../utility/Modal_Util';
+import getFileExstension from "../../utility/File_Exstension";
 
 interface Project {
   name: string;
@@ -15,9 +16,11 @@ interface ProjectRowProps {
 
 const ProjectRow: React.FC<ProjectRowProps> = ({ project, index }) => {
 
-    const deleteProject = () => {
-        // API delete project here
-        console.log("DELETE PROJECT");
+    const deleteProject = (response: boolean) => {
+      if (!response) return
+
+      // API delete project here
+      createNotificationEvent("File Deleted", "Succesfully deleted the file", "success")
     }
 
     const handleDeleteClick = () => {
@@ -25,8 +28,21 @@ const ProjectRow: React.FC<ProjectRowProps> = ({ project, index }) => {
             "Delete project",
             `Are you sure you want to delete the project with id ${project.projectId}`,
             {success: {text: "Delete", type: "danger"}, cancel: {text: "Cancel", type: "secondary"}},
-            deleteProject
+            (response: boolean) => {deleteProject(response)}
         )
+    }
+
+    const launchProject = () => {
+      const fileExtension = getFileExstension(project.filename);
+      let url: string; 
+
+      if (fileExtension === 'xlsx' || fileExtension === 'csv') {
+        url = `https://bot-flowstorm.web.app/selfservice/analytical?configID=${project.projectId}`;
+      } else {
+        url = `https://bot-flowstorm.web.app/selfservice?configID=${project.projectId}`;
+      }
+  
+      window.open(url, '_blank');
     }
 
   return (
@@ -42,7 +58,7 @@ const ProjectRow: React.FC<ProjectRowProps> = ({ project, index }) => {
         <button className="btn btn-outline-warning btn-sm me-2" data-bs-toggle="tooltip" title="Edit">
           <i className="fas fa-edit"></i>
         </button>
-        <button className="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" title="Launch">
+        <button className="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" onClick={launchProject} title="Launch">
           <i className="fas fa-rocket"></i>
         </button>
       </td>

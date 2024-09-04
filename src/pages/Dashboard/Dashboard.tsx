@@ -11,10 +11,11 @@ interface Project {
 
 const Dashboard: React.FC = () => {
   // Example data; replace with actual data fetching logic
-  // eslint-disable-next-line
   const [projects, setProjects] = useState<Project[]>();
 
   useEffect(() => {
+    // API list all projects here
+
     setProjects([
       {
         name: 'ESET Demo',

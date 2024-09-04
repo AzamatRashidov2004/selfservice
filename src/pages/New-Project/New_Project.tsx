@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Stepper from "../../components/Stepper/Stepper";
 import FileUploadSection from '../../components/File-Upload-Section/File_Upload'; // Adjust the import path as necessary
 import ProjectDetails from '../../components/Project-Details-Section/Project_Details';
+import { createNotificationEvent } from '../../utility/Modal_Util';
 import "./New_Project.css";
 
 const New_Project: React.FC = () => {
@@ -17,11 +18,14 @@ const New_Project: React.FC = () => {
   const [introMessage, setIntroMessage] = useState('');
   const [introImage, setIntroImage] = useState('');
 
-  const fileUploadNextButtonClick = () => {
+  const fileUploadNextButtonClick = async () => {
     if (!file) return;
     if (step !== 0) return;
     if (file && isAnalytical && !notationFile) return;
 
+    // API upload file here
+
+    createNotificationEvent("Upload Succesful", "File succesfully uploaded to the server", "success")
     setStep(step + 1);
   };
 
@@ -34,6 +38,7 @@ const New_Project: React.FC = () => {
   return (
     <main className="container-fluid main-container">
       <div className="p-4 rounded mb-4 bg-primary">
+        <h1>New Project</h1>
         <Stepper activeStep={step} />
       </div>
 

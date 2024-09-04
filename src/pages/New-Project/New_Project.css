@@ -6,3 +6,7 @@ section{
 .form-control, .form-select{
     border-color: var(--primary-color);
 }
+
+h1{
+    color: white;
+}
