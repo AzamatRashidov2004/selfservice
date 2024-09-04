@@ -11,7 +11,7 @@ const Navbar: React.FC = () => {
   return (
     <>
       <nav className="navbar-container navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <div className="container-fluid">
+        <div className="container-fluid navbar-wrapper">
           {/* Logo Text */}
           <Link className="navbar-brand" to="/">
             CVUT CIIRC

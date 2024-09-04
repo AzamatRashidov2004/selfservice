@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Popup from './components/Popup';
-import Notification from './components/Notification';
+import Popup from './sub-components/Popup';
+import Notification from './sub-components/Notification';
 import { 
   setupPopupEventListener, 
   handlePopupClose, 

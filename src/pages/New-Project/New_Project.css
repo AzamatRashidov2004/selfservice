@@ -1,0 +1,8 @@
+section{
+    padding: 0 33%;
+    text-align: start;
+}
+
+.form-control, .form-select{
+    border-color: var(--primary-color);
+}

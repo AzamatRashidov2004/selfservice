@@ -1,0 +1,6 @@
+.MuiStepLabel-label{
+    color: rgb(224, 224, 224);
+    &.Mui-active, &.Mui-completed{
+        color: white !important;
+    }
+}
