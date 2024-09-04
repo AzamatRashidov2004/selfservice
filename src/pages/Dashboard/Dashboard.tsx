@@ -41,7 +41,7 @@ const Dashboard: React.FC = () => {
   }, [])
 
   return (
-    <div className="container-fluid dashboard-container">
+    <main className="container-fluid main-container">
       <div className="bg-primary p-4 rounded mb-4">
         <h1 className="text-light">Available Projects</h1>
         <p className="text-light">Choose a project to edit or delete</p>
@@ -78,7 +78,7 @@ const Dashboard: React.FC = () => {
           ))}
         </tbody>
       </table>
-    </div>
+    </main>
   );
 }
 
