@@ -42,9 +42,9 @@ export const defaultNotificationState: NotificationState = {
     notification_time: 2000 // Default time for notification display
   };
 
-export const createPopupEvent = (title: string, text: string, buttons: PopupState['buttons'], callback?: (success: boolean) => void, notification_time?: number) => {
+export const createPopupEvent = (title: string, text: string, buttons: PopupState['buttons'], callback?: (success: boolean) => void) => {
     const showPopupEvent = new CustomEvent('showPopup', {
-      detail: { title, text, buttons, callback, notification_time }
+      detail: { title, text, buttons, callback }
     });
     window.dispatchEvent(showPopupEvent);
   };

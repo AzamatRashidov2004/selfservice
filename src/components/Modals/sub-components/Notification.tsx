@@ -11,7 +11,6 @@ interface NotificationProps {
 }
 
 const Notification: React.FC<NotificationProps> = ({ title, text, type, isVisible, onClose, notification_time=2000 }) => {
-    console.log("typetype", type)
   useEffect(() => {
     if (isVisible) {
       const timer = setTimeout(onClose, notification_time); // Dismiss after 2 seconds

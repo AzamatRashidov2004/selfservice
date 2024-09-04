@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
+import ProjectRow from '../../components/Project-Row/Project_Row'; // Import the new component
 
 interface Project {
   name: string;
@@ -20,25 +21,28 @@ const Dashboard: React.FC = () => {
         lastUpdate: '11-06-2024',
         filename: 'ESET_PROJECT_ELITE_brochure.pdf',
         projectId: '02dd0b421950790bd3ef61c92457eb61',
-      },{
+      },
+      {
         name: 'ESET Demo',
         lastUpdate: '11-06-2024',
         filename: 'ESET_PROJECT_ELITE_brochure.pdf',
         projectId: '02dd0b421950790bd3ef61c92457eb61',
-      },{
+      },
+      {
         name: 'ESET Demo',
         lastUpdate: '11-06-2024',
         filename: 'ESET_PROJECT_ELITE_brochure.pdf',
         projectId: '02dd0b421950790bd3ef61c92457eb61',
-      },{
+      },
+      {
         name: 'ESET Demo',
         lastUpdate: '11-06-2024',
         filename: 'ESET_PROJECT_ELITE_brochure.pdf',
         projectId: '02dd0b421950790bd3ef61c92457eb61',
       },
       // Add more project objects as needed
-    ])
-  }, [])
+    ]);
+  }, []);
 
   return (
     <main className="container-fluid main-container">
@@ -58,28 +62,12 @@ const Dashboard: React.FC = () => {
         </thead>
         <tbody>
           {projects && projects.map((project, index) => (
-            <tr key={index}>
-              <td className={`text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.name}</td>
-              <td className={`text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.lastUpdate}</td>
-              <td className={`text-start hover-underline ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.filename}</td>
-              <td className={`text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.projectId}</td>
-              <td className={`text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>
-                <button className="btn btn-outline-danger btn-sm me-2" data-bs-toggle="tooltip" title="Delete">
-                  <i className="fas fa-trash-alt"></i>
-                </button>
-                <button className="btn btn-outline-warning btn-sm me-2" data-bs-toggle="tooltip" title="Edit">
-                  <i className="fas fa-edit"></i>
-                </button>
-                <button className="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" title="Launch">
-                  <i className="fas fa-rocket"></i>
-                </button>
-              </td>
-            </tr>
+            <ProjectRow key={index} project={project} index={index} />
           ))}
         </tbody>
       </table>
     </main>
   );
-}
+};
 
 export default Dashboard;

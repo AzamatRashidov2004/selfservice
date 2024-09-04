@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Stepper from "../../components/Stepper/Stepper";
-import FileUploadSection from '../../components/File-Upload/File_Upload'; // Adjust the import path as necessary
-import ProjectDetails from '../../components/Project-Details/Project_Details';
+import FileUploadSection from '../../components/File-Upload-Section/File_Upload'; // Adjust the import path as necessary
+import ProjectDetails from '../../components/Project-Details-Section/Project_Details';
 import "./New_Project.css";
 
 const New_Project: React.FC = () => {
