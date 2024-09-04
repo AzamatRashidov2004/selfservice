@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import './Modals.css';
+import '../Modals.css';
 
 interface NotificationProps {
   title: string;
