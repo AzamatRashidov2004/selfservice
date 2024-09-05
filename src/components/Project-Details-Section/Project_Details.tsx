@@ -1,5 +1,4 @@
 import React from 'react';
-import './Project_Details.css'; // Adjust the path as necessary
 
 interface ProjectDescriptionSectionProps {
   projectName: string;

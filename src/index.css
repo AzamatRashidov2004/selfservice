@@ -5,6 +5,7 @@
 body{
   /* Body Padding */
   padding: 0 var(--body-padding);
+  min-height: calc(100vh - 90px);
 }
 
 .hidden{
