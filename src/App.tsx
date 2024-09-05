@@ -1,6 +1,9 @@
 // Import React Routing
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+// Handle scrollbar changes
+import { updateScrollbarGutter } from './utility/Scrollbar_Util';
 
 // Import Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -22,6 +25,22 @@ import Footer from './components/Footer/Footer'; // Import the footer
 import './App.css';
 
 const App: React.FC = () => {
+
+  // Window size listener for Scrollbar width styling
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      updateScrollbarGutter();
+    });
+    resizeObserver.observe(document.body);
+
+    // Initial size check
+    updateScrollbarGutter();
+
+    // Cleanup observer on unmount
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <>

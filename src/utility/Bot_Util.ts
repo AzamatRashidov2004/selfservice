@@ -143,8 +143,8 @@ export const defaultSettings: Settings = {
   fullscreen_margin: 0
 };
 
-  export const botConfig: Settings = {
-    ...defaultSettings,
+// The necessary config to statically display the bot
+  export const botStaticDisplayConfig: object = {
     title: "Custom Bot",
     sound: true,
     key: "646b4706a47a67009f647d79",

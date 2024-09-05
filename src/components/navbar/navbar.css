@@ -1,5 +1,6 @@
 .navbar-container{
-    padding: 10px var(--body-padding);
+    padding: 10px calc(var(--body-padding) - var(--scrollbar-gutter));
+    margin-left: var(--scrollbar-gutter);
 }
   
 .navbar-brand {
@@ -14,5 +15,9 @@ color: #6c757d; /* Secondary color (Bootstrap's .text-secondary) */
 
 .custom-link:hover {
 color: #5a6268; /* Darker shade of secondary color on hover */
+}
+
+.navbar-wrapper{
+    padding: 0;
 }
   

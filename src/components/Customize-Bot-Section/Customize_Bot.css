@@ -12,9 +12,13 @@
 #bot-container{
     flex-basis: 50%;
     position: relative;
-    height: 90%;
+    height: 750px;
 }
 
 .bot-customize-container{
     padding: 0 5px;
+}
+
+.bot-customize-container{
+    height: 750px;
 }

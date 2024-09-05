@@ -4,11 +4,15 @@ import FileUploadSection from '../../components/File-Upload-Section/File_Upload'
 import ProjectDetails from '../../components/Project-Details-Section/Project_Details';
 import { createNotificationEvent } from '../../utility/Modal_Util';
 import CustomizeBot from '../../components/Customize-Bot-Section/Customize_Bot';
+import { Settings } from '../../utility/Bot_Util';
+import getDate from "../../utility/date_util";
 import "./New_Project.css";
 
 const New_Project: React.FC = () => {
   const [step, setStep] = useState(0);
   const [file, setFile] = useState<File | null>(null);
+  const [doc_name, setDocName] = useState<string>("");
+  const [docID, setDocID] = useState<string>("");
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
   const [notationFile, setNotationFile] = useState<File | null>(null);
   
@@ -25,7 +29,9 @@ const New_Project: React.FC = () => {
     if (file && isAnalytical && !notationFile) return;
 
     // API upload file here
+    setDocID("// API save the doc id here")
 
+    setDocName(file.name);
     createNotificationEvent("Upload Succesful", "File succesfully uploaded to the server", "success")
     setStep(step + 1);
   };
@@ -35,6 +41,25 @@ const New_Project: React.FC = () => {
       setStep(step + 1);
     }
   };
+
+  const saveSettings = (settings: Settings) => {
+    settings.attributes = {
+      description, 
+      doc_id: docID,
+      doc_name,
+      intro_image: introImage,
+      language: language,
+      intro_message: introMessage,
+      last_update: getDate(),
+      project_name: projectName,
+      pdf_id: docID
+    }
+
+    // API save the config here
+    console.log(settings);
+    createNotificationEvent("Project Created", "Project successfully created", "success");
+    // createNotificationEvent("Request Failed", "Something went wrong, please try again later...", "danger"); //If the call is failed
+  }
 
   return (
     <main className="container-fluid main-container">
@@ -71,8 +96,9 @@ const New_Project: React.FC = () => {
           handleNextButtonClick={projectDetailsNextButtonClick}
         />
       ) : null}
+
       {step === 2 ? 
-      <CustomizeBot />
+      <CustomizeBot saveSettings={saveSettings}/>
         : null}
     </main>
   );

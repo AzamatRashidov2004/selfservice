@@ -27,6 +27,7 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
   setIntroImage,
   handleNextButtonClick
 }) => {
+  console.log("NAME", projectName)
   return (
     <section className="project-description-wrapper mt-4">
       <h2 className="project-description-title">Project Description</h2>
