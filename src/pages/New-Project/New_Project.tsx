@@ -3,6 +3,7 @@ import Stepper from "../../components/Stepper/Stepper";
 import FileUploadSection from '../../components/File-Upload-Section/File_Upload'; // Adjust the import path as necessary
 import ProjectDetails from '../../components/Project-Details-Section/Project_Details';
 import { createNotificationEvent } from '../../utility/Modal_Util';
+import CustomizeBot from '../../components/Customize-Bot-Section/Customize_Bot';
 import "./New_Project.css";
 
 const New_Project: React.FC = () => {
@@ -30,7 +31,7 @@ const New_Project: React.FC = () => {
   };
 
   const projectDetailsNextButtonClick = () => {
-    if (projectName && description && introMessage && introImage) {
+    if (projectName && description) {
       setStep(step + 1);
     }
   };
@@ -38,7 +39,7 @@ const New_Project: React.FC = () => {
   return (
     <main className="container-fluid main-container">
       <div className="p-4 rounded mb-4 bg-primary">
-        <h1>New Project</h1>
+        <h1 className='text-center'>New Project</h1>
         <Stepper activeStep={step} />
       </div>
 
@@ -70,6 +71,9 @@ const New_Project: React.FC = () => {
           handleNextButtonClick={projectDetailsNextButtonClick}
         />
       ) : null}
+      {step === 2 ? 
+      <CustomizeBot />
+        : null}
     </main>
   );
 };

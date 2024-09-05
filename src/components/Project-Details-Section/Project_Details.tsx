@@ -87,7 +87,7 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
         <button
           className="btn btn-primary"
           type="button"
-          disabled={!projectName || !description || !introMessage || !introImage}
+          disabled={!projectName || !description}
           onClick={handleNextButtonClick}
         >
           Next Step
