@@ -1,6 +1,6 @@
 .navbar-container{
     padding: 10px calc(var(--body-padding) - var(--scrollbar-gutter));
-    margin-left: var(--scrollbar-gutter);
+    padding-left: var(--body-padding);
 }
   
 .navbar-brand {
