@@ -4,7 +4,7 @@ import ProjectRow from '../../components/Project-Row/Project_Row'; // Import the
 import CustomizeBot from '../../components/Customize-Bot-Section/Customize_Bot';
 import { Settings } from '../../utility/Bot_Util';
 import ProjectDetails from '../../components/Project-Details-Section/Project_Details';
-import getDate from "../../utility/date_util.ts";
+import getDate from "../../utility/Date_Util.ts";
 // import { Settings } from '../../utility/Bot_Util';
 
 interface Project {

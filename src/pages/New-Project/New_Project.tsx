@@ -5,7 +5,7 @@ import ProjectDetails from '../../components/Project-Details-Section/Project_Det
 import { createNotificationEvent } from '../../utility/Modal_Util';
 import CustomizeBot from '../../components/Customize-Bot-Section/Customize_Bot';
 import { Settings } from '../../utility/Bot_Util';
-import getDate from "../../utility/date_util";
+import getDate from "../../utility/Date_Util";
 import "./New_Project.css";
 
 const New_Project: React.FC = () => {
