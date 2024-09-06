@@ -1,17 +1,16 @@
-const apiUrl =
-  "https://promethistpublic.blob.core.windows.net/data/universal_cqa/model_storage_develop/faiss_dbs/faiss_dbs";
+const apiUrl: string = import.meta.env.VITE_RESOURCE_URL as string;
 
-export async function getPdfConfig(id) {
+export async function getPdfConfig(id: string): Promise<any> {
   // Get the config.json file for the pdf applications of id
   try {
-    const response = await fetch(`${apiUrl}/${id}/config.json`);
+    const response: Response = await fetch(`${apiUrl}/${id}/config.json`);
 
     if (!response.ok) {
       console.error(`Error: ${response.status} - ${response.statusText}`);
       return null;
     }
 
-    const config = await response.json();
+    const config: any = await response.json();
     return config;
   } catch (error) {
     console.error("Failed to fetch config:", error);

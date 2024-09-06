@@ -1,8 +1,20 @@
-import React from 'react';
-import { createPopupEvent, createNotificationEvent } from '../../utility/Modal_Util';
+import React from "react";
+import {
+  createPopupEvent,
+  createNotificationEvent,
+} from "../../utility/Modal_Util";
 import getFileExstension from "../../utility/File_Exstension";
-import { Settings } from '../../utility/Bot_Util';
-import { defaultSettings } from '../../utility/Bot_Util';
+import { Settings } from "../../utility/Bot_Util";
+import { defaultSettings } from "../../utility/Bot_Util";
+import {
+  deleteAnalyticalProject,
+  getSingleAnalyticalConfig,
+} from "../../api/analyst";
+import {
+  deletePdfProject,
+  getSinglPdfConfig,
+  isProduction,
+} from "../../api/universal";
 
 interface Project {
   name: string;
@@ -15,53 +27,72 @@ interface ProjectRowProps {
   project: Project;
   index: number;
   setSelectedProject: React.Dispatch<React.SetStateAction<string | null>>;
-  setSelectedProjectConfig: React.Dispatch<React.SetStateAction<Settings | null>>;
+  setSelectedProjectConfig: React.Dispatch<
+    React.SetStateAction<Settings | null>
+  >;
   setCustomizeStep: React.Dispatch<React.SetStateAction<number>>;
   scrollIntoEditSection: () => void;
 }
 
 const ProjectRow: React.FC<ProjectRowProps> = ({ project, index, setSelectedProject, setSelectedProjectConfig, setCustomizeStep, scrollIntoEditSection }) => {
 
+    // API delete project here
     const deleteProject = (response: boolean) => {
-      if (!response) return
-
-      // API delete project here
-      createNotificationEvent("File Deleted", "Succesfully deleted the file", "success")
+    if (!response) return;
+    if (!deleteAnalyticalProject(project.projectId)) {
+      deletePdfProject(project.projectId);
     }
+    createNotificationEvent(
+      "File Deleted",
+      "Succesfully deleted the file",
+      "success"
+    );
+  };
 
-    const handleDeleteClick = () => {
-        createPopupEvent(
-            "Delete project",
-            `Are you sure you want to delete the project with id ${project.projectId}`,
-            {success: {text: "Delete", type: "danger"}, cancel: {text: "Cancel", type: "secondary"}},
-            (response: boolean) => {deleteProject(response)}
-        )
-    }
-
-    const launchProject = () => {
-      const fileExtension = getFileExstension(project.filename);
-      let url: string; 
-
-      if (fileExtension === 'xlsx' || fileExtension === 'csv') {
-        url = `https://bot-flowstorm.web.app/selfservice/analytical?configID=${project.projectId}`;
-      } else {
-        url = `https://bot-flowstorm.web.app/selfservice?configID=${project.projectId}`;
+  const handleDeleteClick = () => {
+    createPopupEvent(
+      "Delete project",
+      `Are you sure you want to delete the project with id ${project.projectId}`,
+      {
+        success: { text: "Delete", type: "danger" },
+        cancel: { text: "Cancel", type: "secondary" },
+      },
+      (response: boolean) => {
+        deleteProject(response);
       }
-  
-      window.open(url, '_blank');
+    );
+  };
+
+  const launchProject = () => {
+    const fileExtension = getFileExstension(project.filename);
+    let url: string;
+
+    if (fileExtension === "xlsx" || fileExtension === "csv") {
+      url = `https://bot-flowstorm.web.app/selfservice/analytical?configID=${project.projectId}`;
+    } else {
+      url = `https://bot-flowstorm.web.app/selfservice?configID=${project.projectId}`;
     }
 
-    const handleEditClick = () => {
-      setSelectedProject(project.projectId);
-      setCustomizeStep(0)
+    window.open(url, "_blank");
+  };
 
-      // API get project config here, set it below and please clean the defaultSettings code
-      setSelectedProjectConfig(defaultSettings);
-      scrollIntoEditSection();
+
+  async function handleEditClick() {
+    setSelectedProject(project.projectId);
+    setCustomizeStep(0);
+
+    // API get project config here, set it below and please clean the defaultSettings code
+    var config = await getSingleAnalyticalConfig(project.projectId);
+    if (config === null) {
+      config = await getSinglPdfConfig(project.projectId);
+    } else {
+      setSelectedProjectConfig(config.answer);
     }
+    scrollIntoEditSection();
+  }
 
   return (
-    <tr>
+   <tr>
       <td className={`project-name text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.name}</td>
       <td className={`project-last-update text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.lastUpdate}</td>
       <td className={`project-filename text-start hover-underline ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.filename}</td>
