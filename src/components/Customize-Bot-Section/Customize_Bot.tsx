@@ -1,6 +1,6 @@
 import "../../assets/bot/453.88f55f10.chunk.js";
 import "../../assets/bot/main.b8456701.js";
-import "../../assets/bot/main.fd3e8a04.css";
+import "../../assets/bot/main.af361184.css";
 import { Settings, botStaticDisplayConfig, defaultSettings } from "../../utility/Bot_Util.js";
 import { useEffect } from "react";
 import "./Customize_Bot.css";

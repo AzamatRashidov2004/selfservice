@@ -1,10 +1,6 @@
 import React  from 'react';
 import { Link } from 'react-router-dom'; // Import Link component
 import './Navbar.css';
-import { 
-  createPopupEvent, 
-  createNotificationEvent 
-} from '../../utility/Modal_Util';
 
 const Navbar: React.FC = () => {
 
@@ -19,21 +15,6 @@ const Navbar: React.FC = () => {
 
           {/* Right-aligned buttons */}
           <div className="d-flex ms-auto">
-            <button
-              className="btn"
-              onClick={() => createPopupEvent('Popup Title', 'Popup Text', {
-                success: { text: 'Yes', type: 'primary' },
-                cancel: { text: 'No', type: 'secondary' }
-              })}
-            >
-              Show Popup
-            </button>
-            <button
-              className="btn"
-              onClick={() => createNotificationEvent('Success', 'Item successfully added', 'success', 2000)}
-            >
-              Show Notification
-            </button>
             <Link className="btn btn-link custom-link me-2" to="/new-project">
               New
             </Link>

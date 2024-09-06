@@ -140,11 +140,11 @@ const Dashboard: React.FC = () => {
       <table className="table w-100">
         <thead>
           <tr>
-            <th className="text-start">Project Name</th>
-            <th className="text-start">Last Update</th>
-            <th className="text-start">Filename</th>
-            <th className="text-start">Project ID</th>
-            <th className="text-start">Actions</th>
+            <th className="project-name text-start">Project Name</th>
+            <th className="project-last-update text-start">Last Update</th>
+            <th className="project-filename text-start">Filename</th>
+            <th className="project-id text-start">Project ID</th>
+            <th className="project-actions text-start">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
         <>
           <div ref={customizeSectionRef} className="bg-primary p-4 rounded mb-4 text-center">
             <h1 className="text-light">Customize Project</h1>
-            <p className="text-light">Customize the project with the following id: {selectedProjectID}</p>
+            <p className="text-light">Customize the project with the following id: <em>{selectedProjectID}</em></p>
           </div>
 
           {customizeStep === 0 ?

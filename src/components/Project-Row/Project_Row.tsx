@@ -62,11 +62,11 @@ const ProjectRow: React.FC<ProjectRowProps> = ({ project, index, setSelectedProj
 
   return (
     <tr>
-      <td className={`text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.name}</td>
-      <td className={`text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.lastUpdate}</td>
-      <td className={`text-start hover-underline ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.filename}</td>
-      <td className={`text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.projectId}</td>
-      <td className={`text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>
+      <td className={`project-name text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.name}</td>
+      <td className={`project-last-update text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.lastUpdate}</td>
+      <td className={`project-filename text-start hover-underline ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.filename}</td>
+      <td className={`project-id text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.projectId}</td>
+      <td className={`project-actions text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>
         <button className="btn btn-outline-danger btn-sm me-2" data-bs-toggle="tooltip" onClick={handleDeleteClick} title="Delete">
           <i className="fas fa-trash-alt"></i>
         </button>

@@ -1,6 +1,7 @@
 :root{
   --body-padding: 10%;
   --scrollbar-gutter: 0;
+  --customize-section-padding: 33%;
 }
 
 body{

@@ -23,6 +23,7 @@ import Footer from './components/Footer/Footer'; // Import the footer
 
 // Import css
 import './App.css';
+import "./responsive.css";
 
 const App: React.FC = () => {
 
