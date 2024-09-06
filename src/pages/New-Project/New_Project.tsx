@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import Stepper from "../../components/Stepper/Stepper";
-import FileUploadSection from '../../components/File-Upload-Section/File_Upload'; // Adjust the import path as necessary
-import ProjectDetails from '../../components/Project-Details-Section/Project_Details';
-import { createNotificationEvent } from '../../utility/Modal_Util';
-import CustomizeBot from '../../components/Customize-Bot-Section/Customize_Bot';
-import { Settings } from '../../utility/Bot_Util';
+import FileUploadSection from "../../components/File-Upload-Section/File_Upload"; // Adjust the import path as necessary
+import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
+import { createNotificationEvent } from "../../utility/Modal_Util";
+import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
+import { Settings } from "../../utility/Bot_Util";
 import getDate from "../../utility/Date_Util";
 import "./New_Project.css";
+import { uploadAnalyticalProject } from "../../api/analyst";
+import { isProduction, uploadPdf } from "../../api/universal";
 
 const New_Project: React.FC = () => {
   const [step, setStep] = useState(0);
@@ -15,24 +17,43 @@ const New_Project: React.FC = () => {
   const [docID, setDocID] = useState<string>("");
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
   const [notationFile, setNotationFile] = useState<File | null>(null);
-  
-  // States for Project Details
-  const [projectName, setProjectName] = useState('');
-  const [description, setDescription] = useState('');
-  const [language, setLanguage] = useState('English');
-  const [introMessage, setIntroMessage] = useState('');
-  const [introImage, setIntroImage] = useState('');
 
+  // States for Project Details
+  const [projectName, setProjectName] = useState("");
+  const [description, setDescription] = useState("");
+  const [language, setLanguage] = useState("English");
+  const [introMessage, setIntroMessage] = useState("");
+  const [introImage, setIntroImage] = useState("");
+
+  // API upload file here
   const fileUploadNextButtonClick = async () => {
     if (!file) return;
     if (step !== 0) return;
     if (file && isAnalytical && !notationFile) return;
 
-    // API upload file here
-    setDocID("// API save the doc id here")
+    if (isAnalytical && notationFile) {
+      const formData = new FormData();
+      formData.append("table_file", file);
+      formData.append("annotations_file", notationFile);
+      const response = await uploadAnalyticalProject(formData);
+      setDocID(response["id"]);
+    } else {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await uploadPdf(formData);
+      if (isProduction) {
+        setDocID(response["answer"].split(" ")[4]);
+      } else {
+        // not implemented on server
+      }
+    }
 
     setDocName(file.name);
-    createNotificationEvent("Upload Succesful", "File succesfully uploaded to the server", "success")
+    createNotificationEvent(
+      "Upload Succesful",
+      "File succesfully uploaded to the server",
+      "success"
+    );
     setStep(step + 1);
   };
 
@@ -44,7 +65,7 @@ const New_Project: React.FC = () => {
 
   const saveSettings = (settings: Settings) => {
     settings.attributes = {
-      description, 
+      description,
       doc_id: docID,
       doc_name,
       intro_image: introImage,
@@ -52,19 +73,23 @@ const New_Project: React.FC = () => {
       intro_message: introMessage,
       last_update: getDate(),
       project_name: projectName,
-      pdf_id: docID
-    }
+      pdf_id: docID,
+    };
 
     // API save the config here
     console.log(settings);
-    createNotificationEvent("Project Created", "Project successfully created", "success");
+    createNotificationEvent(
+      "Project Created",
+      "Project successfully created",
+      "success"
+    );
     // createNotificationEvent("Request Failed", "Something went wrong, please try again later...", "danger"); //If the call is failed
-  }
+  };
 
   return (
     <main className="container-fluid main-container">
       <div className="p-4 rounded mb-4 bg-primary">
-        <h1 className='text-center'>New Project</h1>
+        <h1 className="text-center">New Project</h1>
         <Stepper activeStep={step} />
       </div>
 
@@ -97,9 +122,7 @@ const New_Project: React.FC = () => {
         />
       ) : null}
 
-      {step === 2 ? 
-      <CustomizeBot saveSettings={saveSettings}/>
-        : null}
+      {step === 2 ? <CustomizeBot saveSettings={saveSettings} /> : null}
     </main>
   );
 };
