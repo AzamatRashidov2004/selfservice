@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import './Dashboard.css';
 import ProjectRow from '../../components/Project-Row/Project_Row'; // Import the new component
 import CustomizeBot from '../../components/Customize-Bot-Section/Customize_Bot';
@@ -28,6 +28,8 @@ const Dashboard: React.FC = () => {
   const [introImage, setIntroImage] = useState('');
 
   const [customizeStep, setCustomizeStep] = useState<number>(0);
+
+  const customizeSectionRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     if (!selectedProjectConfig) return;
@@ -73,10 +75,30 @@ const Dashboard: React.FC = () => {
     ]);
   }, []);
 
+  const scrollIntoEditSection = useCallback(() => {
+    const topMargin = 80;
+    if (!selectedProjectID || !selectedProjectConfig || !customizeSectionRef.current) return
+    
+    const elementPosition = customizeSectionRef.current.getBoundingClientRect().top + window.pageYOffset;
+    const offsetPosition = elementPosition - topMargin; // Adjust the offset
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth',
+    });
+
+  }, [selectedProjectID, selectedProjectConfig]);
+  
+  useEffect(() => {
+    scrollIntoEditSection();
+  }, [scrollIntoEditSection]);
+
+  useEffect(() => {
+      scrollIntoEditSection();
+  }, [selectedProjectID, scrollIntoEditSection]);
+
   const handleProjectDetailsNext = () => {
-    console.log(selectedProjectConfig, description, projectName)
     if (!description || !projectName || !selectedProjectConfig) return
-    console.log("here")
     const attributes = {
       ...selectedProjectConfig.attributes,
       description: description,
@@ -94,9 +116,6 @@ const Dashboard: React.FC = () => {
     
     setCustomizeStep(customizeStep + 1);
   }
-  useEffect(() => {
-    console.log(customizeStep)
-  }, [customizeStep])
 
   const updateSettings = (settings: Settings) => {
     if (!selectedProjectConfig) return
@@ -137,13 +156,14 @@ const Dashboard: React.FC = () => {
             setSelectedProject={setSelectedProjectID} 
             setSelectedProjectConfig={setSelectedProjectConfig}
             setCustomizeStep={setCustomizeStep}
+            scrollIntoEditSection={scrollIntoEditSection}
             />
           ))}
         </tbody>
       </table>
       {selectedProjectID && selectedProjectConfig ? 
         <>
-          <div className="bg-primary p-4 rounded mb-4 text-center">
+          <div ref={customizeSectionRef} className="bg-primary p-4 rounded mb-4 text-center">
             <h1 className="text-light">Customize Project</h1>
             <p className="text-light">Customize the project with the following id: {selectedProjectID}</p>
           </div>
@@ -162,7 +182,7 @@ const Dashboard: React.FC = () => {
             setIntroImage={setIntroImage}
             handleNextButtonClick={handleProjectDetailsNext}
             />
-          : null}
+            : null}
 
           {customizeStep === 1 ?
             <CustomizeBot saveSettings={updateSettings} selectedProjectConfig={selectedProjectConfig}/>

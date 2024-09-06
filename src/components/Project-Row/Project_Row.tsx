@@ -17,9 +17,10 @@ interface ProjectRowProps {
   setSelectedProject: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedProjectConfig: React.Dispatch<React.SetStateAction<Settings | null>>;
   setCustomizeStep: React.Dispatch<React.SetStateAction<number>>;
+  scrollIntoEditSection: () => void;
 }
 
-const ProjectRow: React.FC<ProjectRowProps> = ({ project, index, setSelectedProject, setSelectedProjectConfig, setCustomizeStep }) => {
+const ProjectRow: React.FC<ProjectRowProps> = ({ project, index, setSelectedProject, setSelectedProjectConfig, setCustomizeStep, scrollIntoEditSection }) => {
 
     const deleteProject = (response: boolean) => {
       if (!response) return
@@ -56,6 +57,7 @@ const ProjectRow: React.FC<ProjectRowProps> = ({ project, index, setSelectedProj
 
       // API get project config here, set it below and please clean the defaultSettings code
       setSelectedProjectConfig(defaultSettings);
+      scrollIntoEditSection();
     }
 
   return (
