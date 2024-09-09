@@ -1,10 +1,10 @@
-const apiUrl: string = import.meta.env.VITE_ANALYTICAL_URL_`${
-  import.meta.env.VITE_ENVIRONMENT
-}`;
+const environment = import.meta.env.VITE_ENVIRONMENT;
+const apiUrl = import.meta.env[`VITE_ANALYTICAL_URL_${environment}`];
 
 export async function getAllAnalyticalTables(): Promise<any | null> {
   // Get all the Id's for analytical files (.csv, .xlsx)
   try {
+    console.log("URL",apiUrl)
     const response = await fetch(`${apiUrl}/agent/list_all_tables`);
 
     if (!response.ok) {
@@ -13,7 +13,7 @@ export async function getAllAnalyticalTables(): Promise<any | null> {
       );
       return null;
     }
-
+    console.log("HHHH", response)
     const all_ids = await response.json();
     return all_ids;
   } catch (error) {

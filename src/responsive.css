@@ -1,6 +1,6 @@
 @media (max-width: 1150px) {
     :root{
-        --body-padding: 3%;
+        --body-padding: 3% !important;
     }
 }
 

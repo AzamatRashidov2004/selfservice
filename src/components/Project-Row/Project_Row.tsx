@@ -5,7 +5,6 @@ import {
 } from "../../utility/Modal_Util";
 import getFileExstension from "../../utility/File_Exstension";
 import { Settings } from "../../utility/Bot_Util";
-import { defaultSettings } from "../../utility/Bot_Util";
 import {
   deleteAnalyticalProject,
   getSingleAnalyticalConfig,
@@ -13,7 +12,6 @@ import {
 import {
   deletePdfProject,
   getSinglPdfConfig,
-  isProduction,
 } from "../../api/universal";
 
 interface Project {
@@ -82,7 +80,7 @@ const ProjectRow: React.FC<ProjectRowProps> = ({ project, index, setSelectedProj
     setCustomizeStep(0);
 
     // API get project config here, set it below and please clean the defaultSettings code
-    var config = await getSingleAnalyticalConfig(project.projectId);
+    let config = await getSingleAnalyticalConfig(project.projectId);
     if (config === null) {
       config = await getSinglPdfConfig(project.projectId);
     } else {

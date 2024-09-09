@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import "./Dashboard.css";
 import ProjectRow from "../../components/Project-Row/Project_Row"; // Import the new component
 import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
         if (Object.keys(config.answer).length !== 0) {
           const project_name = config[1];
           const doc_id = config[0];
-          const last_update = "Uknown";
+          const last_update = "Unkown";
           const doc_name = config[1] + ".pdf";
           setProjects((prevProjects) => [
             ...(prevProjects || []), // Spread existing projects
@@ -128,33 +128,6 @@ const Dashboard: React.FC = () => {
     // After getting all projects call setProjects pls
     fetchData();
     fetchAnalyticalData();
-    setProjects([
-      {
-        name: "ESET Demo",
-        lastUpdate: "11-06-2024",
-        filename: "ESET_PROJECT_ELITE_brochure.pdf",
-        projectId: "02dd0b421950790bd3ef61c92457eb61",
-      },
-      {
-        name: "ESET Demo",
-        lastUpdate: "11-06-2024",
-        filename: "ESET_PROJECT_ELITE_brochure.pdf",
-        projectId: "02dd0b421950790bd3ef61c92457eb61",
-      },
-      {
-        name: "ESET Demo",
-        lastUpdate: "11-06-2024",
-        filename: "ESET_PROJECT_ELITE_brochure.pdf",
-        projectId: "02dd0b421950790bd3ef61c92457eb61",
-      },
-      {
-        name: "ESET Demo",
-        lastUpdate: "11-06-2024",
-        filename: "ESET_PROJECT_ELITE_brochure.pdf",
-        projectId: "02dd0b421950790bd3ef61c92457eb61",
-      },
-      // Add more project objects as needed
-    ]);
   }, []);
 
   const scrollIntoEditSection = useCallback(() => {
