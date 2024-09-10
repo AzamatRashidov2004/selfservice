@@ -1,19 +1,4 @@
-export interface ButtonConfig {
-    text: string;
-    type: 'info' | 'danger' | 'success' | 'primary' | 'secondary';
-  }
-  
-export interface PopupState {
-    isVisible: boolean;
-    title: string;
-    text: string;
-    buttons: {
-      success: ButtonConfig;
-      cancel: ButtonConfig;
-    };
-    callback?: (success: boolean) => void; // Optional callback function
-    notification_time?: number; // Optional time for popup display
-  }
+import { PopupState } from "./types";
 
 export const defaultPopupState: PopupState = {
     isVisible: false,

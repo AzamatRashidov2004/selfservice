@@ -1,18 +1,19 @@
 import "../../assets/bot/453.88f55f10.chunk.js";
 import "../../assets/bot/main.b8456701.js";
 import "../../assets/bot/main.af361184.css";
-import { Settings, botStaticDisplayConfig, defaultSettings } from "../../utility/Bot_Util.js";
+import { botStaticDisplayConfig, defaultSettings } from "../../utility/Bot_Util.js";
+import { SettingsType } from "../../utility/types.js";
 import { useEffect } from "react";
 import "./Customize_Bot.css";
 
 interface CustomizeBotProps {
-  saveSettings: (customSettings: Settings) => void;
+  saveSettings: (customSettings: SettingsType) => void;
   selectedProjectConfig?: object;
   }
   
   const CustomizeBot: React.FC<CustomizeBotProps> = ({ saveSettings, selectedProjectConfig }) => {
 
-    function initBot(id: string, settings: Settings): void {
+    function initBot(id: string, settings: SettingsType): void {
         const initFsBotEvent = new CustomEvent("initFsBot", {
           detail: {
             id,
@@ -37,7 +38,7 @@ interface CustomizeBotProps {
       }
 
       useEffect(() => {
-        let botSettings: Settings = defaultSettings;
+        let botSettings: SettingsType = defaultSettings;
 
         // On dashboard page, if a project is selected this config is passed down
         if(selectedProjectConfig){
