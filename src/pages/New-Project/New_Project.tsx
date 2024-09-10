@@ -4,11 +4,11 @@ import FileUploadSection from "../../components/File-Upload-Section/File_Upload"
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
 import { createNotificationEvent } from "../../utility/Modal_Util";
 import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
-import { Settings } from "../../utility/Bot_Util";
+import { SettingsType } from "../../utility/types.ts";
 import getDate from "../../utility/Date_Util";
 import "./New_Project.css";
-import { uploadAnalyticalProject } from "../../api/analyst";
-import { isProduction, uploadPdf } from "../../api/universal";
+import { uploadProjectFile } from "../../utility/Api_Utils";
+import { updateAnalyticalProject } from "../../api/analyst.ts";
 
 const New_Project: React.FC = () => {
   const [step, setStep] = useState(0);
@@ -31,24 +31,21 @@ const New_Project: React.FC = () => {
     if (step !== 0) return;
     if (file && isAnalytical && !notationFile) return;
 
-    if (isAnalytical && notationFile) {
-      const formData = new FormData();
-      formData.append("table_file", file);
-      formData.append("annotations_file", notationFile);
-      const response = await uploadAnalyticalProject(formData);
-      setDocID(response["id"]);
-    } else {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await uploadPdf(formData);
-      if (isProduction) {
-        setDocID(response["answer"].split(" ")[4]);
-      } else {
-        // not implemented on server
-      }
+    const id = await uploadProjectFile(file, isAnalytical, notationFile);
+    if (!id){
+      createNotificationEvent(
+        "Something Went Wrong",
+        "While uploading the file something went wrong. Please try again later...",
+        "danger",
+        4000
+      );
+      return;
     }
 
+    setDocID(id);
+    console.log("ID");
     setDocName(file.name);
+
     createNotificationEvent(
       "Upload Succesful",
       "File succesfully uploaded to the server",
@@ -63,7 +60,7 @@ const New_Project: React.FC = () => {
     }
   };
 
-  const saveSettings = (settings: Settings) => {
+  const saveSettings = async (settings: SettingsType) => {
     settings.attributes = {
       description,
       doc_id: docID,
@@ -77,13 +74,23 @@ const New_Project: React.FC = () => {
     };
 
     // API save the config here
-    console.log(settings);
+    const response = await updateAnalyticalProject(docID, settings);
+
+    if (!response){
+      createNotificationEvent(
+        "Something Went Wrong",
+        "While setting up your project, something went wrong. Please try again later...",
+        "danger",
+        4000
+      );
+      return null;
+    }
+
     createNotificationEvent(
       "Project Created",
       "Project successfully created",
       "success"
     );
-    // createNotificationEvent("Request Failed", "Something went wrong, please try again later...", "danger"); //If the call is failed
   };
 
   return (

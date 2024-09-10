@@ -4,47 +4,69 @@ import {
   createNotificationEvent,
 } from "../../utility/Modal_Util";
 import getFileExstension from "../../utility/File_Exstension";
-import { Settings } from "../../utility/Bot_Util";
+import { SettingsType } from "../../utility/types.ts";
 import {
   deleteAnalyticalProject,
-  getSingleAnalyticalConfig,
 } from "../../api/analyst";
 import {
   deletePdfProject,
-  getSinglPdfConfig,
 } from "../../api/universal";
-
-interface Project {
-  name: string;
-  lastUpdate: string;
-  filename: string;
-  projectId: string;
-}
+import { handleGetSingleConfig } from "../../utility/Api_Utils";
+import { ProjectType } from "../../utility/types";
 
 interface ProjectRowProps {
-  project: Project;
+  project: ProjectType;
   index: number;
   setSelectedProject: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedProjectConfig: React.Dispatch<
-    React.SetStateAction<Settings | null>
+    React.SetStateAction<SettingsType | null>
   >;
   setCustomizeStep: React.Dispatch<React.SetStateAction<number>>;
+  setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
   scrollIntoEditSection: () => void;
+  setProjects: React.Dispatch<React.SetStateAction<ProjectType[]>>;
 }
 
-const ProjectRow: React.FC<ProjectRowProps> = ({ project, index, setSelectedProject, setSelectedProjectConfig, setCustomizeStep, scrollIntoEditSection }) => {
-
-    // API delete project here
-    const deleteProject = (response: boolean) => {
+const ProjectRow: React.FC<ProjectRowProps> = ({
+  project,
+  index,
+  setSelectedProject,
+  setSelectedProjectConfig,
+  setCustomizeStep,
+  scrollIntoEditSection,
+  setIsAnalytical,
+  setProjects
+}) => {
+  const deleteProject = async (response: boolean) => {
     if (!response) return;
-    if (!deleteAnalyticalProject(project.projectId)) {
-      deletePdfProject(project.projectId);
+
+    let result;
+    const fileExtension = getFileExstension(project.filename);
+    if (fileExtension === "pdf"){
+      result = await deletePdfProject(project.projectId);
+    }else{
+      result = await deleteAnalyticalProject(project.projectId)
     }
+
+    if (!result){
+      console.error("Something went wrong while deleting project");
+    
+      createNotificationEvent(
+        "Something Went Wrong",
+        "While trying to delete the file, something went wrong. Please try again later",
+        "danger"
+      );
+    }
+
     createNotificationEvent(
       "File Deleted",
       "Succesfully deleted the file",
       "success"
     );
+
+    // Remove this project from the list
+    setProjects((prevProjects) => prevProjects.filter((_, i) => i !== index));
+    return result;
   };
 
   const handleDeleteClick = () => {
@@ -74,35 +96,74 @@ const ProjectRow: React.FC<ProjectRowProps> = ({ project, index, setSelectedProj
     window.open(url, "_blank");
   };
 
-
   async function handleEditClick() {
     setSelectedProject(project.projectId);
     setCustomizeStep(0);
+    setIsAnalytical( !(getFileExstension(project.filename) === "pdf") )
 
     // API get project config here, set it below and please clean the defaultSettings code
-    let config = await getSingleAnalyticalConfig(project.projectId);
-    if (config === null) {
-      config = await getSinglPdfConfig(project.projectId);
-    } else {
-      setSelectedProjectConfig(config.answer);
+    const config = await handleGetSingleConfig(project);
+    if (config){
+      setSelectedProjectConfig(config);
+      scrollIntoEditSection();
     }
-    scrollIntoEditSection();
   }
 
   return (
-   <tr>
-      <td className={`project-name text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.name}</td>
-      <td className={`project-last-update text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.lastUpdate}</td>
-      <td className={`project-filename text-start hover-underline ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.filename}</td>
-      <td className={`project-id text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>{project.projectId}</td>
-      <td className={`project-actions text-start ${index % 2 === 0 ? 'gray-bg' : ''}`}>
-        <button className="btn btn-outline-danger btn-sm me-2" data-bs-toggle="tooltip" onClick={handleDeleteClick} title="Delete">
+    <tr>
+      <td
+        className={`project-name text-start ${
+          index % 2 === 0 ? "gray-bg" : ""
+        }`}
+      >
+        {project.name}
+      </td>
+      <td
+        className={`project-last-update text-start ${
+          index % 2 === 0 ? "gray-bg" : ""
+        }`}
+      >
+        {project.lastUpdate}
+      </td>
+      <td
+        className={`project-filename text-start hover-underline ${
+          index % 2 === 0 ? "gray-bg" : ""
+        }`}
+      >
+        {project.filename}
+      </td>
+      <td
+        className={`project-id text-start ${index % 2 === 0 ? "gray-bg" : ""}`}
+      >
+        {project.projectId}
+      </td>
+      <td
+        className={`project-actions text-start ${
+          index % 2 === 0 ? "gray-bg" : ""
+        }`}
+      >
+        <button
+          className="btn btn-outline-danger btn-sm me-2"
+          data-bs-toggle="tooltip"
+          onClick={handleDeleteClick}
+          title="Delete"
+        >
           <i className="fas fa-trash-alt"></i>
         </button>
-        <button className="btn btn-outline-warning btn-sm me-2" data-bs-toggle="tooltip" onClick={handleEditClick} title="Edit">
+        <button
+          className="btn btn-outline-warning btn-sm me-2"
+          data-bs-toggle="tooltip"
+          onClick={handleEditClick}
+          title="Edit"
+        >
           <i className="fas fa-edit"></i>
         </button>
-        <button className="btn btn-outline-info btn-sm" data-bs-toggle="tooltip" onClick={launchProject} title="Launch">
+        <button
+          className="btn btn-outline-info btn-sm"
+          data-bs-toggle="tooltip"
+          onClick={launchProject}
+          title="Launch"
+        >
           <i className="fas fa-rocket"></i>
         </button>
       </td>

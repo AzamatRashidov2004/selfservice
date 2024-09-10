@@ -3,32 +3,107 @@ export const isProduction: boolean =
 
 const apiUrl: string = isProduction
   ? import.meta.env.VITE_UNIVERSAL_URL_DEVELOPMENT
-  : import.meta.env.VITE_KRONOS_URL_DEVELOPMENT;
+  : import.meta.env.VITE_KRONOS_URL_PRODUCTION;
 
-export async function showAllPdfManuals(): Promise<any> {
-  // Get all available pdf manuals
-  try {
-    const response: Response = isProduction
-      ? await fetch(`${apiUrl}/show_available_manuals`)
-      : await fetch(`${apiUrl}/projects/?page_no=1&per_page=10`, {
+import { formatKronosDate } from "../utility/Date_Util";
+// Import statements if needed
+// import { apiUrl, isProduction } from './config';
+import { ProjectType } from "../utility/types";
+import { getPdfConfig } from "./resource";
+
+async function getProductionPdfNamesAndIds(): Promise<{name: string, id: string}[] | null>{
+  const _url = `${apiUrl}/show_available_manuals`;
+
+  // Get all pdf ids and names
+  const response: Response = await fetch(_url);
+
+  if (!response.ok){
+    console.error(`Error: ${response.status} - ${response.statusText}`);
+    return null;
+  }
+
+  const data: {answer: [string[]]} | undefined = await response.json();
+  if (!data || !data.answer) return null
+
+  return data.answer.map(idList => {return {id: idList[0], name: idList[1]}})
+
+}
+
+async function getAllProductionPdf(): Promise<ProjectType[] | null>{
+  const allConfigs: ProjectType[] = [];
+
+  // Get all names and ids of pdfs
+  const allFiles = await getProductionPdfNamesAndIds();
+  if (!allFiles || allFiles.length === 0) {
+    console.error("No pdf documents found");
+    return null;
+  }
+
+  // Get all pdf configs
+  for (const pdf of allFiles) {
+    const config = await getPdfConfig(pdf.id);
+
+    if (config && config.attributes){
+      allConfigs.push({
+        name: config.attributes.project_name,
+        lastUpdate: config.attributes.last_update,
+        filename: pdf.name + ".pdf",
+        projectId: pdf.id
+      })
+    }
+  }
+
+  if (allConfigs.length === 0 ){
+    console.error("No pdf documents found");
+    return null;
+  }
+  return allConfigs;
+}
+
+async function getAllDevelopmentPdfProjects(): Promise<ProjectType[] | null>{
+  interface kronosResponse {
+    _id: string,
+    name: string,
+    description: string,
+    created_at: string
+  }
+
+  const _url = `${apiUrl}/projects/?page_no=1&per_page=10`;
+  try{
+      const response: Response = await fetch(_url,
+        {
           method: "GET",
-          headers: {
+          headers: 
+          {
             accept: "application/json",
             Authorization: import.meta.env.VITE_KRONOS_API_KEY_DEVELOPMENT,
           },
-        });
-
-    if (!response.ok) {
-      console.error(`Error: ${response.status} - ${response.statusText}`);
-      return null;
-    }
-
-    const manuals: any = await response.json();
-    return manuals;
-  } catch (error) {
+        }
+      );
+      const projects: {data: kronosResponse[]} = await response.json();
+       // Map data to the Project interface
+      return projects.data.map((item: kronosResponse) => ({
+        name: item.name,
+        projectId: item._id,
+        lastUpdate: formatKronosDate(new Date(item.created_at)),
+        filename: item.name + ".pdf",
+      }));
+  }catch(error){
     console.error("Failed to fetch manuals:", error);
-    return null;
+    return null
   }
+}
+
+export async function getAllPdfProjects(): Promise<ProjectType[] | null> {
+  let allPdfProjects: ProjectType[] | null;
+  if (isProduction){
+    allPdfProjects = await getAllProductionPdf();
+  }else{
+    allPdfProjects = await getAllDevelopmentPdfProjects();
+  }
+
+  if (!allPdfProjects) return null;
+  return allPdfProjects
 }
 
 export async function deletePdfProject(id: string): Promise<boolean> {
@@ -55,6 +130,7 @@ export async function deletePdfProject(id: string): Promise<boolean> {
     return false;
   }
 }
+
 export async function updatePdfProject(
   id: string,
   formData: FormData
@@ -89,31 +165,40 @@ export async function updatePdfProject(
     return null;
   }
 }
+
+async function uploadProductionPdf(formData: FormData): Promise<any | null>{
+  const response = await fetch(`${apiUrl}/upload_manual`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!response) {
+    console.error(
+      "No response received, possibly due to non-production environment."
+    );
+    return null;
+  }
+
+  if (!response.ok) {
+    console.error(
+      `HTTP error! Status: ${response.status} - ${response.statusText}`
+    );
+    return null;
+  }
+  const result = await response.json();
+  return result;
+}
+
+async function uploadDevelopmentPdf(formData: FormData): Promise<any | null>{
+  console.log(formData);
+  return null
+}
+
 export async function uploadPdf(formData: FormData): Promise<any | null> {
   try {
     if (isProduction) {
-      const response = await fetch(`${apiUrl}/upload_manual`, {
-        method: "POST",
-        body: formData,
-      });
-      if (!response) {
-        console.error(
-          "No response received, possibly due to non-production environment."
-        );
-        return null;
-      }
-
-      if (!response.ok) {
-        console.error(
-          `HTTP error! Status: ${response.status} - ${response.statusText}`
-        );
-        return null;
-      }
-      const result = await response.json();
-      return result;
+      return await uploadProductionPdf(formData);
     } else {
-      // not implemented in kronos yet, since the server doesn't generate ids
-      // need to create a project first get the id, then upload the pdf to the id
+      return await uploadDevelopmentPdf(formData);
     }
   } catch (error) {
     console.error("Failed to upload a project:", error);

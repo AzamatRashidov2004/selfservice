@@ -1,33 +1,19 @@
-
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import "./Dashboard.css";
 import ProjectRow from "../../components/Project-Row/Project_Row"; // Import the new component
 import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
-import { Settings } from "../../utility/Bot_Util";
+import { SettingsType } from "../../utility/types.ts";
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
 import getDate from "../../utility/Date_Util.ts";
-import {
-  getAllAnalyticalConfigs,
-  getAllAnalyticalTables,
-} from "../../api/analyst.ts";
-import { isProduction, showAllPdfManuals } from "../../api/universal.ts";
-// import { Settings } from '../../utility/Bot_Util';
-
-interface Project {
-  name: string;
-  lastUpdate: string;
-  filename: string;
-  projectId: string;
-}
+import { fetchProjectsData, handleUpdateConfig } from "../../utility/Api_Utils.ts";
+import { ProjectType } from "../../utility/types.ts";
+import { createNotificationEvent } from "../../utility/Modal_Util.ts";
 
 const Dashboard: React.FC = () => {
-  // Example data; replace with actual data fetching logic
-  const [projects, setProjects] = useState<Project[]>();
-  const [selectedProjectID, setSelectedProjectID] = useState<string | null>(
-    null
-  );
-  const [selectedProjectConfig, setSelectedProjectConfig] =
-    useState<Settings | null>(null);
+  const [projects, setProjects] = useState<ProjectType[]>([]);
+  const [selectedProjectID, setSelectedProjectID] = useState<string | null>(null);
+  const [selectedProjectConfig, setSelectedProjectConfig] = useState<SettingsType | null>(null);
+  const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
 
   // States for Project Details
   const [projectName, setProjectName] = useState("");
@@ -38,122 +24,58 @@ const Dashboard: React.FC = () => {
 
   const [customizeStep, setCustomizeStep] = useState<number>(0);
 
-
-  async function fetchData() {
-    const configs = await showAllPdfManuals();
-    if (isProduction && configs.answer) {
-      for (const config of configs.answer) {
-        // Process each config here
-        if (Object.keys(config.answer).length !== 0) {
-          const project_name = config[1];
-          const doc_id = config[0];
-          const last_update = "Unkown";
-          const doc_name = config[1] + ".pdf";
-          setProjects((prevProjects) => [
-            ...(prevProjects || []), // Spread existing projects
-            {
-              name: project_name, // Correct property name
-              lastUpdate: last_update, // Correct property name
-              filename: doc_name, // Correct property name
-              projectId: doc_id, // Correct property name
-            },
-          ]);
-        }
-      }
-    } else if (!isProduction && configs.data) {
-      for (const config of configs.data) {
-        // Process each config here
-        if (Object.keys(config.data).length !== 0) {
-          const { _id, name, created_at } = config;
-          setProjects((prevProjects) => [
-            ...(prevProjects || []), // Spread existing projects
-            {
-              name: name, // Correct property name
-              lastUpdate: created_at, // Correct property name
-              filename: name + ".pdf", // Correct property name
-              projectId: _id, // Correct property name
-            },
-          ]);
-        }
-      }
-    } else {
-      console.error("Failed to retrieve data.");
-    }
-  }
-
-  async function fetchAnalyticalData() {
-    const analyst_all_ids = await getAllAnalyticalTables(); //  getAllTables() returns a Promise
-    if (!analyst_all_ids) {
-      console.error("Failed to retrieve tables.");
-      return;
-    }
-    const analyst_configs = await getAllAnalyticalConfigs(analyst_all_ids); // getAllConfigs() also returns a Promise
-    if (!analyst_configs) {
-      console.error("Failed to retrieve analytical configs.");
-      return;
-    }
-    for (const config of analyst_configs) {
-      // Process each config here
-      if (config.answer && Object.keys(config.answer).length !== 0) {
-        const { project_name, doc_id, doc_name, last_update } =
-          config.answer.attributes;
-        setProjects((prevProjects) => [
-          ...(prevProjects || []), // Spread existing projects
-          {
-            name: project_name, // Correct property name
-            lastUpdate: last_update, // Correct property name
-            filename: doc_name, // Correct property name
-            projectId: doc_id, // Correct property name
-          },
-        ]);
-      }
-    }
-  }
-
   const customizeSectionRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
+    // With changes to selected project, set states
     if (!selectedProjectConfig) return;
-
     const attributes = selectedProjectConfig.attributes;
     setProjectName(attributes.project_name);
     setDescription(attributes.description);
     setIntroImage(attributes.intro_image);
     setIntroMessage(attributes.intro_message);
-    setLanguage(attributes.setLanguage);
+    setLanguage(attributes.language);
   }, [selectedProjectConfig]);
 
+  // Initial projects fetch
   useEffect(() => {
-    // API list all projects here
-    // After getting all projects call setProjects pls
+    const fetchData = async () => {
+      await fetchProjectsData(setProjects);
+    };
+  
     fetchData();
-    fetchAnalyticalData();
-  }, []);
+  }, []); 
 
   const scrollIntoEditSection = useCallback(() => {
     const topMargin = 80;
-    if (!selectedProjectID || !selectedProjectConfig || !customizeSectionRef.current) return
-    
-    const elementPosition = customizeSectionRef.current.getBoundingClientRect().top + window.pageYOffset;
+    if (
+      !selectedProjectID ||
+      !selectedProjectConfig ||
+      !customizeSectionRef.current
+    )
+      return;
+
+    const elementPosition =
+      customizeSectionRef.current.getBoundingClientRect().top +
+      window.pageYOffset;
     const offsetPosition = elementPosition - topMargin; // Adjust the offset
 
     window.scrollTo({
       top: offsetPosition,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
-
   }, [selectedProjectID, selectedProjectConfig]);
-  
+
   useEffect(() => {
     scrollIntoEditSection();
   }, [scrollIntoEditSection]);
 
   useEffect(() => {
-      scrollIntoEditSection();
+    scrollIntoEditSection();
   }, [selectedProjectID, scrollIntoEditSection]);
 
   const handleProjectDetailsNext = () => {
-    if (!description || !projectName || !selectedProjectConfig) return
+    if (!description || !projectName || !selectedProjectConfig) return;
     const attributes = {
       ...selectedProjectConfig.attributes,
       description: description,
@@ -163,16 +85,15 @@ const Dashboard: React.FC = () => {
       intro_message: introMessage,
       last_update: getDate(),
     };
-
     setSelectedProjectConfig({
       ...selectedProjectConfig,
       ...{ attributes },
     });
 
     setCustomizeStep(customizeStep + 1);
-  }
+  };
 
-  const updateSettings = (settings: Settings) => {
+  const updateSettings = async (settings: SettingsType) => {
     if (!selectedProjectConfig) return;
     const attributes = {
       ...selectedProjectConfig.attributes,
@@ -181,7 +102,21 @@ const Dashboard: React.FC = () => {
     settings.attributes = attributes;
 
     // API update the config here
+    const result = await handleUpdateConfig(isAnalytical, settings, settings.attributes.doc_id);
+    if (!result){
+      console.error("Something went wrong while updating project");
+      createNotificationEvent(
+        "Something Went Wrong",
+        "While trying to update the project, something went wrong. Please try again later...",
+        "danger"
+      );
+    }
 
+    createNotificationEvent(
+      "Project Updated",
+      "Succesfully updated the project configurations",
+      "success"
+    );
     setCustomizeStep(0);
     setSelectedProjectID(null);
   };
@@ -203,48 +138,59 @@ const Dashboard: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {projects && projects.map((project, index) => (
-            <ProjectRow 
-            key={index} 
-            project={project} 
-            index={index} 
-            setSelectedProject={setSelectedProjectID} 
-            setSelectedProjectConfig={setSelectedProjectConfig}
-            setCustomizeStep={setCustomizeStep}
-            scrollIntoEditSection={scrollIntoEditSection}
-            />
-          ))}
+          {projects &&
+            projects.map((project, index) => (
+              <ProjectRow
+                key={index}
+                project={project}
+                index={index}
+                setSelectedProject={setSelectedProjectID}
+                setSelectedProjectConfig={setSelectedProjectConfig}
+                setCustomizeStep={setCustomizeStep}
+                scrollIntoEditSection={scrollIntoEditSection}
+                setIsAnalytical={setIsAnalytical}
+                setProjects={setProjects}
+              />
+            ))}
         </tbody>
       </table>
-      {selectedProjectID && selectedProjectConfig ? 
+      {selectedProjectID && selectedProjectConfig ? (
         <>
-          <div ref={customizeSectionRef} className="bg-primary p-4 rounded mb-4 text-center">
+          <div
+            ref={customizeSectionRef}
+            className="bg-primary p-4 rounded mb-4 text-center"
+          >
             <h1 className="text-light">Customize Project</h1>
-            <p className="text-light">Customize the project with the following id: <em>{selectedProjectID}</em></p>
+            <p className="text-light">
+              Customize the project with the following id:{" "}
+              <em>{selectedProjectID}</em>
+            </p>
           </div>
 
-          {customizeStep === 0 ?
-            <ProjectDetails 
-            projectName={projectName}
-            setProjectName={setProjectName}
-            description={description}
-            setDescription={setDescription}
-            language={language}
-            setLanguage={setLanguage}
-            introMessage={introMessage}
-            setIntroMessage={setIntroMessage}
-            introImage={introImage}
-            setIntroImage={setIntroImage}
-            handleNextButtonClick={handleProjectDetailsNext}
+          {customizeStep === 0 ? (
+            <ProjectDetails
+              projectName={projectName}
+              setProjectName={setProjectName}
+              description={description}
+              setDescription={setDescription}
+              language={language}
+              setLanguage={setLanguage}
+              introMessage={introMessage}
+              setIntroMessage={setIntroMessage}
+              introImage={introImage}
+              setIntroImage={setIntroImage}
+              handleNextButtonClick={handleProjectDetailsNext}
             />
-            : null}
+          ) : null}
 
-          {customizeStep === 1 ?
-            <CustomizeBot saveSettings={updateSettings} selectedProjectConfig={selectedProjectConfig}/>
-            : null}
+          {customizeStep === 1 ? (
+            <CustomizeBot
+              saveSettings={updateSettings}
+              selectedProjectConfig={selectedProjectConfig}
+            />
+          ) : null}
         </>
-    : null}
-
+      ) : null}
     </main>
   );
 };
