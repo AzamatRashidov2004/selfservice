@@ -143,7 +143,7 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
         {project.docId}
       </td>
       <td
-        className={`project-actions text-start ${
+        className={`project-actions text-start text-nowrap ${
           index % 2 === 0 ? "gray-bg" : ""
         }`}
       >
