@@ -1,31 +1,4 @@
-import { PopupState } from "./types";
-
-export const defaultPopupState: PopupState = {
-    isVisible: false,
-    title: '',
-    text: '',
-    buttons: {
-      success: { text: 'Yes', type: 'primary' },
-      cancel: { text: 'No', type: 'secondary' }
-    },
-    notification_time: 5000 // Default time for popup display
-  };
-
-export interface NotificationState {
-    title: string;
-    text: string;
-    type: 'info' | 'danger' | 'success' | 'primary' | 'secondary';
-    notification_time?: number; // Optional time for notification display
-    isVisible: boolean;
-  }
-  
-export const defaultNotificationState: NotificationState = {
-    isVisible: false,
-    title: '',
-    text: '',
-    type: 'success',
-    notification_time: 2000 // Default time for notification display
-  };
+import { PopupState, NotificationState } from "./types";
 
 export const createPopupEvent = (title: string, text: string, buttons: PopupState['buttons'], callback?: (success: boolean) => void) => {
     const showPopupEvent = new CustomEvent('showPopup', {

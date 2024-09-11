@@ -11,6 +11,7 @@ import { createNotificationEvent } from "../../utility/Modal_Util.ts";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<ProjectType[]>([]);
+  const [selectedDocID, setSelectedDocID] = useState<string | null>(null);
   const [selectedProjectID, setSelectedProjectID] = useState<string | null>(null);
   const [selectedProjectConfig, setSelectedProjectConfig] = useState<SettingsType | null>(null);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
@@ -49,7 +50,7 @@ const Dashboard: React.FC = () => {
   const scrollIntoEditSection = useCallback(() => {
     const topMargin = 80;
     if (
-      !selectedProjectID ||
+      !selectedDocID ||
       !selectedProjectConfig ||
       !customizeSectionRef.current
     )
@@ -64,7 +65,7 @@ const Dashboard: React.FC = () => {
       top: offsetPosition,
       behavior: "smooth",
     });
-  }, [selectedProjectID, selectedProjectConfig]);
+  }, [selectedDocID, selectedProjectConfig]);
 
   useEffect(() => {
     scrollIntoEditSection();
@@ -72,7 +73,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     scrollIntoEditSection();
-  }, [selectedProjectID, scrollIntoEditSection]);
+  }, [selectedDocID, scrollIntoEditSection]);
 
   const handleProjectDetailsNext = () => {
     if (!description || !projectName || !selectedProjectConfig) return;
@@ -94,7 +95,8 @@ const Dashboard: React.FC = () => {
   };
 
   const updateSettings = async (settings: SettingsType) => {
-    if (!selectedProjectConfig) return;
+    if (!selectedProjectConfig || !selectedDocID) return;
+    
     const attributes = {
       ...selectedProjectConfig.attributes,
     };
@@ -102,7 +104,7 @@ const Dashboard: React.FC = () => {
     settings.attributes = attributes;
 
     // API update the config here
-    const result = await handleUpdateConfig(isAnalytical, settings, settings.attributes.doc_id);
+    const result = await handleUpdateConfig(isAnalytical, settings, selectedDocID, selectedProjectID);
     if (!result){
       console.error("Something went wrong while updating project");
       createNotificationEvent(
@@ -110,6 +112,7 @@ const Dashboard: React.FC = () => {
         "While trying to update the project, something went wrong. Please try again later...",
         "danger"
       );
+      return;
     }
 
     createNotificationEvent(
@@ -118,7 +121,7 @@ const Dashboard: React.FC = () => {
       "success"
     );
     setCustomizeStep(0);
-    setSelectedProjectID(null);
+    setSelectedDocID(null);
   };
 
   return (
@@ -144,7 +147,8 @@ const Dashboard: React.FC = () => {
                 key={index}
                 project={project}
                 index={index}
-                setSelectedProject={setSelectedProjectID}
+                setSelectedProjectID={setSelectedProjectID}
+                setSelectedProject={setSelectedDocID}
                 setSelectedProjectConfig={setSelectedProjectConfig}
                 setCustomizeStep={setCustomizeStep}
                 scrollIntoEditSection={scrollIntoEditSection}
@@ -154,7 +158,7 @@ const Dashboard: React.FC = () => {
             ))}
         </tbody>
       </table>
-      {selectedProjectID && selectedProjectConfig ? (
+      {selectedDocID && selectedProjectConfig ? (
         <>
           <div
             ref={customizeSectionRef}
@@ -163,7 +167,7 @@ const Dashboard: React.FC = () => {
             <h1 className="text-light">Customize Project</h1>
             <p className="text-light">
               Customize the project with the following id:{" "}
-              <em>{selectedProjectID}</em>
+              <em>{selectedDocID}</em>
             </p>
           </div>
 

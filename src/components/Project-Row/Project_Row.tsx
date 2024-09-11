@@ -7,10 +7,10 @@ import getFileExstension from "../../utility/File_Exstension";
 import { SettingsType } from "../../utility/types.ts";
 import {
   deleteAnalyticalProject,
-} from "../../api/analyst";
+} from "../../api/analyst/deleteAnalyst.ts";
 import {
-  deletePdfProject,
-} from "../../api/universal";
+  deletePdf,
+} from "../../api/kronos/deleteKronos.ts";
 import { handleGetSingleConfig } from "../../utility/Api_Utils";
 import { ProjectType } from "../../utility/types";
 
@@ -25,6 +25,7 @@ interface ProjectRowProps {
   setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
   scrollIntoEditSection: () => void;
   setProjects: React.Dispatch<React.SetStateAction<ProjectType[]>>;
+  setSelectedProjectID: React.Dispatch<React.SetStateAction<string | null>>
 }
 
 const ProjectRow: React.FC<ProjectRowProps> = ({
@@ -35,17 +36,21 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
   setCustomizeStep,
   scrollIntoEditSection,
   setIsAnalytical,
-  setProjects
+  setProjects,
+  setSelectedProjectID
 }) => {
   const deleteProject = async (response: boolean) => {
     if (!response) return;
 
     let result;
     const fileExtension = getFileExstension(project.filename);
-    if (fileExtension === "pdf"){
-      result = await deletePdfProject(project.projectId);
-    }else{
-      result = await deleteAnalyticalProject(project.projectId)
+    if (fileExtension !== "pdf"){
+      // Analytical delete
+      result = await deleteAnalyticalProject(project.docId)
+
+    }else if(project.projectId){
+      // Pdf delete
+      result = await deletePdf(project.projectId);
     }
 
     if (!result){
@@ -72,7 +77,7 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
   const handleDeleteClick = () => {
     createPopupEvent(
       "Delete project",
-      `Are you sure you want to delete the project with id ${project.projectId}`,
+      `Are you sure you want to delete the project with id ${project.docId}`,
       {
         success: { text: "Delete", type: "danger" },
         cancel: { text: "Cancel", type: "secondary" },
@@ -88,19 +93,19 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
     let url: string;
 
     if (fileExtension === "xlsx" || fileExtension === "csv") {
-      url = `https://bot-flowstorm.web.app/selfservice/analytical?configID=${project.projectId}`;
+      url = `https://bot-flowstorm.web.app/selfservice/analytical?configID=${project.docId}`;
     } else {
-      url = `https://bot-flowstorm.web.app/selfservice?configID=${project.projectId}`;
+      url = `https://bot-flowstorm.web.app/selfservice?configID=${project.docId}`;
     }
 
     window.open(url, "_blank");
   };
 
   async function handleEditClick() {
-    setSelectedProject(project.projectId);
+    setSelectedProject(project.docId);
     setCustomizeStep(0);
-    setIsAnalytical( !(getFileExstension(project.filename) === "pdf") )
-
+    setIsAnalytical(!(getFileExstension(project.filename) === "pdf"))
+    if (project.projectId) setSelectedProjectID(project.projectId);
     // API get project config here, set it below and please clean the defaultSettings code
     const config = await handleGetSingleConfig(project);
     if (config){
@@ -135,7 +140,7 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
       <td
         className={`project-id text-start ${index % 2 === 0 ? "gray-bg" : ""}`}
       >
-        {project.projectId}
+        {project.docId}
       </td>
       <td
         className={`project-actions text-start ${

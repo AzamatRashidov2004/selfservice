@@ -1,57 +1,27 @@
 import {
-  getSingleAnalyticalConfig,
   uploadAnalyticalProject,
   updateAnalyticalProject
-} from "../api/analyst";
-import { getSinglPdfConfig, isProduction, uploadPdf, getAllPdfProjects } from "../api/universal";
+} from "../api/analyst/postAnalyst.ts";
+import { getSinglPdfConfig, getAllPdfs } from "../api/kronos/getKronos.ts";
+import { uploadPdf, updatePdfConfig,  } from "../api/kronos/postKronos.ts";
 import { ProjectType } from "./types";
 import {
   getAllAnalyticalConfigs,
   getAllAnalyticalIDs,
-} from "../api/analyst.ts";
-import getFileExstension from "./File_Exstension.ts";
+  getSingleAnalyticalConfig,
+} from "../api/analyst/getAnalyst.ts";
 import { SettingsType } from "./types.ts";
+import getFileExstension from "../utility/File_Exstension.ts";
 
-async function handleUploadAnalytical(file: File, notationFile: File){
-  const formData = new FormData();
-  formData.append("table_file", file);
-  formData.append("annotations_file", notationFile);
-  const response = await uploadAnalyticalProject(formData);
-
-  if (!response) {
-    console.error("Error while uploading file");
-    return null
-  }
-
-  return response["id"];
-}
-
-async function handleUploadPdf(file: File){
-  const formData = new FormData();
-    formData.append("file", file);
-    const response = await uploadPdf(formData);
-
-    if (!response){
-      console.error("Something went wrong while uploading the file");
-      return null;
-    }
-
-    // TODO Separate this if isProduction logic and put it into uploadPdf.
-    if (isProduction) {
-      return response["answer"].split(" ")[4];
-    } else {
-      // not implemented on server
-    }
-}
 
 export async function uploadProjectFile(file: File, isAnalytical: boolean, notationFile?: File | null){
 
   if (isAnalytical && notationFile){
     // Analytical file (xlsx or csv)
-    return await handleUploadAnalytical(file, notationFile);
+    return await uploadAnalyticalProject(file, notationFile);
   }else{
     // Pdf file
-    return await handleUploadPdf(file);
+    return await uploadPdf(file)
   }
 }
 
@@ -60,10 +30,10 @@ export async function handleGetSingleConfig(project: ProjectType): Promise<Setti
   const fileExstension = getFileExstension(project.filename);
   let config: SettingsType | null;
 
-  if (fileExstension === "pdf"){
-    config = await getSinglPdfConfig(project.projectId);
+  if (fileExstension === "pdf" && project.projectId){
+    config = await getSinglPdfConfig(project.projectId, project.docId);
   }else{
-    config = await getSingleAnalyticalConfig(project.projectId);
+    config = await getSingleAnalyticalConfig(project.docId);
   }
 
   if (!config || !config.attributes){
@@ -76,37 +46,29 @@ export async function handleGetSingleConfig(project: ProjectType): Promise<Setti
 export async function fetchProjectsData(setInitial: React.Dispatch<React.SetStateAction<ProjectType[]>>): Promise<ProjectType[] | null> {
   let allProjects: ProjectType[] = [];
 
-  // Fetch pdf projects
-  const pdfProjects = await getAllPdfProjects();
-  if (pdfProjects) {
-    allProjects = [...pdfProjects];
-    setInitial([...allProjects]);  // Update state with the PDF projects first
+  // Fetch all pdfs (Faster api call first)
+  const pdfProjects: ProjectType[] | null = await getAllPdfs();
+  if (pdfProjects){
+    allProjects = [...allProjects, ...pdfProjects];
+    setInitial(allProjects);
   }
 
-  // Fetch analytical projects (slower call)
-  const analyticalProjects = await fetchAnalyticalConfigs();
-  if (analyticalProjects) {
-    const newProjects = analyticalProjects.map((projectSetting: SettingsType) => ({
-      name: projectSetting.attributes.project_name,
-      projectId: projectSetting.attributes.doc_id,
-      filename: projectSetting.attributes.doc_name,
-      lastUpdate: projectSetting.attributes.last_update,
-    }));
-
-    allProjects = [...allProjects, ...newProjects];  // Combine both sets of projects
-    setInitial(allProjects);  // Update state with the combined projects
+  // Fetch all analytical files (Slower api call last)
+  const analyticalProjects: ProjectType[] | null = await fetchAnalyticalConfigs();
+  if (analyticalProjects){
+    allProjects = [...allProjects, ...analyticalProjects];
+    setInitial(allProjects);
   }
 
-  // Check if any projects exist
-  if (allProjects.length === 0) {
-    console.error("No projects found");
+  if (allProjects.length === 0){
+    console.error("No pdf/analytical documents found!");
     return null;
   }
 
   return allProjects;
 }
 
-export async function fetchAnalyticalConfigs(): Promise<SettingsType[] | null> {
+export async function fetchAnalyticalConfigs(): Promise<ProjectType[] | null> {
   // Get all ids
   const analyst_all_ids = await getAllAnalyticalIDs();
   if (!analyst_all_ids) {
@@ -115,24 +77,62 @@ export async function fetchAnalyticalConfigs(): Promise<SettingsType[] | null> {
   }
 
   // Get all configs
-  const analyst_configs = await getAllAnalyticalConfigs(analyst_all_ids);
+  const analyst_configs: SettingsType[] | null = await getAllAnalyticalConfigs(analyst_all_ids);
   if (!analyst_configs) {
     console.error("Failed to retrieve config data");
     return null;
   }
   
-  return analyst_configs;
+  const result: ProjectType[] = analyst_configs.map((config: SettingsType) => ({
+    name: config.attributes?.project_name || "Unknown Project",
+    lastUpdate: config.attributes?.last_update || "Unknown Date",
+    filename: config.attributes?.doc_name || "Unknown File",
+    docId: config.attributes?.doc_id || "Unknown ID"
+  }));
+
+  return result;
 }
 
 
-export async function handleUpdateConfig(isAnalytical: boolean, newConfig: SettingsType, projectID: string): Promise<boolean | null>{
+export async function handleUpdateConfig(isAnalytical: boolean, newConfig: SettingsType, docID: string, projectID: string | null): Promise<boolean | null>{
   let result: boolean | null = false;
+  const attributes = newConfig.attributes;
+  console.log("id", projectID)
   if (isAnalytical){
-    result = await updateAnalyticalProject(projectID, newConfig);
-  }else{
-    // Implement pdf update
-  }
+    // Analytical documents update
+    result = await updateAnalyticalProject(docID, newConfig);
+    
+  }else if (projectID){
+    // PDF documents update
+    result = await updatePdfConfig(
+      attributes.project_name, 
+      attributes.description, 
+      getLocale(attributes.language), 
+      projectID, 
+      docID, 
+      newConfig, 
+      attributes.doc_name
+    );
 
+  }
+  
   return result
+}
+
+function getLocale(language?: string): string {
+  switch (language?.toLowerCase()) {
+    case 'deutsch':
+    case 'german':
+      return 'de-DE';
+    case 'czech':
+    case 'čeština':
+    case 'česky':
+      return 'cs-CZ';
+    case 'english':
+    case 'angličtina':
+      return 'en-US';
+    default:
+      return 'en-US';  // Default to 'en-US' if undefined or unknown
+  }
 }
 
