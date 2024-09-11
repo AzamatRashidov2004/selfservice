@@ -7,14 +7,14 @@ import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
 import { SettingsType } from "../../utility/types.ts";
 import getDate from "../../utility/Date_Util";
 import "./New_Project.css";
-import { uploadProjectFile } from "../../utility/Api_Utils";
-import { updateAnalyticalProject } from "../../api/analyst.ts";
+import { handleUpdateConfig, uploadProjectFile } from "../../utility/Api_Utils";
 
 const New_Project: React.FC = () => {
   const [step, setStep] = useState(0);
   const [file, setFile] = useState<File | null>(null);
   const [doc_name, setDocName] = useState<string>("");
   const [docID, setDocID] = useState<string>("");
+  const [kronosProjectID, setKronosProjectID] = useState<string | null>("");
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
   const [notationFile, setNotationFile] = useState<File | null>(null);
 
@@ -31,8 +31,8 @@ const New_Project: React.FC = () => {
     if (step !== 0) return;
     if (file && isAnalytical && !notationFile) return;
 
-    const id = await uploadProjectFile(file, isAnalytical, notationFile);
-    if (!id){
+    const ids = await uploadProjectFile(file, isAnalytical, notationFile);
+    if (!ids || !ids.docID){
       createNotificationEvent(
         "Something Went Wrong",
         "While uploading the file something went wrong. Please try again later...",
@@ -42,9 +42,10 @@ const New_Project: React.FC = () => {
       return;
     }
 
-    setDocID(id);
-    console.log("ID");
+    setDocID(ids.docID);
+    setKronosProjectID(ids.projectID);
     setDocName(file.name);
+    console.log("IDS", ids.docID, ids.projectID);
 
     createNotificationEvent(
       "Upload Succesful",
@@ -74,7 +75,7 @@ const New_Project: React.FC = () => {
     };
 
     // API save the config here
-    const response = await updateAnalyticalProject(docID, settings);
+    const response = await handleUpdateConfig(isAnalytical, settings, docID, kronosProjectID);
 
     if (!response){
       createNotificationEvent(
@@ -88,7 +89,7 @@ const New_Project: React.FC = () => {
 
     createNotificationEvent(
       "Project Created",
-      "Project successfully created",
+      "Project successfully created with your configurations",
       "success"
     );
   };

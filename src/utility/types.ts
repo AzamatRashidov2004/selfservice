@@ -2,7 +2,8 @@ export interface ProjectType {
     name: string;
     lastUpdate: string;
     filename: string;
-    projectId: string;
+    docId: string;
+    projectId?: string;
   }
 
   // Define ComponentColor type
@@ -106,3 +107,55 @@ export interface PopupState {
     callback?: (success: boolean) => void; // Optional callback function
     notification_time?: number; // Optional time for popup display
   }
+
+  export type KronosProjectType = {
+    _id: string;
+    name: string;
+    description: string;
+    created_at: Date;
+    modal_version: number;
+  }
+
+  export type kronosKnowledgeBaseType = {
+    _id: string;
+    project_id: string;
+    name: string;
+    description: string;
+    embedding_model: string;
+    language: string;
+    total_pages: number;
+    source_file: string;
+    source_type: string;
+    created_at: string;
+    model_version: number;
+
+    chatbot_config: SettingsType;
+  }
+
+
+  export const defaultPopupState: PopupState = {
+    isVisible: false,
+    title: '',
+    text: '',
+    buttons: {
+      success: { text: 'Yes', type: 'primary' },
+      cancel: { text: 'No', type: 'secondary' }
+    },
+    notification_time: 5000 // Default time for popup display
+  };
+
+export interface NotificationState {
+    title: string;
+    text: string;
+    type: 'info' | 'danger' | 'success' | 'primary' | 'secondary';
+    notification_time?: number; // Optional time for notification display
+    isVisible: boolean;
+  }
+  
+export const defaultNotificationState: NotificationState = {
+    isVisible: false,
+    title: '',
+    text: '',
+    type: 'success',
+    notification_time: 2000 // Default time for notification display
+  };

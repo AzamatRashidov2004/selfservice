@@ -3,7 +3,7 @@ import {
     defaultNotificationState, 
     defaultPopupState, 
     NotificationState 
-  } from "../../utility/Modal_Util";
+  } from "../../utility/types";
   
   export const getDefaultPopupState = (): PopupState => {
     return { ...defaultPopupState };
