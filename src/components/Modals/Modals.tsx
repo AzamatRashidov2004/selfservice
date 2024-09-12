@@ -13,7 +13,7 @@ import {
 import { 
   PopupState,
   NotificationState,
-} from '../../utility/Modal_Util';
+} from '../../utility/types';
 
 const Modals: React.FC = () => {
   // Initialise popup and notification states
