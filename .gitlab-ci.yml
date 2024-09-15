@@ -1,0 +1,33 @@
+stages:
+  - build
+  - test
+  - deploy
+
+# Build Stage
+build:
+  stage: build
+  image: node:16 # Use appropriate node version if different
+  script:
+    - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - dist # Save the build artifacts for later stages
+
+# Test Stage
+test:
+  stage: test
+  image: node:16
+  script:
+    - echo "Test phase: No tests available, passing by default." # Dummy test script
+  allow_failure: true # Always pass
+
+# Deploy Stage
+deploy:
+  stage: deploy
+  image: node:16
+  only:
+    - main # Deploy only on the main branch
+  script:
+    - npm install -g firebase-tools
+    - firebase deploy --only hosting # Adjust for your firebase deploy settings
