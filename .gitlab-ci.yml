@@ -11,6 +11,7 @@ build:
   image: node:18 # Updated to use Node.js 18
   script:
     - npm install
+    - npm install -g typescript # Ensure TypeScript is installed globally
     - npm run build
   artifacts:
     paths:
