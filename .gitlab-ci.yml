@@ -19,7 +19,7 @@ test:
   stage: test
   image: node:16
   script:
-    - echo "Test phase: No tests available, passing by default." # Dummy test script
+    - echo "Test phase No tests available, passing by default" # Dummy test script
   allow_failure: true # Always pass
 
 # Deploy Stage
