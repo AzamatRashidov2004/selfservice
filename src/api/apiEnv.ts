@@ -6,14 +6,25 @@ export const kronosApiKey: string = `${import.meta.env[`VITE_KRONOS_API_KEY_${en
 
 export const analystApiUrl: string = `${import.meta.env[`VITE_ANALYTICAL_URL_${environment}`]}`;
 
-export const handleError = (e: unknown): null => {
-    if (e instanceof Error) {
-        console.error(e)
-        console.error(`Error occurred: ${e.message}`);
-        console.error(`Stack trace: ${e.stack}`);
+export const handleError = (error: unknown, context: string = ''): null => {
+  if (error instanceof Error) {
+      console.error('An error occurred:');
+      console.error(`Context: ${context}`);
+      console.error(`Type: ${error.name}`);
+      console.error(`Message: ${error.message}`);
+      
+      if (error.stack) {
+          console.error('Stack trace:');
+          console.error(error.stack);
       } else {
-        console.error('An unknown error occurred:', e);
+          console.error('No stack trace available.');
       }
-  
-      return null
+  } else {
+      console.error('An unknown error occurred with the following details:');
+      console.error('Context:', context);
+      console.error(error);
+  }
+
+  return null;
 }
+
