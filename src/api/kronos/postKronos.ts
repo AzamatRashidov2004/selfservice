@@ -29,7 +29,7 @@ async function createKronosProject(name="", description=""): Promise<KronosProje
     return project
       
   }catch(e: unknown){
-    return handleError(e);
+    return handleError({error: e, origin: "createKronosProject"})
   }
 }
 
@@ -58,9 +58,9 @@ async function uploadPdfToKronosProject(projectID: string, file: File): Promise<
     return result._id;
       
   }catch(e: unknown){
-    return handleError(e);
+    return handleError({error: e, origin: "uploadPdfToKronosProject"})
   }
-  }
+}
 
 export async function updatePdfConfig(
     name: string, 
@@ -102,7 +102,7 @@ export async function updatePdfConfig(
       return true;
       
     }catch(e: unknown){
-      return handleError(e);
+      return handleError({error: e, origin: "updatePdfConfig"})
     }
   
   }
@@ -129,6 +129,6 @@ export async function updatePdfConfig(
       return {projectID, docID}
       
     }catch(e: unknown){
-      return handleError(e);
+      return handleError({error: e, origin: "uploadPdf"})
     }
   }
