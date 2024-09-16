@@ -8,6 +8,7 @@ export const analystApiUrl: string = `${import.meta.env[`VITE_ANALYTICAL_URL_${e
 
 export const handleError = (e: unknown): null => {
     if (e instanceof Error) {
+        console.error(e)
         console.error(`Error occurred: ${e.message}`);
         console.error(`Stack trace: ${e.stack}`);
       } else {
