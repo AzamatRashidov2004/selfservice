@@ -1,3 +1,5 @@
+image: node:18
+
 stages:
   - build
   - test
@@ -7,7 +9,7 @@ variables:
   FIREBASE_TOKEN: $FIREBASE_TOKEN # Ensure this is added to your GitLab CI/CD variables
   VITE_ENVIRONMENT: $VITE_ENVIRONMENT
   VITE_ANALYTICAL_URL_PRODUCTION: $VITE_ANALYTICAL_URL_PRODUCTION
-  VITE_ANALYTICAL_URL_DEVELOPMENT: $VITE_ANALytical_URL_DEVELOPMENT
+  VITE_ANALYTICAL_URL_DEVELOPMENT: $VITE_ANALYTICAL_URL_DEVELOPMENT
   VITE_DOCRETR_URL_DEVELOPMENT: $VITE_DOCRETR_URL_DEVELOPMENT
   VITE_DOCRETR_API_KEY_DEVELOPMENT: $VITE_DOCRETR_API_KEY_DEVELOPMENT
   VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
@@ -17,7 +19,6 @@ variables:
 
 build:
   stage: build
-  image: node:18 # Use Node.js 18
   script:
     - npm install
     - npm run build
@@ -29,29 +30,20 @@ build:
   only:
     - main
 
-test:
-  stage: test
-  image: node:18 # Ensuring the same Node version
-  script:
-    - echo "Test stage passed!"
-  artifacts:
-    paths:
-      - dist/ # Include the built files
-      - node_modules/ # Include node_modules for consistency
-  when: always # This will always pass the test stage
+# test:
+#   stage: test
+#   script:
+#     - echo "Test stage passed!"
+#   when: always # This will always pass the test stage
 
 deploy:
   stage: deploy
-  image: node:18 # Ensure Node.js 18 for deployment
   only:
     - main # Deploy only from the 'main' branch
   script:
     - echo "Deploy stage starting..."
     - npm install -g firebase-tools
-    # Add firebase variables env
     - firebase functions:config:set \
-      --token $FIREBASE_TOKEN \
-      --project sop-generator \
       VITE_ENVIRONMENT=$VITE_ENVIRONMENT \
       VITE_ANALYTICAL_URL_PRODUCTION=$VITE_ANALYTICAL_URL_PRODUCTION \
       VITE_ANALYTICAL_URL_DEVELOPMENT=$VITE_ANALYTICAL_URL_DEVELOPMENT \
