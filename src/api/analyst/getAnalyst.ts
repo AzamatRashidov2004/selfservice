@@ -19,7 +19,7 @@ export async function getSingleAnalyticalConfig(
       return config.answer;
   
     } catch (e: unknown) {
-      return handleError(e)
+      return handleError({error: e, origin: "getSingleAnalyticalConfig"})
     }
   }
 
@@ -39,7 +39,7 @@ export async function getAllAnalyticalIDs(): Promise<string[] | null> {
       return all_ids.answer;
   
     } catch (e: unknown) {
-      return handleError(e)
+      return handleError({error: e, origin: "getAllAnalyticalIDs"})
     }
   }
 
@@ -61,6 +61,6 @@ export async function getAllAnalyticalConfigs(
       return configs;
       
     }catch(e: unknown){
-      return handleError(e);
+      return handleError({error: e, origin: "getAllAnalyticalConfigs"})
     }
   }

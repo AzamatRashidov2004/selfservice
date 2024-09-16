@@ -31,7 +31,7 @@ async function getAllPdfsFromProject(projectId: string): Promise<kronosKnowledge
     return result.data;
       
   }catch(e: unknown){
-    return handleError(e);
+    return handleError({error: e, origin: "getAllPdfsFromProject"})
   }
   }
 
@@ -69,7 +69,7 @@ async function getAllPdfsFromProject(projectId: string): Promise<kronosKnowledge
       return result
 
     }catch(e: unknown){
-      return handleError(e);
+      return handleError({error: e, origin: "getAllPdfs"})
     }
   }
 
@@ -91,7 +91,7 @@ export async function getAllPdfProjects(): Promise<KronosProjectType[] | null> {
   
         return projects.data;
     }catch(e: unknown){
-      return handleError(e);
+      return handleError({error: e, origin: "getAllPdfProjects"})
     }
   }
 
@@ -120,7 +120,7 @@ export async function getKronosProject(projectId: string): Promise<KronosProject
     return project;
       
   }catch (e: unknown) {
-    return handleError(e);
+    return handleError({error: e, origin: "getKronosProject"})
   }
   
   }
@@ -165,7 +165,7 @@ export async function getKronosProject(projectId: string): Promise<KronosProject
       return settings;
       
     }catch (e: unknown) {
-      return handleError(e);
+      return handleError({error: e, origin: "getSinglPdfConfig"})
     }
   }
 
@@ -193,6 +193,6 @@ export async function getKronosProject(projectId: string): Promise<KronosProject
     
       return project;
     }catch (e: unknown) {
-      return handleError(e);
+      return handleError({error: e, origin: "getKronosConfig"})
     }
   }

@@ -33,7 +33,7 @@ export async function updateAnalyticalProject(
       const result = await response.json();
       return !!result; // Return true if there's a result
     } catch (e:unknown) {
-      return handleError(e);
+      return handleError({error: e, origin: "updateAnalyticalProject"})
     }
   }
   
@@ -61,6 +61,6 @@ export async function updateAnalyticalProject(
       const result: {id: string} = await response.json();
       return {docID: result.id, projectID: null};
     } catch (e:unknown) {
-      return handleError(e);
+      return handleError({error: e, origin: "uploadAnalyticalProject"})
     }
   }

@@ -6,10 +6,11 @@ export const kronosApiKey: string = `${import.meta.env[`VITE_KRONOS_API_KEY_${en
 
 export const analystApiUrl: string = `${import.meta.env[`VITE_ANALYTICAL_URL_${environment}`]}`;
 
-export const handleError = (error: unknown, context: string = ''): null => {
+export const handleError = (vars: {error: unknown, origin: string}): null => {
+  const error = vars.error
   if (error instanceof Error) {
       console.error('An error occurred:');
-      console.error(`Context: ${context}`);
+      console.error(`Context: ${vars.origin}`);
       console.error(`Type: ${error.name}`);
       console.error(`Message: ${error.message}`);
       
@@ -21,7 +22,7 @@ export const handleError = (error: unknown, context: string = ''): null => {
       }
   } else {
       console.error('An unknown error occurred with the following details:');
-      console.error('Context:', context);
+      console.error('Context:', vars.origin);
       console.error(error);
   }
 

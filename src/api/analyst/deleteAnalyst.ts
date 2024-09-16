@@ -15,7 +15,7 @@ export async function deleteAnalyticalProject(id: string): Promise<boolean> {
       }
       return true;
     } catch (e:unknown) {
-      handleError(e)
+      handleError({error: e, origin: "deleteAnalyticalProject"})
       return false
     }
   }

@@ -17,6 +17,6 @@ export async function deletePdf(projectID: string): Promise<boolean | null>{
     return true
 
   }catch (e: unknown) {
-    return handleError(e);
+    return handleError({error: e, origin: "deletePdf"})
   }
 }
