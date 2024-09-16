@@ -2,7 +2,6 @@ image: node:18
 
 stages:
   - build
-  - test
   - deploy
 
 variables:
@@ -26,7 +25,6 @@ build:
     paths:
       - dist/ # Include the built files
       - node_modules/ # Include node_modules to avoid re-installing
-      - .env # Include the .env file if needed for deployment
   only:
     - main
 
@@ -43,16 +41,6 @@ deploy:
   script:
     - echo "Deploy stage starting..."
     - npm install -g firebase-tools
-    - firebase functions:config:set \
-      VITE_ENVIRONMENT=$VITE_ENVIRONMENT \
-      VITE_ANALYTICAL_URL_PRODUCTION=$VITE_ANALYTICAL_URL_PRODUCTION \
-      VITE_ANALYTICAL_URL_DEVELOPMENT=$VITE_ANALYTICAL_URL_DEVELOPMENT \
-      VITE_DOCRETR_URL_DEVELOPMENT=$VITE_DOCRETR_URL_DEVELOPMENT \
-      VITE_DOCRETR_API_KEY_DEVELOPMENT=$VITE_DOCRETR_API_KEY_DEVELOPMENT \
-      VITE_KRONOS_URL_PRODUCTION=$VITE_KRONOS_URL_PRODUCTION \
-      VITE_KRONOS_URL_DEVELOPMENT=$VITE_KRONOS_URL_DEVELOPMENT \
-      VITE_KRONOS_API_KEY_PRODUCTION=$VITE_KRONOS_API_KEY_PRODUCTION \
-      VITE_KRONOS_API_KEY_DEVELOPMENT=$VITE_KRONOS_API_KEY_DEVELOPMENT
     - firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator
   dependencies:
     - build
