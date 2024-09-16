@@ -108,8 +108,8 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
     if (config) {
       setSelectedProjectConfig(config);
       scrollIntoEditSection();
+      setSelectedIndex(index);
     }
-    setSelectedIndex(index);
   }
 
   return (
