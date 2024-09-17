@@ -5,15 +5,22 @@ import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
 import { SettingsType } from "../../utility/types.ts";
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
 import getDate from "../../utility/Date_Util.ts";
-import { fetchProjectsData, handleUpdateConfig } from "../../utility/Api_Utils.ts";
+import {
+  fetchProjectsData,
+  handleUpdateConfig,
+} from "../../utility/Api_Utils.ts";
 import { ProjectType } from "../../utility/types.ts";
 import { createNotificationEvent } from "../../utility/Modal_Util.ts";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const [selectedDocID, setSelectedDocID] = useState<string | null>(null);
-  const [selectedProjectID, setSelectedProjectID] = useState<string | null>(null);
-  const [selectedProjectConfig, setSelectedProjectConfig] = useState<SettingsType | null>(null);
+  const [selectedProjectID, setSelectedProjectID] = useState<string | null>(
+    null
+  );
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [selectedProjectConfig, setSelectedProjectConfig] =
+    useState<SettingsType | null>(null);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
 
   // States for Project Details
@@ -38,14 +45,13 @@ const Dashboard: React.FC = () => {
     setLanguage(attributes.language);
   }, [selectedProjectConfig]);
 
+  const fetchData = async () => {
+    await fetchProjectsData(setProjects);
+  };
   // Initial projects fetch
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchProjectsData(setProjects);
-    };
-  
     fetchData();
-  }, []); 
+  }, []);
 
   const scrollIntoEditSection = useCallback(() => {
     const topMargin = 80;
@@ -96,7 +102,7 @@ const Dashboard: React.FC = () => {
 
   const updateSettings = async (settings: SettingsType) => {
     if (!selectedProjectConfig || !selectedDocID) return;
-    
+
     const attributes = {
       ...selectedProjectConfig.attributes,
     };
@@ -104,8 +110,13 @@ const Dashboard: React.FC = () => {
     settings.attributes = attributes;
 
     // API update the config here
-    const result = await handleUpdateConfig(isAnalytical, settings, selectedDocID, selectedProjectID);
-    if (!result){
+    const result = await handleUpdateConfig(
+      isAnalytical,
+      settings,
+      selectedDocID,
+      selectedProjectID
+    );
+    if (!result) {
       console.error("Something went wrong while updating project");
       createNotificationEvent(
         "Something Went Wrong",
@@ -114,6 +125,13 @@ const Dashboard: React.FC = () => {
       );
       return;
     }
+
+    // updates project name
+    const updatedProjects = projects.map((project, index) =>
+      index === selectedIndex ? { ...project, name: projectName } : project
+    );
+
+    setProjects(updatedProjects);
 
     createNotificationEvent(
       "Project Updated",
@@ -147,6 +165,7 @@ const Dashboard: React.FC = () => {
                 key={index}
                 project={project}
                 index={index}
+                setSelectedIndex={setSelectedIndex}
                 setSelectedProjectID={setSelectedProjectID}
                 setSelectedProject={setSelectedDocID}
                 setSelectedProjectConfig={setSelectedProjectConfig}

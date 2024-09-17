@@ -5,12 +5,8 @@ import {
 } from "../../utility/Modal_Util";
 import getFileExstension from "../../utility/File_Exstension";
 import { SettingsType } from "../../utility/types.ts";
-import {
-  deleteAnalyticalProject,
-} from "../../api/analyst/deleteAnalyst.ts";
-import {
-  deletePdf,
-} from "../../api/kronos/deleteKronos.ts";
+import { deleteAnalyticalProject } from "../../api/analyst/deleteAnalyst.ts";
+import { deletePdf } from "../../api/kronos/deleteKronos.ts";
 import { handleGetSingleConfig } from "../../utility/Api_Utils";
 import { ProjectType } from "../../utility/types";
 
@@ -25,7 +21,8 @@ interface ProjectRowProps {
   setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
   scrollIntoEditSection: () => void;
   setProjects: React.Dispatch<React.SetStateAction<ProjectType[]>>;
-  setSelectedProjectID: React.Dispatch<React.SetStateAction<string | null>>
+  setSelectedProjectID: React.Dispatch<React.SetStateAction<string | null>>;
+  setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const ProjectRow: React.FC<ProjectRowProps> = ({
@@ -37,25 +34,25 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
   scrollIntoEditSection,
   setIsAnalytical,
   setProjects,
-  setSelectedProjectID
+  setSelectedProjectID,
+  setSelectedIndex,
 }) => {
   const deleteProject = async (response: boolean) => {
     if (!response) return;
 
     let result;
     const fileExtension = getFileExstension(project.filename);
-    if (fileExtension !== "pdf"){
+    if (fileExtension !== "pdf") {
       // Analytical delete
-      result = await deleteAnalyticalProject(project.docId)
-
-    }else if(project.projectId){
+      result = await deleteAnalyticalProject(project.docId);
+    } else if (project.projectId) {
       // Pdf delete
       result = await deletePdf(project.projectId);
     }
 
-    if (!result){
+    if (!result) {
       console.error("Something went wrong while deleting project");
-    
+
       createNotificationEvent(
         "Something Went Wrong",
         "While trying to delete the file, something went wrong. Please try again later",
@@ -104,13 +101,14 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
   async function handleEditClick() {
     setSelectedProject(project.docId);
     setCustomizeStep(0);
-    setIsAnalytical(!(getFileExstension(project.filename) === "pdf"))
+    setIsAnalytical(!(getFileExstension(project.filename) === "pdf"));
     if (project.projectId) setSelectedProjectID(project.projectId);
     // API get project config here, set it below and please clean the defaultSettings code
     const config = await handleGetSingleConfig(project);
-    if (config){
+    if (config) {
       setSelectedProjectConfig(config);
       scrollIntoEditSection();
+      setSelectedIndex(index);
     }
   }
 
