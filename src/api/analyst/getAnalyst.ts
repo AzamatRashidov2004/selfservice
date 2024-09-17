@@ -43,24 +43,22 @@ export async function getAllAnalyticalIDs(): Promise<string[] | null> {
     }
   }
 
-export async function getAllAnalyticalConfigs(
+  export async function getAllAnalyticalConfigs(
     all_ids: string[]
   ): Promise<SettingsType[] | null> {
-
-    try{
-      // Get all the configs for the analytical files
-      const configs: SettingsType[] = [];
-      
-      for (const id of all_ids) {
-        const projectConfig = await getSingleAnalyticalConfig(id);
-        if (projectConfig){
-          configs.push(projectConfig);
-        }
-      }
-      if (configs.length === 0) return null;
-      return configs;
-      
-    }catch(e: unknown){
-      return handleError({error: e, origin: "getAllAnalyticalConfigs"})
+    try {
+      // Create an array of promises for each analytical config request
+      const requests = all_ids.map(id => getSingleAnalyticalConfig(id));
+  
+      // Wait for all promises to resolve. Batch request for overall faster response times
+      const results = await Promise.all(requests);
+  
+      // Filter out null or undefined results and return them
+      const configs = results.filter(config => config !== null && config !== undefined);
+  
+      return configs.length > 0 ? configs : null;
+  
+    } catch (e: unknown) {
+      return handleError({ error: e, origin: "getAllAnalyticalConfigs" });
     }
   }
