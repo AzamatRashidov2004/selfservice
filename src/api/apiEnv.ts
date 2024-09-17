@@ -1,10 +1,10 @@
-const environment = import.meta.env.VITE_ENVIRONMENT 
+const environment = import.meta.env.vite_environment;
 
-export const isProduction: boolean = import.meta.env.VITE_ENVIRONMENT === "PRODUCTION";
-export const kronosApiUrl: string = `${import.meta.env[`VITE_KRONOS_URL_${environment}`]}`;
-export const kronosApiKey: string = `${import.meta.env[`VITE_KRONOS_API_KEY_${environment}`]}`;
+export const isProduction: boolean = import.meta.env.vite_environment === "PRODUCTION";
+export const kronosApiUrl: string = `${import.meta.env[`vite_kronos_url_${environment}`]}`;
+export const kronosApiKey: string = `${import.meta.env[`vite_kronos_api_key_${environment}`]}`;
 
-export const analystApiUrl: string = `${import.meta.env[`VITE_ANALYTICAL_URL_${environment}`]}`;
+export const analystApiUrl: string = `${import.meta.env[`vite_analytical_url_${environment}`]}`;
 
 console.log("Is Production", isProduction);
 console.log("Kronos API Key", kronosApiKey);
