@@ -9,6 +9,7 @@ import { deleteAnalyticalProject } from "../../api/analyst/deleteAnalyst.ts";
 import { deletePdf } from "../../api/kronos/deleteKronos.ts";
 import { handleGetSingleConfig } from "../../utility/Api_Utils";
 import { ProjectType } from "../../utility/types";
+import "./Project_Row.css";
 
 interface ProjectRowProps {
   project: ProjectType;
@@ -115,28 +116,30 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
   return (
     <tr>
       <td
-        className={`project-name text-start ${
+        className={`collapsable-text project-name text-start ${
           index % 2 === 0 ? "gray-bg" : ""
         }`}
       >
         {project.name}
       </td>
       <td
-        className={`project-last-update text-start ${
+        className={`collapsable-text project-last-update text-start ${
           index % 2 === 0 ? "gray-bg" : ""
         }`}
       >
         {project.lastUpdate}
       </td>
       <td
-        className={`project-filename text-start hover-underline ${
+        className={`collapsable-text project-filename text-start hover-underline ${
           index % 2 === 0 ? "gray-bg" : ""
         }`}
       >
         {project.filename}
       </td>
       <td
-        className={`project-id text-start ${index % 2 === 0 ? "gray-bg" : ""}`}
+        className={`collapsable-text project-id text-start ${
+          index % 2 === 0 ? "gray-bg" : ""
+        }`}
       >
         {project.docId}
       </td>
