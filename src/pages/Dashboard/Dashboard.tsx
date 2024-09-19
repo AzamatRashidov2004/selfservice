@@ -11,6 +11,7 @@ import {
 } from "../../utility/Api_Utils.ts";
 import { ProjectType } from "../../utility/types.ts";
 import { createNotificationEvent } from "../../utility/Modal_Util.ts";
+import Loader from "../../components/Loader/Loader.tsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<ProjectType[]>([]);
@@ -22,6 +23,7 @@ const Dashboard: React.FC = () => {
   const [selectedProjectConfig, setSelectedProjectConfig] =
     useState<SettingsType | null>(null);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // States for Project Details
   const [projectName, setProjectName] = useState("");
@@ -45,11 +47,12 @@ const Dashboard: React.FC = () => {
     setLanguage(attributes.language);
   }, [selectedProjectConfig]);
 
-  const fetchData = async () => {
-    await fetchProjectsData(setProjects);
-  };
+ 
   // Initial projects fetch
   useEffect(() => {
+    const fetchData = async () => {
+      await fetchProjectsData(setProjects, setLoading);
+    };
     fetchData();
   }, []);
 
@@ -148,35 +151,40 @@ const Dashboard: React.FC = () => {
         <h1 className="text-light">Available Projects</h1>
         <p className="text-light">Choose a project to edit or delete</p>
       </div>
-      <table className="table w-100">
-        <thead>
-          <tr>
-            <th className="project-name text-start">Project Name</th>
-            <th className="project-last-update text-start">Last Update</th>
-            <th className="project-filename text-start">Filename</th>
-            <th className="project-id text-start">Project ID</th>
-            <th className="project-actions text-start">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {projects &&
-            projects.map((project, index) => (
-              <ProjectRow
-                key={index}
-                project={project}
-                index={index}
-                setSelectedIndex={setSelectedIndex}
-                setSelectedProjectID={setSelectedProjectID}
-                setSelectedProject={setSelectedDocID}
-                setSelectedProjectConfig={setSelectedProjectConfig}
-                setCustomizeStep={setCustomizeStep}
-                scrollIntoEditSection={scrollIntoEditSection}
-                setIsAnalytical={setIsAnalytical}
-                setProjects={setProjects}
-              />
-            ))}
-        </tbody>
-      </table>
+      {loading ? (
+        <div className="loader-container">
+          <Loader />
+        </div>
+      ) : (
+        <table className="table w-100">
+          <thead>
+            <tr>
+              <th className="project-name text-start">Project Name</th>
+              <th className="project-last-update text-start">Last Update</th>
+              <th className="project-filename text-start">Filename</th>
+              <th className="project-id text-start">Project ID</th>
+              <th className="project-actions text-start">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {projects &&
+              projects.map((project, index) => (
+                <ProjectRow
+                  key={index}
+                  project={project}
+                  index={index}
+                  setSelectedProjectID={setSelectedProjectID}
+                  setSelectedProject={setSelectedDocID}
+                  setSelectedProjectConfig={setSelectedProjectConfig}
+                  setCustomizeStep={setCustomizeStep}
+                  scrollIntoEditSection={scrollIntoEditSection}
+                  setIsAnalytical={setIsAnalytical}
+                  setProjects={setProjects}
+                />
+              ))}
+          </tbody>
+        </table>
+      )}
       {selectedDocID && selectedProjectConfig ? (
         <>
           <div

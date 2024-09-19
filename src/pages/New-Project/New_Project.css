@@ -1,12 +1,19 @@
-section:not(.bot-customization-section){
-    padding: 0 var(--customize-section-padding);
-    text-align: start;
+section:not(.bot-customization-section) {
+  padding: 0 var(--customize-section-padding);
+  text-align: start;
 }
 
-.form-control, .form-select{
-    border-color: var(--primary-color);
+.form-control,
+.form-select {
+  border-color: var(--primary-color);
 }
 
-h1{
-    color: white;
+h1 {
+  color: white;
+}
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh; /* Adjust based on the size you want */
 }
