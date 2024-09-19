@@ -1,14 +1,21 @@
-#root{
-    width: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
+#root {
+  width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-.hover-underline:hover{
-    text-decoration: underline;
-    cursor: pointer;
+.hover-underline:hover {
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-.gray-bg{
-    background-color: #F2F2F2 !important;
+.gray-bg {
+  background-color: #f2f2f2 !important;
+}
+
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh; /* Adjust based on the size you want */
 }
