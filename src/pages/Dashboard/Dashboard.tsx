@@ -47,7 +47,6 @@ const Dashboard: React.FC = () => {
     setLanguage(attributes.language);
   }, [selectedProjectConfig]);
 
- 
   // Initial projects fetch
   useEffect(() => {
     const fetchData = async () => {
@@ -180,6 +179,7 @@ const Dashboard: React.FC = () => {
                   scrollIntoEditSection={scrollIntoEditSection}
                   setIsAnalytical={setIsAnalytical}
                   setProjects={setProjects}
+                  setSelectedIndex={setSelectedIndex}
                 />
               ))}
           </tbody>
