@@ -54,7 +54,6 @@
     cursor: pointer;
     
     & * {
-      background-color: #dedede;
       text-decoration: underline;
     }
   }

@@ -343,6 +343,31 @@ const Dashboard: React.FC = () => {
         openProjectIndex={openProjectIndex}
         setOpenProjectIndex={setOpenProjectIndex}
         />
+
+      <Project projectData={project1KnowledgeList} project={project2} index={2}
+        setSelectedIndex={setSelectedIndex}
+        setSelectedProjectID={setSelectedProjectID}
+        setSelectedProject={setSelectedDocID}
+        setSelectedProjectConfig={setSelectedProjectConfig}
+        setCustomizeStep={setCustomizeStep}
+        scrollIntoEditSection={scrollIntoEditSection}
+        setIsAnalytical={setIsAnalytical}
+        setProjects={setProjects}
+        openProjectIndex={openProjectIndex}
+        setOpenProjectIndex={setOpenProjectIndex}
+        />
+        <Project projectData={project1KnowledgeList} project={project2} index={3}
+        setSelectedIndex={setSelectedIndex}
+        setSelectedProjectID={setSelectedProjectID}
+        setSelectedProject={setSelectedDocID}
+        setSelectedProjectConfig={setSelectedProjectConfig}
+        setCustomizeStep={setCustomizeStep}
+        scrollIntoEditSection={scrollIntoEditSection}
+        setIsAnalytical={setIsAnalytical}
+        setProjects={setProjects}
+        openProjectIndex={openProjectIndex}
+        setOpenProjectIndex={setOpenProjectIndex}
+        />
       </div>
       <table className="table w-100 hidden">
         <thead>
