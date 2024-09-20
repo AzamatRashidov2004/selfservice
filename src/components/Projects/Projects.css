@@ -70,3 +70,11 @@
   .accordion > .accordion-item:last-child h2 {
     border-bottom: none !important;
   }
+
+  .files-cancel-button-wrapper{
+    display: flex;
+    justify-content: end;
+    & > button{
+      width: calc(110.3px + 16px) ;
+    }
+  }

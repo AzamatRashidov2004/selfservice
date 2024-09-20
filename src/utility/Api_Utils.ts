@@ -43,6 +43,8 @@ export async function handleGetSingleConfig(project: ProjectType): Promise<Setti
   return config;
 }
 
+export async function fetch
+
 export async function fetchProjectsData(setInitial: React.Dispatch<React.SetStateAction<ProjectType[]>>): Promise<ProjectType[] | null> {
   let allProjects: ProjectType[] = [];
 

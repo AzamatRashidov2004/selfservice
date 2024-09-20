@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import {
   createPopupEvent,
   createNotificationEvent,
@@ -34,6 +34,9 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
   setSelectedProjectID,
   setSelectedIndex,
 }) => {
+  const addFileRef = useRef<HTMLTableRowElement | null>(null);
+  const newFileInputRef = useRef<HTMLTableRowElement | null>(null);
+
   const getIconByExtension = (extension: string) => {
     switch (extension.toLowerCase()) {
       case "pdf":
@@ -128,7 +131,16 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
           </tr>
         </thead>
         <tbody>
-          <tr className="add-file-wrapper">
+        <tr
+          ref={addFileRef}
+          className="add-file-wrapper"
+          onClick={() => {
+            if (newFileInputRef.current && addFileRef.current) {
+              newFileInputRef.current.classList.remove("hidden");
+              addFileRef.current.classList.add("hidden");
+            }
+          }}
+        >
             <td>
               <img
                 src={plusIcon.src}
@@ -138,6 +150,40 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
               <span className="project-row-span">Add new file</span>
             </td>
             <td></td>
+          </tr>
+          <tr 
+          ref={newFileInputRef} 
+          className="hidden">
+            <td>
+              <div className="input-group">
+                <input
+                  type="file"
+                  className="form-control"
+                  id="inputGroupFile"
+                  multiple
+                  aria-label="Upload"
+                />
+                <button
+                  className="btn btn-outline-primary"
+                  type="button"
+                  id="inputGroupFileAddon"
+                >
+                  Upload
+                </button>
+              </div>
+            </td>
+            <td>
+              <div className="files-cancel-button-wrapper">
+                <button 
+                className="btn btn-danger text-center"
+                onClick={() => {
+                  if (addFileRef.current && newFileInputRef.current) {
+                    addFileRef.current.classList.remove("hidden");
+                    newFileInputRef.current.classList.add("hidden");
+                  }
+                }}>Cancel</button>
+              </div>
+            </td>
           </tr>
 
           {projectData &&

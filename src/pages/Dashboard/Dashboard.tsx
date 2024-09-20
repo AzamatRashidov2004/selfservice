@@ -153,14 +153,6 @@ const Dashboard: React.FC = () => {
     _id: "0kj3asd84as9dcb91",
   }
 
-  const project2: KronosProjectType = {
-    name: "Project 2",
-    created_at: new Date("12-02-2024"),
-    description: "This is the project description for project 2",
-    modal_version: 2,
-    _id: "0kj3asd84as9dcb91",
-  }
-
   const project1KnowledgeList: kronosKnowledgeBaseType[] = [
     {
       "_id": "66966a415b8437d77c70fc78",
@@ -319,44 +311,6 @@ const Dashboard: React.FC = () => {
 
       <div className="accordion" id="projectsAccordion">
         <Project projectData={project1KnowledgeList} project={project1} index={0}
-        setSelectedIndex={setSelectedIndex}
-        setSelectedProjectID={setSelectedProjectID}
-        setSelectedProject={setSelectedDocID}
-        setSelectedProjectConfig={setSelectedProjectConfig}
-        setCustomizeStep={setCustomizeStep}
-        scrollIntoEditSection={scrollIntoEditSection}
-        setIsAnalytical={setIsAnalytical}
-        setProjects={setProjects}
-        openProjectIndex={openProjectIndex}
-        setOpenProjectIndex={setOpenProjectIndex}
-        />
-        
-        <Project projectData={project1KnowledgeList} project={project2} index={1}
-        setSelectedIndex={setSelectedIndex}
-        setSelectedProjectID={setSelectedProjectID}
-        setSelectedProject={setSelectedDocID}
-        setSelectedProjectConfig={setSelectedProjectConfig}
-        setCustomizeStep={setCustomizeStep}
-        scrollIntoEditSection={scrollIntoEditSection}
-        setIsAnalytical={setIsAnalytical}
-        setProjects={setProjects}
-        openProjectIndex={openProjectIndex}
-        setOpenProjectIndex={setOpenProjectIndex}
-        />
-
-      <Project projectData={project1KnowledgeList} project={project2} index={2}
-        setSelectedIndex={setSelectedIndex}
-        setSelectedProjectID={setSelectedProjectID}
-        setSelectedProject={setSelectedDocID}
-        setSelectedProjectConfig={setSelectedProjectConfig}
-        setCustomizeStep={setCustomizeStep}
-        scrollIntoEditSection={scrollIntoEditSection}
-        setIsAnalytical={setIsAnalytical}
-        setProjects={setProjects}
-        openProjectIndex={openProjectIndex}
-        setOpenProjectIndex={setOpenProjectIndex}
-        />
-        <Project projectData={project1KnowledgeList} project={project2} index={3}
         setSelectedIndex={setSelectedIndex}
         setSelectedProjectID={setSelectedProjectID}
         setSelectedProject={setSelectedDocID}

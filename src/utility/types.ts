@@ -6,6 +6,14 @@ export interface ProjectType {
     projectId?: string;
   }
 
+  export type KronosProjectType = {
+    _id: string;
+    name: string;
+    description: string;
+    created_at: Date;
+    modal_version: number;
+  }
+
   // Define ComponentColor type
   type ComponentColor = {
     background: string; // Component background color
@@ -106,14 +114,6 @@ export interface PopupState {
     };
     callback?: (success: boolean) => void; // Optional callback function
     notification_time?: number; // Optional time for popup display
-  }
-
-  export type KronosProjectType = {
-    _id: string;
-    name: string;
-    description: string;
-    created_at: Date;
-    modal_version: number;
   }
 
   export type kronosKnowledgeBaseType = {
