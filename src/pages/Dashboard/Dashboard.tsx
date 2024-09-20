@@ -31,6 +31,8 @@ const Dashboard: React.FC = () => {
   const [introMessage, setIntroMessage] = useState("");
   const [introImage, setIntroImage] = useState("");
 
+  const [openProjectIndex, setOpenProjectIndex] = useState<number | null>(null);
+
   const [customizeStep, setCustomizeStep] = useState<number>(0);
 
   const customizeSectionRef = useRef<HTMLHeadingElement>(null);
@@ -324,7 +326,11 @@ const Dashboard: React.FC = () => {
         setCustomizeStep={setCustomizeStep}
         scrollIntoEditSection={scrollIntoEditSection}
         setIsAnalytical={setIsAnalytical}
-        setProjects={setProjects}/>
+        setProjects={setProjects}
+        openProjectIndex={openProjectIndex}
+        setOpenProjectIndex={setOpenProjectIndex}
+        />
+        
         <Project projectData={project1KnowledgeList} project={project2} index={1}
         setSelectedIndex={setSelectedIndex}
         setSelectedProjectID={setSelectedProjectID}
@@ -333,7 +339,10 @@ const Dashboard: React.FC = () => {
         setCustomizeStep={setCustomizeStep}
         scrollIntoEditSection={scrollIntoEditSection}
         setIsAnalytical={setIsAnalytical}
-        setProjects={setProjects}/>
+        setProjects={setProjects}
+        openProjectIndex={openProjectIndex}
+        setOpenProjectIndex={setOpenProjectIndex}
+        />
       </div>
       <table className="table w-100 hidden">
         <thead>
