@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface ProjectDescriptionSectionProps {
   projectName: string;
@@ -25,13 +25,15 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
   setIntroMessage,
   introImage,
   setIntroImage,
-  handleNextButtonClick
+  handleNextButtonClick,
 }) => {
   return (
     <section className="project-description-wrapper mt-4">
       <h2 className="project-description-title">Project Description</h2>
       <div className="mb-3">
-        <label htmlFor="projectName" className="form-label">Project Name</label>
+        <label htmlFor="projectName" className="form-label">
+          Project Name<span className="text-danger">*</span>
+        </label>
         <input
           type="text"
           className="form-control"
@@ -41,7 +43,9 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="description" className="form-label">Description</label>
+        <label htmlFor="description" className="form-label">
+          Description<span className="text-danger">*</span>
+        </label>
         <textarea
           className="form-control"
           id="description"
@@ -51,7 +55,9 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="language" className="form-label">Select Language</label>
+        <label htmlFor="language" className="form-label">
+          Select Language
+        </label>
         <select
           id="language"
           className="form-select"
@@ -64,7 +70,9 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
         </select>
       </div>
       <div className="mb-3">
-        <label htmlFor="introMessage" className="form-label">Introductory Message</label>
+        <label htmlFor="introMessage" className="form-label">
+          Introductory Message
+        </label>
         <textarea
           className="form-control"
           id="introMessage"
@@ -74,7 +82,9 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
         />
       </div>
       <div className="mb-3">
-        <label htmlFor="introImage" className="form-label">Introductory Image URL</label>
+        <label htmlFor="introImage" className="form-label">
+          Introductory Image URL
+        </label>
         <input
           type="url"
           className="form-control"
