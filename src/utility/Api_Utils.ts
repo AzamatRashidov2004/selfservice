@@ -72,7 +72,7 @@ async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
 
 
 
-export async function fetchProjectsData(setInitial: React.Dispatch<React.SetStateAction<fetchProjectsDataReturn>>): Promise<fetchProjectsDataReturn | null> {
+export async function fetchProjectsData(setInitial: (data: fetchProjectsDataReturn) => void): Promise<fetchProjectsDataReturn | null> {
   let allProjects: projectFetchReturn[] = [];
   let allAnalytical: ProjectType[] = [];
 

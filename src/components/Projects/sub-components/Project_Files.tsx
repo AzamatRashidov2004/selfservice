@@ -4,7 +4,7 @@ import {
   createNotificationEvent,
 } from "../../../utility/Modal_Util";
 import getFileExstension from "../../../utility/File_Exstension";
-import { kronosKnowledgeBaseType, SettingsType, ProjectType } from "../../../utility/types.ts";
+import { kronosKnowledgeBaseType, SettingsType, projectFetchReturn } from "../../../utility/types.ts";
 import { deleteAnalyticalProject } from "../../../api/analyst/deleteAnalyst.ts";
 import { deletePdf } from "../../../api/kronos/deleteKronos.ts";
 import { handleGetSingleConfig } from "../../../utility/Api_Utils";
@@ -18,7 +18,7 @@ interface ProjectFilesProps {
   setCustomizeStep: React.Dispatch<React.SetStateAction<number>>;
   scrollIntoEditSection: () => void;
   setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
-  setProjects: React.Dispatch<React.SetStateAction<ProjectType[]>>;
+  setProjects: React.Dispatch<React.SetStateAction<projectFetchReturn[]>>;
   setSelectedProjectID: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
 }

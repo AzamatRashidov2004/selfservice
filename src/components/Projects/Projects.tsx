@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from "react";
 import "./Projects.css";
 import ProjectFiles from "./sub-components/Project_Files";
-import { kronosKnowledgeBaseType, KronosProjectType, SettingsType, ProjectType } from "../../utility/types";
+import { kronosKnowledgeBaseType, KronosProjectType, SettingsType, projectFetchReturn } from "../../utility/types";
 
 interface ProjectsProps {
   project: KronosProjectType;
@@ -12,7 +12,7 @@ interface ProjectsProps {
   setCustomizeStep: React.Dispatch<React.SetStateAction<number>>;
   setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
   scrollIntoEditSection: () => void;
-  setProjects: React.Dispatch<React.SetStateAction<ProjectType[]>>;
+  setProjects: React.Dispatch<React.SetStateAction<projectFetchReturn[]>>;
   setSelectedProjectID: React.Dispatch<React.SetStateAction<string | null>>;
   setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
   openProjectIndex: number | null;
