@@ -5,7 +5,6 @@ import {
 } from "../../../utility/Modal_Util";
 import getFileExstension from "../../../utility/File_Exstension";
 import { kronosKnowledgeBaseType, SettingsType, projectFetchReturn } from "../../../utility/types.ts";
-import { deleteAnalyticalProject } from "../../../api/analyst/deleteAnalyst.ts";
 import { deletePdf } from "../../../api/kronos/deleteKronos.ts";
 import { handleGetSingleConfig } from "../../../utility/Api_Utils";
 import { pdfIcon, excelIcon, unknownIcon, csvIcon, txtIcon, plusIcon } from "../../../utility/icons.ts";
@@ -56,13 +55,8 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
   const deleteProject = async (response: boolean, project: kronosKnowledgeBaseType, index: number) => {
     if (!response) return;
 
-    let result;
-    const fileExtension = getFileExstension(project.source_file);
-    if (fileExtension !== "pdf") {
-      result = await deleteAnalyticalProject(project._id);
-    } else if (project.project_id) {
-      result = await deletePdf(project.project_id);
-    }
+    const result = await deletePdf(project.project_id, project._id);
+    
 
     if (!result) {
       console.error("Something went wrong while deleting project");
