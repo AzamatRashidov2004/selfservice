@@ -2,7 +2,7 @@ import { kronosApiUrl as apiUrl, kronosApiKey as apiKey, handleError } from "../
 import { KronosProjectType, kronosKnowledgeBaseType, ProjectType, SettingsType } from "../../utility/types";
 import { formatKronosDate } from "../../utility/Date_Util";
 
-async function getAllPdfsFromProject(projectId: string): Promise<kronosKnowledgeBaseType[] | null>{
+export async function getAllPdfsFromProject(projectId: string): Promise<kronosKnowledgeBaseType[] | null>{
 
   try{
     const _url = `${apiUrl}/projects/${projectId}/knowledge_base/`

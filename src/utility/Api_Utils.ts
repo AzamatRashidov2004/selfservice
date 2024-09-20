@@ -2,9 +2,9 @@ import {
   uploadAnalyticalProject,
   updateAnalyticalProject
 } from "../api/analyst/postAnalyst.ts";
-import { getSinglPdfConfig, getAllPdfs } from "../api/kronos/getKronos.ts";
+import { getSinglPdfConfig, getAllPdfProjects, getAllPdfsFromProject } from "../api/kronos/getKronos.ts";
 import { uploadPdf, updatePdfConfig,  } from "../api/kronos/postKronos.ts";
-import { ProjectType } from "./types";
+import { fetchProjectsDataReturn, kronosKnowledgeBaseType, KronosProjectType, projectFetchReturn, ProjectType } from "./types";
 import {
   getAllAnalyticalConfigs,
   getAllAnalyticalIDs,
@@ -43,23 +43,51 @@ export async function handleGetSingleConfig(project: ProjectType): Promise<Setti
   return config;
 }
 
-export async function fetch
 
-export async function fetchProjectsData(setInitial: React.Dispatch<React.SetStateAction<ProjectType[]>>): Promise<ProjectType[] | null> {
-  let allProjects: ProjectType[] = [];
+
+async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
+  let allResults: projectFetchReturn[] = [];
+  const allProjects: KronosProjectType[] | null = await getAllPdfProjects();
+
+  if (!allProjects) return []; // Return an empty array if allProjects is null
+
+  if (allProjects.length > 0) {
+    // Create an array of promises to fetch project data for each project
+    const projectDataPromises = allProjects.map(async (project) => {
+      const projectData: kronosKnowledgeBaseType[] | null = await getAllPdfsFromProject(project._id);
+      
+      // If projectData is null, return an empty array for projectData
+      return {
+        project,
+        projectData: projectData || [],
+      };
+    });
+
+    // Wait for all the promises to resolve
+    allResults = await Promise.all(projectDataPromises);
+  }
+
+  return allResults; // Return the collected results
+}
+
+
+
+export async function fetchProjectsData(setInitial: React.Dispatch<React.SetStateAction<fetchProjectsDataReturn>>): Promise<fetchProjectsDataReturn | null> {
+  let allProjects: projectFetchReturn[] = [];
+  let allAnalytical: ProjectType[] = [];
 
   // Fetch all pdfs (Faster api call first)
-  const pdfProjects: ProjectType[] | null = await getAllPdfs();
+  const pdfProjects: projectFetchReturn[] = await getAllProjectsAndProjectData();
   if (pdfProjects){
-    allProjects = [...allProjects, ...pdfProjects];
-    setInitial(allProjects);
+    allProjects = pdfProjects;
+    setInitial({analytical: allAnalytical, project: allProjects});
   }
 
   // Fetch all analytical files (Slower api call last)
   const analyticalProjects: ProjectType[] | null = await fetchAnalyticalConfigs();
   if (analyticalProjects){
-    allProjects = [...allProjects, ...analyticalProjects];
-    setInitial(allProjects);
+    allAnalytical = analyticalProjects;
+    setInitial({analytical: allAnalytical, project: allProjects});
   }
 
   if (allProjects.length === 0){
@@ -67,7 +95,7 @@ export async function fetchProjectsData(setInitial: React.Dispatch<React.SetStat
     return null;
   }
 
-  return allProjects;
+  return {analytical: allAnalytical, project: allProjects};
 }
 
 export async function fetchAnalyticalConfigs(): Promise<ProjectType[] | null> {

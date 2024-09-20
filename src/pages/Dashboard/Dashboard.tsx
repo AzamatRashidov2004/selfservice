@@ -2,19 +2,18 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import "./Dashboard.css";
 import ProjectRow from "../../components/Project-Row/Project_Row"; // Import the new component
 import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
-import { kronosKnowledgeBaseType, KronosProjectType, SettingsType } from "../../utility/types.ts";
+import { fetchProjectsDataReturn, kronosKnowledgeBaseType, KronosProjectType, SettingsType } from "../../utility/types.ts";
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
 import getDate from "../../utility/Date_Util.ts";
 import {
   fetchProjectsData,
   handleUpdateConfig,
 } from "../../utility/Api_Utils.ts";
-import { ProjectType } from "../../utility/types.ts";
 import { createNotificationEvent } from "../../utility/Modal_Util.ts";
 import Project from "../../components/Projects/Projects.tsx";
 
 const Dashboard: React.FC = () => {
-  const [projects, setProjects] = useState<ProjectType[]>([]);
+  const [projects, setProjects] = useState<fetchProjectsDataReturn[]>([]);
   const [selectedDocID, setSelectedDocID] = useState<string | null>(null);
   const [selectedProjectID, setSelectedProjectID] = useState<string | null>(
     null

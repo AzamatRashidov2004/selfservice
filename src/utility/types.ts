@@ -159,3 +159,13 @@ export const defaultNotificationState: NotificationState = {
     type: 'success',
     notification_time: 2000 // Default time for notification display
   };
+  
+  export type projectFetchReturn = {
+    project: KronosProjectType;
+    projectData: kronosKnowledgeBaseType[];
+  };
+
+  export type fetchProjectsDataReturn = {
+    analytical: ProjectType[],
+    project: projectFetchReturn[]
+  }
