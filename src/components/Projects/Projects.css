@@ -1,0 +1,73 @@
+/* Accordion transition styles */
+.accordion-collapse {
+    overflow: hidden;
+    transition: max-height 0.3s ease; /* Only animate max-height */
+    max-height: 0; /* Collapsed state */
+  }
+  
+  .accordion-collapse.expanded {
+    max-height: 500px; /* Expanded state; adjust this value as needed */
+  }
+
+  .accordion-item button{
+    font-size: 20px;
+  }
+  
+
+  .action-padding{
+    padding-right: calc((39.6px * 3) - 40px) !important;
+  }
+  
+  .project-row-img{
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+
+    &.add-file-img{
+      width: 30px;
+      height: 25px;
+    }
+  }
+
+  .project-table-wrapper{
+    border: solid 1px rgb(207, 207, 207);
+    background-color: rgb(207, 207, 207) !important;
+    & > table{
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .filename-wrapper{
+    vertical-align: middle;
+  }
+
+  .project-row-span{
+    margin-left: 5px;
+    display: inline-flex;
+    height: 35px;
+    align-items: center;
+  }
+
+  .add-file-wrapper:hover{
+    text-decoration: underline;
+    cursor: pointer;
+    
+    & * {
+      background-color: #dedede;
+      text-decoration: underline;
+    }
+  }
+
+  .thead-content{
+    background-color: #e6e6e6 !important;
+  }
+
+  .accordion-header, .accordion-button {
+    border-bottom: solid 1px gray;
+    background-color: #E6E6E6 !important;
+  }
+
+  .accordion > .accordion-item:last-child h2 {
+    border-bottom: none !important;
+  }
