@@ -19,6 +19,9 @@ const Dashboard: React.FC = () => {
   const [selectedProjectID, setSelectedProjectID] = useState<string | null>(
     null
   );
+
+  const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
+  const accordionRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [selectedProjectConfig, setSelectedProjectConfig] =
     useState<SettingsType | null>(null);
@@ -150,190 +153,38 @@ const Dashboard: React.FC = () => {
     setSelectedDocID(null);
   };
 
-  // const project1: KronosProjectType = {
-  //   name: "Project 1",
-  //   created_at: new Date("12-02-2024"),
-  //   description: "This is the project description for project 1",
-  //   modal_version: 2,
-  //   _id: "0kj3asd84as9dcb91",
-  // }
+    // Synchronize the height of .kronos-projects-wrapper with .accordion using ResizeObserver
+    useEffect(() => {
+      const observer = new ResizeObserver(() => {
+        if (!kronosProjectsWrapperRef.current || !accordionRef.current) return;
+        const accordionHeight = accordionRef.current.offsetHeight;
+        kronosProjectsWrapperRef.current.style.height = `${accordionHeight}px`;
+      });
+  
+      if (accordionRef.current) {
+        observer.observe(accordionRef.current);
+      }
+  
+      return () => {
+        observer.disconnect();
+      };
+    }, []);
 
-  // const project1KnowledgeList: kronosKnowledgeBaseType[] = [
-  //   {
-  //     "_id": "66966a415b8437d77c70fc78",
-  //     "project_id": "669668775b8437d77c70fc77",
-  //     "name": "Porsche Taycan Manual (EN)",
-  //     "description": "English manual for Porsche Taycan.",
-  //     "embedding_model": "openai-3-large",
-  //     "language": "en-US",
-  //     "total_pages": 302,
-  //     "source_file": "1f7a678da3d96872e48954764004e0e0.pdf",
-  //     "source_type": "pdf",
-  //     "chatbot_config": {
-  //       "title": "Custom Bot",
-  //       "sound": true,
-  //       "key": "646b4706a47a67009f647d79",
-  //       "fontSize": "standard",
-  //       "starting_pos": {
-  //         "x": 930,
-  //         "y": 100
-  //       },
-  //       "resizing": true,
-  //       "dragging": true,
-  //       "size": "standard",
-  //       "customComponents": {
-  //         "Bubble": "",
-  //         "Button": "",
-  //         "Bot": "",
-  //         "Suggestions": "",
-  //         "Video": "",
-  //         "TextInput": "",
-  //         "Loading_Bar": "",
-  //         "Image": "",
-  //         "Messages": "",
-  //         "Icon": ""
-  //       },
-  //       "attributes": {
-  //         "description": "English manual for Porsche Taycan.",
-  //         "last_update": "17-09-2024",
-  //         "project_name": "Porsche Taycan Manual (EN)",
-  //         "docId": "66966a415b8437d77c70fc78",
-  //         "projectId": "669668775b8437d77c70fc77"
-  //       },
-  //       "colors": {
-  //         "bot": {
-  //           "background": "#37258D",
-  //           "color": "white"
-  //         },
-  //         "user": {
-  //           "background": "#7881CB",
-  //           "color": "white"
-  //         },
-  //         "suggestions": {
-  //           "background": "#ffffffb",
-  //           "color": "black",
-  //           "hover_color": "#ffffff80"
-  //         },
-  //         "title_color": "white",
-  //         "background_color": "#5341DA",
-  //         "icon_color": "#5A5A5A"
-  //       },
-  //       "search": true,
-  //       "file_selector": false,
-  //       "positioning": "static",
-  //       "pdfScale": 1,
-  //       "inputLineLimit": 5,
-  //       "save_customization": true,
-  //       "toggle": false,
-  //       "suggestion_button_style": "grid",
-  //       "fullscreen_margin": 0,
-  //       "save_callback": () => {}
-  //     },
-  //     "created_at": "2024-08-14T11:49:29.194000",
-  //     "model_version": 2
-  //   },
-  //   {
-  //     "_id": "66966a415b8437d77c70fc78",
-  //     "project_id": "669668775b8437d77c70fc77",
-  //     "name": "Porsche Taycan Manual (EN)",
-  //     "description": "English manual for Porsche Taycan.",
-  //     "embedding_model": "openai-3-large",
-  //     "language": "en-US",
-  //     "total_pages": 302,
-  //     "source_file": "Flat Sheets.csv",
-  //     "source_type": "csv",
-  //     "chatbot_config": {
-  //       "title": "Custom Bot",
-  //       "sound": true,
-  //       "key": "646b4706a47a67009f647d79",
-  //       "fontSize": "standard",
-  //       "starting_pos": {
-  //         "x": 930,
-  //         "y": 100
-  //       },
-  //       "resizing": true,
-  //       "dragging": true,
-  //       "size": "standard",
-  //       "customComponents": {
-  //         "Bubble": "",
-  //         "Button": "",
-  //         "Bot": "",
-  //         "Suggestions": "",
-  //         "Video": "",
-  //         "TextInput": "",
-  //         "Loading_Bar": "",
-  //         "Image": "",
-  //         "Messages": "",
-  //         "Icon": ""
-  //       },
-  //       "attributes": {
-  //         "description": "English manual for Porsche Taycan.",
-  //         "last_update": "17-09-2024",
-  //         "project_name": "Porsche Taycan Manual (EN)",
-  //         "docId": "66966a415b8437d77c70fc78",
-  //         "projectId": "669668775b8437d77c70fc77"
-  //       },
-  //       "colors": {
-  //         "bot": {
-  //           "background": "#37258D",
-  //           "color": "white"
-  //         },
-  //         "user": {
-  //           "background": "#7881CB",
-  //           "color": "white"
-  //         },
-  //         "suggestions": {
-  //           "background": "#ffffffb",
-  //           "color": "black",
-  //           "hover_color": "#ffffff80"
-  //         },
-  //         "title_color": "white",
-  //         "background_color": "#5341DA",
-  //         "icon_color": "#5A5A5A"
-  //       },
-  //       "search": true,
-  //       "file_selector": false,
-  //       "positioning": "static",
-  //       "pdfScale": 1,
-  //       "inputLineLimit": 5,
-  //       "save_customization": true,
-  //       "toggle": false,
-  //       "suggestion_button_style": "grid",
-  //       "fullscreen_margin": 0,
-  //       "save_callback": () => {}
-  //     },
-  //     "created_at": "2024-08-14T11:49:29.194000",
-  //     "model_version": 2
-  //   }
-  // ]
+  useEffect(() => {
+    if (!projects) return;
+
+    if (projects.length % 2 === 0){
+      const root = document.documentElement;
+      root.style.setProperty('--even-analytical-project-bg', "#FFFFFF");
+      root.style.setProperty('--odd-analytical-project-bg', "#F2F2F2");
+    }
+  }, [projects])
 
   return (
     <main className="container-fluid main-container">
       <div className="bg-primary p-4 rounded mb-4 text-center">
         <h1 className="text-light">Available Projects</h1>
         <p className="text-light">Choose a project to edit or delete</p>
-      </div>
-      <div className="accordion" id="projectsAccordion">
-        {projects.map((project, index) => {
-          if (!project.project || !project.project.name || !project.projectData) return null
-          return (
-          <Project
-            key={project.project._id} // Assuming _id is unique
-            projectData={project.projectData}
-            project={project.project}
-            index={index}
-            setSelectedIndex={setSelectedIndex}
-            setSelectedProjectID={setSelectedProjectID}
-            setSelectedProject={setSelectedDocID}
-            setSelectedProjectConfig={setSelectedProjectConfig}
-            setCustomizeStep={setCustomizeStep}
-            scrollIntoEditSection={scrollIntoEditSection}
-            setIsAnalytical={setIsAnalytical}
-            setProjects={setProjects}
-            openProjectIndex={openProjectIndex}
-            setOpenProjectIndex={setOpenProjectIndex}
-          />
-        )})}
       </div>
       <br />
       <h3>Analytical Projects</h3>
@@ -342,12 +193,35 @@ const Dashboard: React.FC = () => {
           <tr>
             <th className="project-name text-start">Project Name</th>
             <th className="project-last-update text-start">Last Update</th>
-            <th className="project-filename text-start">Filename</th>
             <th className="project-id text-start">Project ID</th>
             <th className="project-actions text-start">Actions</th>
           </tr>
         </thead>
         <tbody>
+          <tr ref={kronosProjectsWrapperRef} className="kronos-projects-wrapper">
+            <div ref={accordionRef} className="accordion" id="projectsAccordion">
+              {projects.map((project, index) => {
+                if (!project.project || !project.project.name || !project.projectData) return null
+                return (
+                <Project
+                  key={project.project._id} // Assuming _id is unique
+                  projectData={project.projectData}
+                  project={project.project}
+                  index={index}
+                  setSelectedIndex={setSelectedIndex}
+                  setSelectedProjectID={setSelectedProjectID}
+                  setSelectedProject={setSelectedDocID}
+                  setSelectedProjectConfig={setSelectedProjectConfig}
+                  setCustomizeStep={setCustomizeStep}
+                  scrollIntoEditSection={scrollIntoEditSection}
+                  setIsAnalytical={setIsAnalytical}
+                  setProjects={setProjects}
+                  openProjectIndex={openProjectIndex}
+                  setOpenProjectIndex={setOpenProjectIndex}
+                />
+              )})}
+            </div>
+          </tr>
           {analyticalProjects &&
             analyticalProjects.map((project: ProjectType, index: number) => (
               <ProjectRow

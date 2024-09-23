@@ -5,7 +5,7 @@
 }
 
 @media (max-width: 960px) {
-    .project-last-update{
+    .project-last-update, .accordion-project-update{
         display: none;
     }
 }
@@ -37,10 +37,6 @@
     :root{
         --customize-section-padding: 20% !important;
     }
-    
-    .project-filename{
-        display: none;
-    }
 }
 
 @media (max-width: 580px) {
@@ -48,7 +44,7 @@
         --customize-section-padding: 10% !important;
     }
 
-    .project-name{
+    .project-name, .accordion-project-name{
         display: none;
     }
 }

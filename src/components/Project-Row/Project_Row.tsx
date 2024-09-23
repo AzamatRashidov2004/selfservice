@@ -6,7 +6,7 @@ import {
 import getFileExstension from "../../utility/File_Exstension";
 import { SettingsType } from "../../utility/types.ts";
 import { deleteAnalyticalProject } from "../../api/analyst/deleteAnalyst.ts";
-import { deletePdf } from "../../api/kronos/deleteKronos.ts";
+import { deletePdfProject } from "../../api/kronos/deleteKronos.ts";
 import { handleGetSingleConfig } from "../../utility/Api_Utils";
 import { ProjectType } from "../../utility/types";
 import "./Project_Row.css";
@@ -48,7 +48,7 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
       result = await deleteAnalyticalProject(project.docId);
     } else if (project.projectId) {
       // Pdf delete
-      result = await deletePdf(project.projectId);
+      result = await deletePdfProject(project.projectId);
     }
 
     if (!result) {
@@ -117,35 +117,28 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
     <tr>
       <td
         className={`collapsable-text project-name text-start ${
-          index % 2 === 0 ? "gray-bg" : ""
+          index % 2 === 0 ? "even gray-bg" : "odd-row"
         }`}
       >
         {project.name}
       </td>
       <td
         className={`collapsable-text project-last-update text-start ${
-          index % 2 === 0 ? "gray-bg" : ""
+          index % 2 === 0 ? "even gray-bg" : "odd-row"
         }`}
       >
         {project.lastUpdate}
       </td>
       <td
-        className={`collapsable-text project-filename text-start hover-underline ${
-          index % 2 === 0 ? "gray-bg" : ""
-        }`}
-      >
-        {project.filename}
-      </td>
-      <td
         className={`collapsable-text project-id text-start ${
-          index % 2 === 0 ? "gray-bg" : ""
+          index % 2 === 0 ? "even gray-bg" : "odd-row"
         }`}
       >
         {project.docId}
       </td>
       <td
-        className={`project-actions text-start text-nowrap ${
-          index % 2 === 0 ? "gray-bg" : ""
+        className={` project-actions text-start text-nowrap ${
+          index % 2 === 0 ? "even gray-bg" : "odd-row"
         }`}
       >
         <button

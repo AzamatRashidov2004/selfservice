@@ -12,3 +12,15 @@
 .gray-bg{
     background-color: #F2F2F2 !important;
 }
+
+.project-name, .project-id{
+    width: 35%;
+}
+
+.project-last-update{
+    width: 20%;
+}
+
+.project-actions{
+    width: 10%;
+}

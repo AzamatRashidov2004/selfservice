@@ -10,7 +10,7 @@
   }
 
   .accordion-item button{
-    font-size: 20px;
+    border-radius: 0px !important;
   }
   
 
@@ -62,11 +62,6 @@
     background-color: #e6e6e6 !important;
   }
 
-  .accordion-header, .accordion-button {
-    border-bottom: solid 1px gray;
-    background-color: #E6E6E6 !important;
-  }
-
   .accordion > .accordion-item:last-child h2 {
     border-bottom: none !important;
   }
@@ -77,4 +72,57 @@
     & > button{
       width: calc(110.3px + 16px) ;
     }
+  }
+
+  .kronos-projects-wrapper{
+    position: relative;
+  }
+
+  .accordion{
+    position: absolute;
+    padding: 0 !important;
+    width: 100%;
+  }
+
+  .accordion-collapse.expanded{
+    border-radius: 0 !important;
+    border: 2px solid #DEE2E6;
+    border-top: none;
+  }
+
+  .accordion-button{
+    height: 47px;
+    padding: 0;
+    background-color: #FFFFFF !important;
+    border-bottom: 0.8px solid #DEE2E6;
+    
+
+    &::after{
+      margin-right: 15px;
+    }
+
+    &.odd{
+      background-color: #F2F2F2 !important;
+    }
+
+    & > div {
+      padding: 8px;
+    }
+  }
+
+  .accordion-project-name, .accordion-project-id{
+    width: 35%;
+  }
+
+  .accordion-project-update{
+    width: 20%;
+  }
+
+  .accordion-item{
+    border-radius: 0;
+    border: none;
+  }
+
+  .accordion-header-container.expanded{
+    border: 0.8px solid #DEE2E6;
   }

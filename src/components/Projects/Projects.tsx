@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from "react";
 import "./Projects.css";
 import ProjectFiles from "./sub-components/Project_Files";
 import { kronosKnowledgeBaseType, KronosProjectType, SettingsType, projectFetchReturn } from "../../utility/types";
+import { formatKronosDate } from "../../utility/Date_Util";
 
 interface ProjectsProps {
   project: KronosProjectType;
@@ -60,17 +61,20 @@ const Project: React.FC<ProjectsProps> = ({
 
   return (
     <div className="accordion-item">
-      <h2 className="bg-primary accordion-header" id={`heading${index}`}>
+      <div className={`accordion-header-container bg-primary ${openProjectIndex === index ? "expanded" : ""}`}  id={`heading${index}`}>
         <button
           onClick={toggleAccordion}
-          className={`accordion-button ${openProjectIndex === index ? "" : "collapsed"}`}
+          className={`accordion-button ${index % 2 === 0 ? "odd" : ""} ${openProjectIndex === index ? "" : "collapsed"}`}
           type="button"
           aria-expanded={openProjectIndex === index}
           aria-controls={`collapse${index}`}
         >
-          {project.name}
+          <div className="accordion-project-name">{project.name}</div>
+          <div className="accordion-project-update">{formatKronosDate(new Date(project.created_at))}</div>
+          <div className="accordion-project-id">{project._id}</div>
         </button>
-      </h2>
+        
+      </div>
       <div
         id={`collapse${index}`}
         className={`accordion-collapse ${openProjectIndex === index ? "expanded" : ""}`}

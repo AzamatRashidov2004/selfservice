@@ -1,9 +1,8 @@
 {
   "hosting": {
+    "target": "slf-service-preview",
     "public": "dist",
-    "target": "selfservice",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "predeploy": "npm run build",
     "rewrites": [
       {
         "source": "**",

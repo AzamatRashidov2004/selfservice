@@ -4,3 +4,16 @@
   text-overflow: ellipsis;
   max-width: 150px;
 }
+
+:root{
+  --even-analytical-project-bg: #F2F2F2;
+  --odd-analytical-project-bg: #FFFFFF; 
+}
+
+.even.gray-bg{
+  background-color: var(--even-analytical-project-bg) !important;
+}
+
+.odd-row{
+  background-color: var(--odd-analytical-project-bg) !important;
+}
