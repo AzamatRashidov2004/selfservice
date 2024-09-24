@@ -98,7 +98,8 @@
     
 
     &::after{
-      margin-right: 15px;
+      position: absolute;
+      right: 15px;
     }
 
     &.odd{
@@ -116,6 +117,10 @@
 
   .accordion-project-update{
     width: 20%;
+  }
+
+  .accordion-project-action{
+    width: 10%;
   }
 
   .accordion-item{

@@ -72,6 +72,7 @@ const Project: React.FC<ProjectsProps> = ({
           <div className="accordion-project-name">{project.name}</div>
           <div className="accordion-project-update">{formatKronosDate(new Date(project.created_at))}</div>
           <div className="accordion-project-id">{project._id}</div>
+          <div className="accordion-project-action">&nbsp;</div>
         </button>
         
       </div>

@@ -24,3 +24,8 @@
 .project-actions{
     width: 10%;
 }
+
+.main-table{
+    table-layout: fixed;
+    padding: 0 20px;
+}

@@ -188,7 +188,7 @@ const Dashboard: React.FC = () => {
       </div>
       <br />
       <h3>Analytical Projects</h3>
-      <table className="table w-100">
+      <table className="table main-table w-100">
         <thead>
           <tr>
             <th className="project-name text-start">Project Name</th>
