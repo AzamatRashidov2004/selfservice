@@ -5,6 +5,14 @@
 }
 
 @media (max-width: 960px) {
+    .accordion-project-name, .accordion-project-id{
+        width: 45% !important;
+    }
+
+    .accordion-project-action{
+        width: 12.5%;
+      }
+
     .project-last-update, .accordion-project-update{
         display: none;
     }
