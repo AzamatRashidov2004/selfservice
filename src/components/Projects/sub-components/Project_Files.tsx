@@ -7,7 +7,7 @@ import getFileExstension from "../../../utility/File_Exstension";
 import { kronosKnowledgeBaseType, SettingsType, projectFetchReturn } from "../../../utility/types.ts";
 import { deletePdf } from "../../../api/kronos/deleteKronos.ts";
 import { handleGetSingleConfig } from "../../../utility/Api_Utils";
-import { pdfIcon, excelIcon, unknownIcon, csvIcon, txtIcon, plusIcon } from "../../../utility/icons.ts";
+import { pdfIcon, excelIcon, unknownIcon, csvIcon, txtIcon, plusIcon, htmlIcon, jsonIcon } from "../../../utility/icons.ts";
 import "../../Project-Row/Project_Row.css";  // Your existing styles
 
 interface ProjectFilesProps {
@@ -47,6 +47,10 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
         return csvIcon;
       case "txt":
         return txtIcon;
+      case "html":
+        return htmlIcon;
+      case "json":
+          return jsonIcon;
       default:
         return unknownIcon;
     }

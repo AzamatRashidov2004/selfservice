@@ -5,6 +5,8 @@ import txtIconSrc from '../assets/txt.svg';
 import unknownIconSrc from '../assets/unknown.svg';
 import pdfIconSrc from '../assets/pdf.svg';
 import plusIconSrc from '../assets/plus.svg';
+import jsonIconSrc from '../assets/json.svg';
+import htmlIconSrc from '../assets/html.svg';
 
 export const csvIcon = {
   src: csvIconSrc,
@@ -13,6 +15,16 @@ export const csvIcon = {
 
 export const excelIcon = {
   src: excelIconSrc,
+  alt: "Excel Icon",
+};
+
+export const htmlIcon = {
+  src: htmlIconSrc,
+  alt: "CSV Icon",
+};
+
+export const jsonIcon = {
+  src: jsonIconSrc,
   alt: "Excel Icon",
 };
 
