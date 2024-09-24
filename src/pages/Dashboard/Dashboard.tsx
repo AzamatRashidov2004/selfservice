@@ -187,7 +187,6 @@ const Dashboard: React.FC = () => {
         <p className="text-light">Choose a project to edit or delete</p>
       </div>
       <br />
-      <h3>Analytical Projects</h3>
       <table className="table main-table w-100">
         <thead>
           <tr>
@@ -208,13 +207,6 @@ const Dashboard: React.FC = () => {
                   projectData={project.projectData}
                   project={project.project}
                   index={index}
-                  setSelectedIndex={setSelectedIndex}
-                  setSelectedProjectID={setSelectedProjectID}
-                  setSelectedProject={setSelectedDocID}
-                  setSelectedProjectConfig={setSelectedProjectConfig}
-                  setCustomizeStep={setCustomizeStep}
-                  scrollIntoEditSection={scrollIntoEditSection}
-                  setIsAnalytical={setIsAnalytical}
                   setProjects={setProjects}
                   openProjectIndex={openProjectIndex}
                   setOpenProjectIndex={setOpenProjectIndex}

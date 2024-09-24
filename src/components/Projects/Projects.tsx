@@ -1,21 +1,14 @@
 import React, { useRef, useEffect } from "react";
 import "./Projects.css";
 import ProjectFiles from "./sub-components/Project_Files";
-import { kronosKnowledgeBaseType, KronosProjectType, SettingsType, projectFetchReturn } from "../../utility/types";
+import { kronosKnowledgeBaseType, KronosProjectType, projectFetchReturn } from "../../utility/types";
 import { formatKronosDate } from "../../utility/Date_Util";
 
 interface ProjectsProps {
   project: KronosProjectType;
   projectData: kronosKnowledgeBaseType[];
   index: number;
-  setSelectedProject: React.Dispatch<React.SetStateAction<string | null>>;
-  setSelectedProjectConfig: React.Dispatch<React.SetStateAction<SettingsType | null>>;
-  setCustomizeStep: React.Dispatch<React.SetStateAction<number>>;
-  setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
-  scrollIntoEditSection: () => void;
   setProjects: React.Dispatch<React.SetStateAction<projectFetchReturn[]>>;
-  setSelectedProjectID: React.Dispatch<React.SetStateAction<string | null>>;
-  setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
   openProjectIndex: number | null;
   setOpenProjectIndex: React.Dispatch<React.SetStateAction<number | null>>;
 }
@@ -24,14 +17,7 @@ const Project: React.FC<ProjectsProps> = ({
   index, 
   project, 
   projectData,
-  setSelectedProject,
-  setSelectedProjectConfig,
-  setCustomizeStep,
-  scrollIntoEditSection,
-  setIsAnalytical,
   setProjects,
-  setSelectedProjectID,
-  setSelectedIndex,
   openProjectIndex,
   setOpenProjectIndex
  }) => {
@@ -88,13 +74,6 @@ const Project: React.FC<ProjectsProps> = ({
           <b>Files </b> ({projectData.length} {projectData.length <= 1 ? "file" : "files"})<br />
           <ProjectFiles
             projectData={projectData}
-            setSelectedIndex={setSelectedIndex}
-            setSelectedProjectID={setSelectedProjectID}
-            setSelectedProject={setSelectedProject}
-            setSelectedProjectConfig={setSelectedProjectConfig}
-            setCustomizeStep={setCustomizeStep}
-            scrollIntoEditSection={scrollIntoEditSection}
-            setIsAnalytical={setIsAnalytical}
             setProjects={setProjects}
           />
         </div>
