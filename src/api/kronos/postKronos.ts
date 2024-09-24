@@ -1,7 +1,7 @@
 import { kronosApiUrl as apiUrl, kronosApiKey as apiKey, handleError } from "../apiEnv";
 import { SettingsType, KronosProjectType } from "../../utility/types";
 
-async function createKronosProject(name="", description=""): Promise<KronosProjectType | null>{
+export async function createKronosProject(projectName="", description="", chatbot_config: SettingsType): Promise<KronosProjectType | null>{
 
   try{
     // Create new kronos project
@@ -11,7 +11,7 @@ async function createKronosProject(name="", description=""): Promise<KronosProje
         'Content-Type': 'application/json',
         'Authorization': apiKey
       },
-      body: JSON.stringify({name, description})
+      body: JSON.stringify({name: projectName, description, chatbot_config})
     });
   
     if (!projectResponse.ok){
@@ -33,7 +33,7 @@ async function createKronosProject(name="", description=""): Promise<KronosProje
   }
 }
 
-async function uploadPdfToKronosProject(projectID: string, file: File): Promise<string | null> {
+export async function uploadPdfToKronosProject(projectID: string, file: File): Promise<string | null> {
 
   try{
     const formData = new FormData();
@@ -64,28 +64,21 @@ async function uploadPdfToKronosProject(projectID: string, file: File): Promise<
 
 export async function updatePdfConfig(
     name: string, 
-    description: string, 
-    language: string, 
+    description: string,
     projectID: string,
-    docId: string,
-    settings: SettingsType, 
-    filename: string
+    settings: SettingsType,
   ): Promise<boolean | null>{
 
     try{
-      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/${docId}/`, {
+      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': apiKey
         },
         body: JSON.stringify({
-          _id: docId, 
-          project_id: projectID,
           name, 
           description,
-          language,
-          source_file: filename,
           chatbot_config: settings
         })
       });
@@ -107,28 +100,32 @@ export async function updatePdfConfig(
   
   }
 
-  export async function uploadPdf(file: File): Promise<{projectID: string, docID: string} | null> {
-    
-    try{
-      //  Create new Kronos project  
-      const project = await createKronosProject();
-      if (!project ){
-        return null;
-      }
-    
-      const projectID = project._id;
-    
-      // Upload the pdf to the project
-      const docID = await uploadPdfToKronosProject(projectID, file);
-    
-      if (!docID){
-        return null;
-      }
-    
-      console.log(projectID, docID)
-      return {projectID, docID}
+  export async function uploadMultiplePdfs(files: FileList, projectID: string): Promise<boolean> {
+    try {
+      console.log(files);
       
-    }catch(e: unknown){
-      return handleError({error: e, origin: "uploadPdf"})
+      // Create a new FormData object
+      const formData = new FormData();
+  
+      // Loop through each file in the FileList and append it to FormData
+      Array.from(files).forEach(file => {
+        formData.append('files', file); // Use the same key 'files' for each file
+      });
+  
+      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/file/bulk`, {
+        method: 'POST',
+        headers: {
+          'Authorization': apiKey,
+          // Do not set Content-Type; let the browser set it automatically
+        },
+        body: formData // Use formData directly here
+      });
+  
+      if (!projectResponse.ok) return false; // Check for response status
+  
+      return true; // Return true if successful
+    } catch (e: unknown) {
+      handleError({ error: e, origin: "uploadPdf" });
+      return false;
     }
   }

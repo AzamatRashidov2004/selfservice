@@ -3,7 +3,7 @@ import {
   updateAnalyticalProject
 } from "../api/analyst/postAnalyst.ts";
 import { getSinglPdfConfig, getAllPdfProjects, getAllPdfsFromProject } from "../api/kronos/getKronos.ts";
-import { uploadPdf, updatePdfConfig,  } from "../api/kronos/postKronos.ts";
+import { updatePdfConfig, createKronosProject, uploadMultiplePdfs  } from "../api/kronos/postKronos.ts";
 import { fetchProjectsDataReturn, kronosKnowledgeBaseType, KronosProjectType, projectFetchReturn, ProjectType } from "./types";
 import {
   getAllAnalyticalConfigs,
@@ -12,18 +12,7 @@ import {
 } from "../api/analyst/getAnalyst.ts";
 import { SettingsType } from "./types.ts";
 import getFileExstension from "../utility/File_Exstension.ts";
-
-
-export async function uploadProjectFile(file: File, isAnalytical: boolean, notationFile?: File | null){
-
-  if (isAnalytical && notationFile){
-    // Analytical file (xlsx or csv)
-    return await uploadAnalyticalProject(file, notationFile);
-  }else{
-    // Pdf file
-    return await uploadPdf(file)
-  }
-}
+import { deletePdfProject } from "../api/kronos/deleteKronos.ts";
 
 
 export async function handleGetSingleConfig(project: ProjectType): Promise<SettingsType | null> {
@@ -123,6 +112,38 @@ export async function fetchAnalyticalConfigs(): Promise<ProjectType[] | null> {
   return result;
 }
 
+export async function createInitialAnalyticalProject(settings: SettingsType, files: FileList, notationFile: File): Promise<boolean>{
+  // Upload files to create the analytical project
+  const uploadResult = await uploadAnalyticalProject(files[0], notationFile);
+
+  if (!uploadResult) return false;
+
+  const docID = uploadResult.docID;
+
+  const response = await updateAnalyticalProject(docID, settings);
+
+  if (!response) return false;
+
+  return true;
+}
+
+export async function createInitialKronosProject(settings: SettingsType, projectName: string, description: string, files: FileList): Promise<boolean>{
+  const kronosProject = await createKronosProject(projectName, description, settings);
+
+  if (!kronosProject) return false;
+
+  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id);
+
+
+  if (!filesUpload) {
+    // Delete the created project if file upload fails
+    await deletePdfProject(kronosProject._id);
+    return false
+  };
+
+  return true
+}
+
 
 export async function handleUpdateConfig(isAnalytical: boolean, newConfig: SettingsType, docID: string, projectID: string | null): Promise<boolean | null>{
   let result: boolean | null = false;
@@ -137,11 +158,8 @@ export async function handleUpdateConfig(isAnalytical: boolean, newConfig: Setti
     result = await updatePdfConfig(
       attributes.project_name, 
       attributes.description, 
-      getLocale(attributes.language), 
-      projectID, 
-      docID, 
-      newConfig, 
-      attributes.doc_name
+      getLocale(attributes.language),
+      newConfig
     );
 
   }
