@@ -2,9 +2,9 @@ import {
   uploadAnalyticalProject,
   updateAnalyticalProject,
 } from "../api/analyst/postAnalyst.ts";
-import { getSinglPdfConfig, getAllPdfs } from "../api/kronos/getKronos.ts";
-import { uploadPdf, updatePdfConfig } from "../api/kronos/postKronos.ts";
-import { ProjectType } from "./types";
+import { getSinglPdfConfig, getAllPdfProjects, getAllPdfsFromProject } from "../api/kronos/getKronos.ts";
+import { updatePdfConfig, createKronosProject, uploadMultiplePdfs  } from "../api/kronos/postKronos.ts";
+import { fetchProjectsDataReturn, kronosKnowledgeBaseType, KronosProjectType, projectFetchReturn, ProjectType } from "./types";
 import {
   getAllAnalyticalConfigs,
   getAllAnalyticalIDs,
@@ -12,26 +12,7 @@ import {
 } from "../api/analyst/getAnalyst.ts";
 import { SettingsType } from "./types.ts";
 import getFileExstension from "../utility/File_Exstension.ts";
-
-export async function uploadProjectFile(
-  file: File,
-  isAnalytical: boolean,
-  notationFile?: File | null,
-  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
-) {
-  if (setLoading) setLoading(true);
-  if (isAnalytical && notationFile) {
-    // Analytical file (xlsx or csv)
-    const response = await uploadAnalyticalProject(file, notationFile);
-    if (setLoading) setLoading(false);
-    return response;
-  } else {
-    // Pdf file
-    const response = await uploadPdf(file);
-    if (setLoading) setLoading(false);
-    return response;
-  }
-}
+import { deletePdfProject } from "../api/kronos/deleteKronos.ts";
 
 export async function handleGetSingleConfig(
   project: ProjectType,
@@ -56,34 +37,59 @@ export async function handleGetSingleConfig(
   return config;
 }
 
-export async function fetchProjectsData(
-  setInitial: React.Dispatch<React.SetStateAction<ProjectType[]>>,
-  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
-): Promise<ProjectType[] | null> {
-  let allProjects: ProjectType[] = [];
-  if (setLoading) setLoading(true);
+
+
+async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
+  let allResults: projectFetchReturn[] = [];
+  const allProjects: KronosProjectType[] | null = await getAllPdfProjects();
+
+  if (!allProjects) return []; // Return an empty array if allProjects is null
+
+  if (allProjects.length > 0) {
+    // Create an array of promises to fetch project data for each project
+    const projectDataPromises = allProjects.map(async (project) => {
+      const projectData: kronosKnowledgeBaseType[] | null = await getAllPdfsFromProject(project._id);
+      
+      // If projectData is null, return an empty array for projectData
+      return {
+        project,
+        projectData: projectData || [],
+      };
+    });
+
+    // Wait for all the promises to resolve
+    allResults = await Promise.all(projectDataPromises);
+  }
+
+  return allResults; // Return the collected results
+}
+
+
+
+export async function fetchProjectsData(setInitial: (data: fetchProjectsDataReturn) => void): Promise<fetchProjectsDataReturn | null> {
+  let allProjects: projectFetchReturn[] = [];
+  let allAnalytical: ProjectType[] = [];
 
   // Fetch all pdfs (Faster api call first)
-  const pdfProjects: ProjectType[] | null = await getAllPdfs();
-  if (pdfProjects) {
-    allProjects = [...allProjects, ...pdfProjects];
-    setInitial(allProjects);
+  const pdfProjects: projectFetchReturn[] = await getAllProjectsAndProjectData();
+  if (pdfProjects){
+    allProjects = pdfProjects;
+    setInitial({analytical: allAnalytical, project: allProjects});
   }
 
   // Fetch all analytical files (Slower api call last)
-  const analyticalProjects: ProjectType[] | null =
-    await fetchAnalyticalConfigs();
-  if (analyticalProjects) {
-    allProjects = [...allProjects, ...analyticalProjects];
-    setInitial(allProjects);
+  const analyticalProjects: ProjectType[] | null = await fetchAnalyticalConfigs();
+  if (analyticalProjects){
+    allAnalytical = analyticalProjects;
+    setInitial({analytical: allAnalytical, project: allProjects});
   }
 
   if (allProjects.length === 0) {
     console.error("No pdf/analytical documents found!");
     return null;
   }
-  if (setLoading) setLoading(false);
-  return allProjects;
+
+  return {analytical: allAnalytical, project: allProjects};
 }
 
 export async function fetchAnalyticalConfigs(
@@ -118,14 +124,40 @@ export async function fetchAnalyticalConfigs(
   return result;
 }
 
-export async function handleUpdateConfig(
-  isAnalytical: boolean,
-  newConfig: SettingsType,
-  docID: string,
-  projectID: string | null,
-  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
-): Promise<boolean | null> {
-  if (setLoading) setLoading(true);
+export async function createInitialAnalyticalProject(settings: SettingsType, files: FileList, notationFile: File): Promise<boolean>{
+  // Upload files to create the analytical project
+  const uploadResult = await uploadAnalyticalProject(files[0], notationFile);
+
+  if (!uploadResult) return false;
+
+  const docID = uploadResult.docID;
+
+  const response = await updateAnalyticalProject(docID, settings);
+
+  if (!response) return false;
+
+  return true;
+}
+
+export async function createInitialKronosProject(settings: SettingsType, projectName: string, description: string, files: FileList): Promise<boolean>{
+  const kronosProject = await createKronosProject(projectName, description, settings);
+
+  if (!kronosProject) return false;
+
+  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id);
+
+
+  if (!filesUpload) {
+    // Delete the created project if file upload fails
+    await deletePdfProject(kronosProject._id);
+    return false
+  };
+
+  return true
+}
+
+
+export async function handleUpdateConfig(isAnalytical: boolean, newConfig: SettingsType, docID: string, projectID: string | null): Promise<boolean | null>{
   let result: boolean | null = false;
   const attributes = newConfig.attributes;
   console.log("id", projectID);
@@ -135,13 +167,10 @@ export async function handleUpdateConfig(
   } else if (projectID) {
     // PDF documents update
     result = await updatePdfConfig(
-      attributes.project_name,
-      attributes.description,
+      attributes.project_name, 
+      attributes.description, 
       getLocale(attributes.language),
-      projectID,
-      docID,
-      newConfig,
-      attributes.doc_name
+      newConfig
     );
   }
   if (setLoading) setLoading(false);

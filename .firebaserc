@@ -1,12 +1,10 @@
 {
-  "projects": {
-    "default": "sop-generator"
-  },
+  "projects": {},
   "targets": {
     "sop-generator": {
       "hosting": {
-        "selfservice": [
-          "selfservice-react"
+        "slf-service-preview": [
+          "slf-service-preview"
         ]
       }
     }

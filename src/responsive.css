@@ -5,7 +5,15 @@
 }
 
 @media (max-width: 960px) {
-    .project-last-update{
+    .accordion-project-name, .accordion-project-id{
+        width: 45% !important;
+    }
+
+    .accordion-project-action{
+        width: 12.5%;
+      }
+
+    .project-last-update, .accordion-project-update{
         display: none;
     }
 }
@@ -37,10 +45,6 @@
     :root{
         --customize-section-padding: 20% !important;
     }
-    
-    .project-filename{
-        display: none;
-    }
 }
 
 @media (max-width: 580px) {
@@ -48,7 +52,7 @@
         --customize-section-padding: 10% !important;
     }
 
-    .project-name{
+    .project-name, .accordion-project-name{
         display: none;
     }
 }

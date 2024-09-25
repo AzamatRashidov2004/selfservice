@@ -2,23 +2,26 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import "./Dashboard.css";
 import ProjectRow from "../../components/Project-Row/Project_Row"; // Import the new component
 import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
-import { SettingsType } from "../../utility/types.ts";
+import { fetchProjectsDataReturn, projectFetchReturn, ProjectType, SettingsType } from "../../utility/types.ts";
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
 import getDate from "../../utility/Date_Util.ts";
 import {
   fetchProjectsData,
   handleUpdateConfig,
 } from "../../utility/Api_Utils.ts";
-import { ProjectType } from "../../utility/types.ts";
 import { createNotificationEvent } from "../../utility/Modal_Util.ts";
-import Loader from "../../components/Loader/Loader.tsx";
+import Project from "../../components/Projects/Projects.tsx";
 
 const Dashboard: React.FC = () => {
-  const [projects, setProjects] = useState<ProjectType[]>([]);
+  const [projects, setProjects] = useState<projectFetchReturn[]>([]);
+  const [analyticalProjects, setAnalyticalProjects] = useState<ProjectType[]>([]);
   const [selectedDocID, setSelectedDocID] = useState<string | null>(null);
   const [selectedProjectID, setSelectedProjectID] = useState<string | null>(
     null
   );
+
+  const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
+  const accordionRef = useRef<HTMLDivElement>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [selectedProjectConfig, setSelectedProjectConfig] =
     useState<SettingsType | null>(null);
@@ -31,6 +34,8 @@ const Dashboard: React.FC = () => {
   const [language, setLanguage] = useState("English");
   const [introMessage, setIntroMessage] = useState("");
   const [introImage, setIntroImage] = useState("");
+
+  const [openProjectIndex, setOpenProjectIndex] = useState<number | null>(null);
 
   const [customizeStep, setCustomizeStep] = useState<number>(0);
 
@@ -47,6 +52,14 @@ const Dashboard: React.FC = () => {
     setLanguage(attributes.language);
   }, [selectedProjectConfig]);
 
+  const fetchData = async () => {
+    await fetchProjectsData((allProjects: fetchProjectsDataReturn | null) => {
+      if (!allProjects) return;
+
+      setAnalyticalProjects(allProjects.analytical);
+      setProjects(allProjects.project);
+    });
+  };
   // Initial projects fetch
   useEffect(() => {
     const fetchData = async () => {
@@ -129,11 +142,11 @@ const Dashboard: React.FC = () => {
     }
 
     // updates project name
-    const updatedProjects = projects.map((project, index) =>
+    const updatedProjects = analyticalProjects.map((project: ProjectType, index: number) =>
       index === selectedIndex ? { ...project, name: projectName } : project
     );
 
-    setProjects(updatedProjects);
+    setAnalyticalProjects(updatedProjects);
 
     createNotificationEvent(
       "Project Updated",
@@ -144,47 +157,85 @@ const Dashboard: React.FC = () => {
     setSelectedDocID(null);
   };
 
+    // Synchronize the height of .kronos-projects-wrapper with .accordion using ResizeObserver
+    useEffect(() => {
+      const observer = new ResizeObserver(() => {
+        if (!kronosProjectsWrapperRef.current || !accordionRef.current) return;
+        const accordionHeight = accordionRef.current.offsetHeight;
+        kronosProjectsWrapperRef.current.style.height = `${accordionHeight}px`;
+      });
+  
+      if (accordionRef.current) {
+        observer.observe(accordionRef.current);
+      }
+  
+      return () => {
+        observer.disconnect();
+      };
+    }, []);
+
+  useEffect(() => {
+    if (!projects) return;
+
+    if (projects.length % 2 === 0){
+      const root = document.documentElement;
+      root.style.setProperty('--even-analytical-project-bg', "#FFFFFF");
+      root.style.setProperty('--odd-analytical-project-bg', "#F2F2F2");
+    }
+  }, [projects])
+
   return (
     <main className="container-fluid main-container">
       <div className="bg-primary p-4 rounded mb-4 text-center">
         <h1 className="text-light">Available Projects</h1>
         <p className="text-light">Choose a project to edit or delete</p>
       </div>
-      {loading ? (
-        <div className="loader-container">
-          <Loader />
-        </div>
-      ) : (
-        <table className="table w-100">
-          <thead>
-            <tr>
-              <th className="project-name text-start">Project Name</th>
-              <th className="project-last-update text-start">Last Update</th>
-              <th className="project-filename text-start">Filename</th>
-              <th className="project-id text-start">Project ID</th>
-              <th className="project-actions text-start">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects &&
-              projects.map((project, index) => (
-                <ProjectRow
-                  key={index}
-                  project={project}
+      <br />
+      <table className="table main-table w-100">
+        <thead>
+          <tr>
+            <th className="project-name text-start">Project Name</th>
+            <th className="project-last-update text-start">Last Update</th>
+            <th className="project-id text-start">Project ID</th>
+            <th className="project-actions text-start">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ref={kronosProjectsWrapperRef} className="kronos-projects-wrapper">
+            <div ref={accordionRef} className="accordion" id="projectsAccordion">
+              {projects.map((project, index) => {
+                if (!project.project || !project.project.name || !project.projectData) return null
+                return (
+                <Project
+                  key={project.project._id} // Assuming _id is unique
+                  projectData={project.projectData}
+                  project={project.project}
                   index={index}
-                  setSelectedProjectID={setSelectedProjectID}
-                  setSelectedProject={setSelectedDocID}
-                  setSelectedProjectConfig={setSelectedProjectConfig}
-                  setCustomizeStep={setCustomizeStep}
-                  scrollIntoEditSection={scrollIntoEditSection}
-                  setIsAnalytical={setIsAnalytical}
                   setProjects={setProjects}
-                  setSelectedIndex={setSelectedIndex}
+                  openProjectIndex={openProjectIndex}
+                  setOpenProjectIndex={setOpenProjectIndex}
                 />
-              ))}
-          </tbody>
-        </table>
-      )}
+              )})}
+            </div>
+          </tr>
+          {analyticalProjects &&
+            analyticalProjects.map((project: ProjectType, index: number) => (
+              <ProjectRow
+                key={index}
+                project={project}
+                index={index}
+                setSelectedIndex={setSelectedIndex}
+                setSelectedProjectID={setSelectedProjectID}
+                setSelectedProject={setSelectedDocID}
+                setSelectedProjectConfig={setSelectedProjectConfig}
+                setCustomizeStep={setCustomizeStep}
+                scrollIntoEditSection={scrollIntoEditSection}
+                setIsAnalytical={setIsAnalytical}
+                setProjects={setAnalyticalProjects}
+              />
+            ))}
+        </tbody>
+      </table>
       {selectedDocID && selectedProjectConfig ? (
         <>
           <div

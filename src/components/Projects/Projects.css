@@ -1,0 +1,178 @@
+/* Accordion transition styles */
+.accordion-collapse {
+    overflow: hidden;
+    transition: max-height 0.3s ease; /* Only animate max-height */
+    max-height: 0; /* Collapsed state */
+  }
+  
+  .accordion-collapse.expanded {
+    max-height: 500px; /* Expanded state; adjust this value as needed */
+  }
+
+  .accordion-item button{
+    border-radius: 0px !important;
+  }
+  
+
+  .action-padding{
+    padding-right: calc((39.6px * 3) - 40px) !important;
+  }
+  
+  .project-row-img{
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+
+    &.add-file-img{
+      width: 30px;
+      height: 25px;
+    }
+  }
+
+  .project-table-wrapper{
+    border: solid 1px rgb(207, 207, 207);
+    background-color: rgb(207, 207, 207) !important;
+    & > table{
+      margin: 0;
+      padding: 0;
+    }
+  }
+
+  .filename-wrapper{
+    vertical-align: middle;
+  }
+
+  .project-row-span{
+    margin-left: 5px;
+    display: inline-flex;
+    height: 35px;
+    align-items: center;
+  }
+
+  .add-file-wrapper:hover{
+    text-decoration: underline;
+    cursor: pointer;
+    
+    & * {
+      text-decoration: underline;
+    }
+  }
+
+  .thead-content{
+    background-color: #e6e6e6 !important;
+  }
+
+  .accordion > .accordion-item:last-child h2 {
+    border-bottom: none !important;
+  }
+
+  .files-cancel-button-wrapper{
+    display: flex;
+    justify-content: end;
+    & > button{
+      width: calc(110.3px + 16px) ;
+    }
+  }
+
+  .kronos-projects-wrapper{
+    position: relative;
+  }
+
+  .accordion{
+    position: absolute;
+    padding: 0 !important;
+    width: 100%;
+  }
+
+  .accordion-header-container.expanded{
+    border: 3px solid #38444f !important;
+  }
+
+  .accordion-collapse.expanded{
+    border-radius: 0 !important;
+    border: 3px solid #38444f;
+    border-top: none;
+  }
+
+  .accordion-button{
+    height: 47px;
+    padding: 0;
+    background-color: #FFFFFF !important;
+    border-bottom: 0.8px solid #DEE2E6;
+    
+
+    &::after{
+      position: absolute;
+      right: 15px;
+    }
+
+    &.odd{
+      background-color: #F2F2F2 !important;
+    }
+
+    & > div {
+      padding: 8px;
+    }
+  }
+
+  .accordion-project-name, .accordion-project-id{
+    width: 35%;
+  }
+
+  .accordion-project-update{
+    width: 20%;
+  }
+
+  .accordion-project-action{
+    width: 10%;
+  }
+
+  .accordion-item{
+    border-radius: 0;
+    border: none;
+  }
+
+  .accordion-header-container.expanded{
+    border: 4px solid #DEE2E6;
+  }
+
+  .accordion-action-buttons-container{
+    background-color: white;
+    padding: 5px 20px 15px 20px;
+    display: flex;
+    justify-content: end;
+    width: 100%;
+    gap: 15px;
+
+    & > button{
+      border-radius: 5px !important;
+    }
+  }
+
+  .file-table{
+    border-collapse: collapse;
+  }
+
+  .file-table td{
+    width: 100%;
+  }
+
+  .file-table tbody{
+    display:block;
+    overflow: auto;
+    max-height: 300px;
+  }
+  
+  .file-table thead tr {
+     display: block;
+  }
+  
+  .file-table thead {
+    background: black;
+    color:#fff;
+  }
+  
+  .file-table th, .file-table td {
+    padding: 5px;
+    text-align: left;
+  }

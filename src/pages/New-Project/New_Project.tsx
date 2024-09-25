@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Stepper from "../../components/Stepper/Stepper";
 import FileUploadSection from "../../components/File-Upload-Section/File_Upload"; // Adjust the import path as necessary
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
@@ -7,15 +7,11 @@ import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
 import { SettingsType } from "../../utility/types.ts";
 import getDate from "../../utility/Date_Util";
 import "./New_Project.css";
-import { handleUpdateConfig, uploadProjectFile } from "../../utility/Api_Utils";
-import Loader from "../../components/Loader/Loader.tsx";
+import { createInitialAnalyticalProject, createInitialKronosProject } from "../../utility/Api_Utils";
 
 const New_Project: React.FC = () => {
   const [step, setStep] = useState(0);
-  const [file, setFile] = useState<File | null>(null);
-  const [doc_name, setDocName] = useState<string>("");
-  const [docID, setDocID] = useState<string>("");
-  const [kronosProjectID, setKronosProjectID] = useState<string | null>("");
+  const [files, setFiles] = useState<FileList | null>(null);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
   const [notationFile, setNotationFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -29,36 +25,10 @@ const New_Project: React.FC = () => {
 
   // API upload file here
   const fileUploadNextButtonClick = async () => {
-    if (!file) return;
+    if (!files) return;
     if (step !== 0) return;
-    if (file && isAnalytical && !notationFile) return;
+    if (files && isAnalytical && !notationFile) return;
 
-    const ids = await uploadProjectFile(
-      file,
-      isAnalytical,
-      notationFile,
-      setLoading
-    );
-    if (!ids || !ids.docID) {
-      createNotificationEvent(
-        "Something Went Wrong",
-        "While uploading the file something went wrong. Please try again later...",
-        "danger",
-        4000
-      );
-      return;
-    }
-
-    setDocID(ids.docID);
-    setKronosProjectID(ids.projectID);
-    setDocName(file.name);
-    console.log("IDS", ids.docID, ids.projectID);
-
-    createNotificationEvent(
-      "Upload Succesful",
-      "File succesfully uploaded to the server",
-      "success"
-    );
     setStep(step + 1);
   };
 
@@ -68,28 +38,32 @@ const New_Project: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    console.log("FILES; ", files);
+  }, [files])
+
   const saveSettings = async (settings: SettingsType) => {
     settings.attributes = {
       description,
-      doc_id: docID,
-      doc_name,
       intro_image: introImage,
       language: language,
       intro_message: introMessage,
       last_update: getDate(),
       project_name: projectName,
-      pdf_id: docID,
     };
 
+    let response;
+    if (!files) return
+    if (isAnalytical && !notationFile) return
     // API save the config here
-    const response = await handleUpdateConfig(
-      isAnalytical,
-      settings,
-      docID,
-      kronosProjectID
-    );
-
-    if (!response) {
+    if (isAnalytical && notationFile){
+      // Handle analytical files
+      response = await createInitialAnalyticalProject(settings, files, notationFile);
+    }else{
+      response = await createInitialKronosProject(settings, projectName, description, files)
+    }
+    
+    if (!response){
       createNotificationEvent(
         "Something Went Wrong",
         "While setting up your project, something went wrong. Please try again later...",
@@ -114,22 +88,16 @@ const New_Project: React.FC = () => {
       </div>
 
       {step === 0 ? (
-        loading ? (
-          <div className="loader-container">
-            <Loader />
-          </div>
-        ) : (
-          <FileUploadSection
-            step={step}
-            setFile={setFile}
-            setNotationFile={setNotationFile}
-            setIsAnalytical={setIsAnalytical}
-            file={file}
-            isAnalytical={isAnalytical}
-            notationFile={notationFile}
-            handleNextButtonClick={fileUploadNextButtonClick}
-          />
-        )
+        <FileUploadSection
+          step={step}
+          setFile={setFiles}
+          setNotationFile={setNotationFile}
+          setIsAnalytical={setIsAnalytical}
+          file={files}
+          isAnalytical={isAnalytical}
+          notationFile={notationFile}
+          handleNextButtonClick={fileUploadNextButtonClick}
+        />
       ) : null}
 
       {step === 1 ? (

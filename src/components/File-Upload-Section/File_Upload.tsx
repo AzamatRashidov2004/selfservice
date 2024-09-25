@@ -4,10 +4,10 @@ import getFileExstension from "../../utility/File_Exstension";
 
 interface FileUploadSectionProps {
   step: number;
-  setFile: React.Dispatch<React.SetStateAction<File | null>>;
+  setFile: React.Dispatch<React.SetStateAction<FileList | null>>;
   setNotationFile: React.Dispatch<React.SetStateAction<File | null>>;
   setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
-  file: File | null;
+  file: FileList | null;
   isAnalytical: boolean;
   notationFile: File | null;
   handleNextButtonClick: () => void;
@@ -24,10 +24,10 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 }) => {
   // Handle file selection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0] || null;
+    const selectedFile = event.target.files || null;
 
     if (selectedFile) {
-      const fileExtension = getFileExstension(selectedFile.name);
+      const fileExtension = getFileExstension(selectedFile[0].name);
 
       // Check if the file is .xlsx or .csv AKA analytical app
       if (fileExtension === 'xlsx' || fileExtension === 'csv') {
@@ -58,6 +58,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           type="file"
           id="formFile"
           accept=".pdf, .xlsx, .csv"
+          multiple
           onChange={handleFileChange}
         />
       </div>

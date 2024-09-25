@@ -2,7 +2,7 @@ import { kronosApiUrl as apiUrl, kronosApiKey as apiKey, handleError } from "../
 import { KronosProjectType, kronosKnowledgeBaseType, ProjectType, SettingsType } from "../../utility/types";
 import { formatKronosDate } from "../../utility/Date_Util";
 
-async function getAllPdfsFromProject(projectId: string): Promise<kronosKnowledgeBaseType[] | null>{
+export async function getAllPdfsFromProject(projectId: string): Promise<kronosKnowledgeBaseType[] | null>{
 
   try{
     const _url = `${apiUrl}/projects/${projectId}/knowledge_base/`
@@ -194,5 +194,45 @@ export async function getKronosProject(projectId: string): Promise<KronosProject
       return project;
     }catch (e: unknown) {
       return handleError({error: e, origin: "getKronosConfig"})
+    }
+  }
+
+  export async function getPdfFile(projectID: string, docID: string, docName: string): Promise<boolean> {
+    try {
+      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/${docID}/source`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': apiKey
+        }
+      });
+  
+      if (!projectResponse.ok) {
+        console.error("Failed to get PDF file");
+        return false;
+      }
+  
+      // Convert response to Blob
+      const blob = await projectResponse.blob();
+  
+      // Create a downloadable link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+  
+      // Set the file name for download (you can modify it as per your needs)
+      link.download = `${docName}`;
+  
+      // Programmatically click the link to trigger the download
+      link.click();
+  
+      // Clean up the object URL
+      window.URL.revokeObjectURL(url);
+  
+      return true;
+  
+    } catch (e: unknown) {
+      handleError({ error: e, origin: "getPdfFile" });
+      return false;
     }
   }
