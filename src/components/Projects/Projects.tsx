@@ -112,6 +112,8 @@ const Project: React.FC<ProjectsProps> = ({
             projectId={project._id}
             projectData={projectData}
             setProjects={setProjects}
+            projectIndex={index}
+            project={project}
           />
         </div>
       </div>

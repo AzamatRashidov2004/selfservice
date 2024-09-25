@@ -3,7 +3,7 @@ import {
   createPopupEvent,
   createNotificationEvent,
 } from "../../../utility/Modal_Util";
-import { kronosKnowledgeBaseType, projectFetchReturn } from "../../../utility/types.ts";
+import { kronosKnowledgeBaseType, KronosProjectType, projectFetchReturn } from "../../../utility/types.ts";
 import { pdfIcon, excelIcon, unknownIcon, csvIcon, txtIcon, plusIcon, htmlIcon, jsonIcon } from "../../../utility/icons.ts";
 import "../../Project-Row/Project_Row.css";  // Your existing styles
 import { uploadMultiplePdfs } from "../../../api/kronos/postKronos.ts";
@@ -12,14 +12,17 @@ import { getPdfFile } from "../../../api/kronos/getKronos.ts";
 
 interface ProjectFilesProps {
   projectId: string,
+  project: KronosProjectType;
+  projectIndex: number;
   projectData: kronosKnowledgeBaseType[];
-  setProjectData: React.Dispatch<React.SetStateAction<projectFetchReturn[]>>;
+  setProjects: React.Dispatch<React.SetStateAction<projectFetchReturn[]>>;
 }
 
 const ProjectFiles: React.FC<ProjectFilesProps> = ({
   projectId,
+  projectIndex,
   projectData,
-  setProjectData,
+  setProjects,
 }) => {
   const addFileRef = useRef<HTMLTableRowElement | null>(null);
   const newFileInputRef = useRef<HTMLTableRowElement | null>(null);
@@ -67,7 +70,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
     return createNotificationEvent("File Upload Succesfull", "Succesfully uploaded the files", "success");
   }
 
-  const handleDeleteClick = (knowledgeBase: kronosKnowledgeBaseType, index: number) => {
+  const handleDeleteClick = (knowledgeBase: kronosKnowledgeBaseType) => {
     createPopupEvent(
       "Delete project",
       `Are you sure you want to delete the pdf file with name ${knowledgeBase.source_file}?`,
@@ -75,11 +78,11 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
         success: { text: "Delete", type: "danger" },
         cancel: { text: "Cancel", type: "secondary" },
       },
-      (response: boolean) => handleDeletePdf(response, index, knowledgeBase)
+      (response: boolean) => handleDeletePdf(response, knowledgeBase)
     );
   }
 
-  const handleDeletePdf = async (response: boolean, index: number, knowledgeBase: kronosKnowledgeBaseType) => {
+  const handleDeletePdf = async (response: boolean, knowledgeBase: kronosKnowledgeBaseType) => {
     if (!response) return;
 
     const result = await deletePdf(projectId, knowledgeBase._id);
@@ -92,6 +95,24 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
     } 
 
     // Remove the pdf file from UI
+    
+    setProjects((allProjects) => {
+      const currentProject = allProjects[projectIndex];
+    
+      const updatedProjectData = currentProject.projectData.filter(
+        (data) => data._id !== knowledgeBase._id
+      );
+    
+      const updatedProject = {
+        ...currentProject,
+        projectData: updatedProjectData,
+      };
+    
+      const updatedAllProjects = [...allProjects];
+      updatedAllProjects[projectIndex] = updatedProject;
+    
+      return updatedAllProjects;
+    });
 
     return  createNotificationEvent("Successfully deleted file",
       "File was deleted succesfully",
@@ -209,7 +230,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
                       <button
                         className="btn btn-outline-danger btn-sm me-2"
                         data-bs-toggle="tooltip"
-                        onClick={() => handleDeleteClick(knowledgeBase, index)}
+                        onClick={() => handleDeleteClick(knowledgeBase)}
                         title="Delete"
                       >
                         <i className="fas fa-trash-alt"></i>
