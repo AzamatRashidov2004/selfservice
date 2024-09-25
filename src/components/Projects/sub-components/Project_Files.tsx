@@ -8,7 +8,7 @@ import { pdfIcon, excelIcon, unknownIcon, csvIcon, txtIcon, plusIcon, htmlIcon, 
 import "../../Project-Row/Project_Row.css";  // Your existing styles
 import { uploadMultiplePdfs } from "../../../api/kronos/postKronos.ts";
 import { deletePdf } from "../../../api/kronos/deleteKronos.ts";
-import { getPdfFile } from "../../../api/kronos/getKronos.ts";
+import { getAllPdfsFromProject, getPdfFile } from "../../../api/kronos/getKronos.ts";
 
 interface ProjectFilesProps {
   projectId: string,
@@ -60,14 +60,31 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
 
   const handleUploadFiles = async () => {
     if (!files) return;
-
+  
     const response = await uploadMultiplePdfs(files, projectId);
-
+  
     if (!response) {
       return createNotificationEvent("Failed To Upload", "Something went wrong while uploading files...", "danger");
     }
-    // setProjects([...projectData, ]) // TODO add the newly uploaded file.
-    return createNotificationEvent("File Upload Succesfull", "Succesfully uploaded the files", "success");
+    createNotificationEvent("File Upload Successful", "Successfully uploaded the files", "success");
+
+    const getNewFiles = await getAllPdfsFromProject(projectId);
+    
+    if (!getNewFiles) return;
+
+    // Update the projects state with the newly uploaded files
+    setProjects((allProjects) => {
+      const currentProject = allProjects[projectIndex];
+  
+      return [
+        ...allProjects.slice(0, projectIndex),
+        {
+          ...currentProject,
+          projectData: [...getNewFiles],
+        },
+        ...allProjects.slice(projectIndex + 1),
+      ];
+    });
   }
 
   const handleDeleteClick = (knowledgeBase: kronosKnowledgeBaseType) => {
