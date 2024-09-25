@@ -102,13 +102,49 @@ export async function updatePdfConfig(
 
   export async function uploadMultiplePdfs(files: FileList, projectID: string): Promise<boolean> {
     try {
-      
-      // Create a new FormData object
+      const fileArray = Array.from(files);
+      const MAX_BATCH_SIZE = 200 * 1024 * 1024; // 200MB in bytes
+  
+      let currentBatch = [];
+      let currentBatchSize = 0;
+  
+      for (const file of fileArray) {
+        // Check if adding the next file exceeds the batch size limit
+        if (currentBatchSize + file.size > MAX_BATCH_SIZE) {
+          // Upload the current batch
+          const success = await uploadBatch(currentBatch, projectID);
+          if (!success) return false; // If upload fails, return false
+  
+          // Reset for the next batch
+          currentBatch = [];
+          currentBatchSize = 0;
+        }
+        // Add the file to the current batch
+        currentBatch.push(file);
+        currentBatchSize += file.size;
+      }
+  
+      // Upload any remaining files in the last batch
+      if (currentBatch.length > 0) {
+        const success = await uploadBatch(currentBatch, projectID);
+        if (!success) return false; // If upload fails, return false
+      }
+  
+      return true; // Return true if all batches uploaded successfully
+    } catch (e: unknown) {
+      handleError({ error: e, origin: "uploadPdf" });
+      return false;
+    }
+  }
+  
+  async function uploadBatch(files: File[], projectID: string): Promise<boolean> {
+    try {
+      // Create a new FormData object for the current batch
       const formData = new FormData();
   
-      // Loop through each file in the FileList and append it to FormData
-      Array.from(files).forEach(file => {
-        formData.append('files', file); // Use the same key 'files' for each file
+      // Append each file to FormData
+      files.forEach(file => {
+        formData.append('files', file);
       });
   
       const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/file/bulk`, {
@@ -117,14 +153,12 @@ export async function updatePdfConfig(
           'Authorization': apiKey,
           // Do not set Content-Type; let the browser set it automatically
         },
-        body: formData // Use formData directly here
+        body: formData
       });
   
-      if (!projectResponse.ok) return false; // Check for response status
-  
-      return true; // Return true if successful
+      return projectResponse.ok; // Return true if successful, false otherwise
     } catch (e: unknown) {
-      handleError({ error: e, origin: "uploadPdf" });
+      handleError({ error: e, origin: "uploadBatch" });
       return false;
     }
   }
