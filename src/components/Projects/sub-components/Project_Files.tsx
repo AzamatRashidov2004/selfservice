@@ -40,6 +40,16 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
     }
   };
 
+  
+  // Sorting function based on the custom order
+  const sortBySourceType = (a: kronosKnowledgeBaseType, b: kronosKnowledgeBaseType) => {
+    // Custom order for source types
+    const customOrder = ['pdf', 'svg', 'xlsx', 'xls', 'json', 'csv', 'xml', 'txt', 'doc', 'docx', 'ppt', 'pptx', 'rtf', 'html', 'md', 'yaml', 'yml', 'odt', 'ods'];
+    return customOrder.indexOf(a.source_type) - customOrder.indexOf(b.source_type);
+  };
+
+  projectData = projectData.sort(sortBySourceType); // Sort the project files to have the same types next to one another
+
   const deleteProject = async (response: boolean, project: kronosKnowledgeBaseType, index: number) => {
     if (!response) return;
 
@@ -72,6 +82,12 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
       (response: boolean) => deleteProject(response, project, index)
     );
   };
+
+  const projectDataWithResoursec = [
+    ...projectData, 
+    {source_type: "json", source_file: "fsm.json", _id: null}, 
+    {source_type: "html", source_file: "index.html", _id: null}
+  ]; // Adding the fsm and html resources as visuals
 
   return (
     <div className="project-table-wrapper bg-secondary">
@@ -139,7 +155,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
           </tr>
 
           {projectData &&
-            projectData.map((project, index) => {
+            projectDataWithResoursec.map((project, index) => {
               const { src: iconSrc, alt: iconAlt } = getIconByExtension(project.source_type);
 
               return (
@@ -159,14 +175,16 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
                       index % 2 === 0 ? "gray-bg" : ""
                     }`}
                   >
-                    <button
-                      className="btn btn-outline-danger btn-sm me-2"
-                      data-bs-toggle="tooltip"
-                      onClick={() => handleDeleteClick(project, index)}
-                      title="Delete"
-                    >
-                      <i className="fas fa-trash-alt"></i>
-                    </button>
+                    {project._id && 
+                      <button
+                        className="btn btn-outline-danger btn-sm me-2"
+                        data-bs-toggle="tooltip"
+                        onClick={() => handleDeleteClick(project, index)}
+                        title="Delete"
+                      >
+                        <i className="fas fa-trash-alt"></i>
+                      </button>
+                    }
                   </td>
                 </tr>
               );
