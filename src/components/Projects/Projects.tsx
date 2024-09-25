@@ -48,10 +48,10 @@ const Project: React.FC<ProjectsProps> = ({
     }
   }, [openProjectIndex, index]);
 
-  const handleDeleteProjectClick = (project: kronosKnowledgeBaseType, index: number) => {
+  const handleDeleteProjectClick = (project: KronosProjectType, index: number) => {
     createPopupEvent(
       "Delete project",
-      `Are you sure you want to delete the pdf file with name ${project.source_file}?`,
+      `Are you sure you want to delete the project with id ${project._id}?`,
       {
         success: { text: "Delete", type: "danger" },
         cancel: { text: "Cancel", type: "secondary" },
@@ -76,6 +76,7 @@ const Project: React.FC<ProjectsProps> = ({
     } else {
       createNotificationEvent("File Deleted", "Succesfully deleted the file", "success");
       setProjects((prevProjects) => prevProjects.filter((_, i) => i !== index));
+      setOpenProjectIndex(null);
     }
 
     return result;
@@ -116,6 +117,11 @@ const Project: React.FC<ProjectsProps> = ({
             project={project}
           />
         </div>
+        <div className="accordion-action-buttons-container">
+          <button className="btn btn-danger" onClick={() => {handleDeleteProjectClick(project, index)}}>Delete Project</button>
+          <button className="btn btn-secondary">Edit Project</button>
+          <button className="btn btn-primary">Launch Project</button>
+      </div>
       </div>
     </div>
   );

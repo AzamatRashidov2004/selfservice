@@ -131,3 +131,16 @@
   .accordion-header-container.expanded{
     border: 0.8px solid #DEE2E6;
   }
+
+  .accordion-action-buttons-container{
+    background-color: white;
+    padding: 5px 20px 15px 20px;
+    display: flex;
+    justify-content: end;
+    width: 100%;
+    gap: 15px;
+
+    & > button{
+      border-radius: 5px !important;
+    }
+  }
