@@ -3,6 +3,9 @@ import "./Projects.css";
 import ProjectFiles from "./sub-components/Project_Files";
 import { kronosKnowledgeBaseType, KronosProjectType, projectFetchReturn } from "../../utility/types";
 import { formatKronosDate } from "../../utility/Date_Util";
+import { createNotificationEvent, createPopupEvent } from "../../utility/Modal_Util";
+import { deletePdfProject } from "../../api/kronos/deleteKronos";
+
 
 interface ProjectsProps {
   project: KronosProjectType;
@@ -45,6 +48,39 @@ const Project: React.FC<ProjectsProps> = ({
     }
   }, [openProjectIndex, index]);
 
+  const handleDeleteProjectClick = (project: kronosKnowledgeBaseType, index: number) => {
+    createPopupEvent(
+      "Delete project",
+      `Are you sure you want to delete the pdf file with name ${project.source_file}?`,
+      {
+        success: { text: "Delete", type: "danger" },
+        cancel: { text: "Cancel", type: "secondary" },
+      },
+      (response: boolean) => handleDeleteProject(response, index)
+    );
+  };
+
+  const handleDeleteProject = async (response: boolean, index: number) => {
+    if (!response) return;
+
+    const result = await deletePdfProject(project._id);
+    
+
+    if (!result) {
+      console.error("Something went wrong while deleting project");
+      createNotificationEvent(
+        "Something Went Wrong",
+        "While trying to delete the file, something went wrong. Please try again later",
+        "danger"
+      );
+    } else {
+      createNotificationEvent("File Deleted", "Succesfully deleted the file", "success");
+      setProjects((prevProjects) => prevProjects.filter((_, i) => i !== index));
+    }
+
+    return result;
+  };
+
   return (
     <div className="accordion-item">
       <div className={`accordion-header-container bg-primary ${openProjectIndex === index ? "expanded" : ""}`}  id={`heading${index}`}>
@@ -73,6 +109,7 @@ const Project: React.FC<ProjectsProps> = ({
           <b>Description: </b> {project.description}<br />
           <b>Files </b> ({projectData.length} {projectData.length <= 1 ? "file" : "files"})<br />
           <ProjectFiles
+            projectId={project._id}
             projectData={projectData}
             setProjects={setProjects}
           />

@@ -102,7 +102,6 @@ export async function updatePdfConfig(
 
   export async function uploadMultiplePdfs(files: FileList, projectID: string): Promise<boolean> {
     try {
-      console.log(files);
       
       // Create a new FormData object
       const formData = new FormData();

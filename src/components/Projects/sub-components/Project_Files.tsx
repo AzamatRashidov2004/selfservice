@@ -1,24 +1,28 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
   createPopupEvent,
   createNotificationEvent,
 } from "../../../utility/Modal_Util";
 import { kronosKnowledgeBaseType, projectFetchReturn } from "../../../utility/types.ts";
-import { deletePdf } from "../../../api/kronos/deleteKronos.ts";
 import { pdfIcon, excelIcon, unknownIcon, csvIcon, txtIcon, plusIcon, htmlIcon, jsonIcon } from "../../../utility/icons.ts";
 import "../../Project-Row/Project_Row.css";  // Your existing styles
+import { uploadMultiplePdfs } from "../../../api/kronos/postKronos.ts";
+import { deletePdf } from "../../../api/kronos/deleteKronos.ts";
 
 interface ProjectFilesProps {
+  projectId: string,
   projectData: kronosKnowledgeBaseType[];
-  setProjects: React.Dispatch<React.SetStateAction<projectFetchReturn[]>>;
+  setProjectData: React.Dispatch<React.SetStateAction<projectFetchReturn[]>>;
 }
 
 const ProjectFiles: React.FC<ProjectFilesProps> = ({
+  projectId,
   projectData,
-  setProjects
+  setProjectData,
 }) => {
   const addFileRef = useRef<HTMLTableRowElement | null>(null);
   const newFileInputRef = useRef<HTMLTableRowElement | null>(null);
+  const [files, setFiles] = useState<FileList | null>(null);
 
   const getIconByExtension = (extension: string) => {
     switch (extension.toLowerCase()) {
@@ -50,44 +54,59 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
 
   projectData = projectData.sort(sortBySourceType); // Sort the project files to have the same types next to one another
 
-  const deleteProject = async (response: boolean, project: kronosKnowledgeBaseType, index: number) => {
-    if (!response) return;
+  const handleUploadFiles = async () => {
+    if (!files) return;
 
-    const result = await deletePdf(project.project_id, project._id);
-    
+    const response = await uploadMultiplePdfs(files, projectId);
 
-    if (!result) {
-      console.error("Something went wrong while deleting project");
-      createNotificationEvent(
-        "Something Went Wrong",
-        "While trying to delete the file, something went wrong. Please try again later",
-        "danger"
-      );
-    } else {
-      createNotificationEvent("File Deleted", "Succesfully deleted the file", "success");
-      setProjects((prevProjects) => prevProjects.filter((_, i) => i !== index));
+    if (!response) {
+      return createNotificationEvent("Failed To Upload", "Something went wrong while uploading files...", "danger");
     }
+    // setProjects([...projectData, ]) // TODO add the newly uploaded file.
+    return createNotificationEvent("File Upload Succesfull", "Succesfully uploaded the files", "success");
+  }
 
-    return result;
-  };
-
-  const handleDeleteClick = (project: kronosKnowledgeBaseType, index: number) => {
+  const handleDeleteClick = (knowledgeBase: kronosKnowledgeBaseType, index: number) => {
     createPopupEvent(
       "Delete project",
-      `Are you sure you want to delete the project with id ${project._id}?`,
+      `Are you sure you want to delete the pdf file with name ${knowledgeBase.source_file}?`,
       {
         success: { text: "Delete", type: "danger" },
         cancel: { text: "Cancel", type: "secondary" },
       },
-      (response: boolean) => deleteProject(response, project, index)
+      (response: boolean) => handleDeletePdf(response, index, knowledgeBase)
     );
-  };
+  }
+
+  const handleDeletePdf = async (response: boolean, index: number, knowledgeBase: kronosKnowledgeBaseType) => {
+    if (!response) return;
+
+    const result = await deletePdf(projectId, knowledgeBase._id);
+
+    if (!result){
+        return createNotificationEvent("Something Went Wrong",
+          "While trying to delete the file, something went wrong. Please try again later",
+          "danger"
+        );
+    } 
+
+    // Remove the pdf file from UI
+
+    return  createNotificationEvent("Successfully deleted file",
+      "File was deleted succesfully",
+      "success"
+    );
+  }
 
   const projectDataWithResoursec = [
     ...projectData, 
     {source_type: "json", source_file: "fsm.json", _id: null}, 
     {source_type: "html", source_file: "index.html", _id: null}
   ]; // Adding the fsm and html resources as visuals
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFiles(event.target.files); // Set the selected files
+  };
 
   return (
     <div className="project-table-wrapper bg-secondary">
@@ -130,11 +149,14 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
                   id="inputGroupFile"
                   multiple
                   aria-label="Upload"
+                  accept=".pdf"
+                  onChange={handleFileChange}
                 />
                 <button
                   className="btn btn-outline-primary"
                   type="button"
                   id="inputGroupFileAddon"
+                  onClick={handleUploadFiles}
                 >
                   Upload
                 </button>
@@ -155,8 +177,8 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
           </tr>
 
           {projectData &&
-            projectDataWithResoursec.map((project, index) => {
-              const { src: iconSrc, alt: iconAlt } = getIconByExtension(project.source_type);
+            projectDataWithResoursec.map((knowledgeBase, index) => {
+              const { src: iconSrc, alt: iconAlt } = getIconByExtension(knowledgeBase.source_type);
 
               return (
                 <tr key={index}>
@@ -167,7 +189,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
                   >
                     <img src={iconSrc} alt={iconAlt} className="project-row-img" />
                     <span className="hover-underline project-row-span">
-                      {project.source_file}
+                      {knowledgeBase.source_file}
                     </span>
                   </td>
                   <td
@@ -175,11 +197,11 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
                       index % 2 === 0 ? "gray-bg" : ""
                     }`}
                   >
-                    {project._id && 
+                    {knowledgeBase._id && 
                       <button
                         className="btn btn-outline-danger btn-sm me-2"
                         data-bs-toggle="tooltip"
-                        onClick={() => handleDeleteClick(project, index)}
+                        onClick={() => handleDeleteClick(knowledgeBase, index)}
                         title="Delete"
                       >
                         <i className="fas fa-trash-alt"></i>

@@ -23,7 +23,7 @@ export async function deletePdfProject(projectID: string): Promise<boolean | nul
 
 export async function deletePdf(projectID: string, docID: string): Promise<boolean>{
   try{
-    const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/${docID}`, {
+    const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/${docID}/`, {
       method: 'DELETE',
       headers: {
         'Authorization': apiKey
