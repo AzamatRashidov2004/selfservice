@@ -148,3 +148,31 @@
       border-radius: 5px !important;
     }
   }
+
+  .file-table{
+    border-collapse: collapse;
+  }
+
+  .file-table td{
+    width: 100%;
+  }
+
+  .file-table tbody{
+    display:block;
+    overflow: auto;
+    max-height: 300px;
+  }
+  
+  .file-table thead tr {
+     display: block;
+  }
+  
+  .file-table thead {
+    background: black;
+    color:#fff;
+  }
+  
+  .file-table th, .file-table td {
+    padding: 5px;
+    text-align: left;
+  }

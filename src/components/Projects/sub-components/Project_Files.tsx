@@ -138,11 +138,11 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
 
   return (
     <div className="project-table-wrapper bg-secondary">
-      <table className="table w-100 bg-secondary">
+      <table className="table w-100 bg-secondary file-table">
         <thead>
           <tr className="thead-content">
             <th className="thead-content project-filename text-start">Filename</th>
-            <th className="thead-content project-actions text-end">Actions</th>
+            <th className="thead-content project-actions text-end"></th>
           </tr>
         </thead>
         <tbody>
