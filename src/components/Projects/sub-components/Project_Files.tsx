@@ -8,6 +8,7 @@ import { pdfIcon, excelIcon, unknownIcon, csvIcon, txtIcon, plusIcon, htmlIcon, 
 import "../../Project-Row/Project_Row.css";  // Your existing styles
 import { uploadMultiplePdfs } from "../../../api/kronos/postKronos.ts";
 import { deletePdf } from "../../../api/kronos/deleteKronos.ts";
+import { getPdfFile } from "../../../api/kronos/getKronos.ts";
 
 interface ProjectFilesProps {
   projectId: string,
@@ -108,6 +109,12 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
     setFiles(event.target.files); // Set the selected files
   };
 
+  const handleFilenameClick = async (knowledgeBase: kronosKnowledgeBaseType) => {
+    if (!knowledgeBase._id) return;
+
+    await getPdfFile(projectId, knowledgeBase._id, knowledgeBase.source_file);
+  }
+
   return (
     <div className="project-table-wrapper bg-secondary">
       <table className="table w-100 bg-secondary">
@@ -183,6 +190,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
               return (
                 <tr key={index}>
                   <td
+                    onClick={() => {if (knowledgeBase._id) handleFilenameClick(knowledgeBase)}}
                     className={`collapsable-text project-name text-start filename-wrapper ${
                       index % 2 === 0 ? "gray-bg" : ""
                     }`}
