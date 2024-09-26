@@ -12,6 +12,7 @@ export interface ProjectType {
     description: string;
     created_at: Date;
     modal_version: number;
+    chatbot_config: SettingsType;
   }
 
   // Define ComponentColor type

@@ -140,13 +140,20 @@ const Dashboard: React.FC = () => {
       );
       return;
     }
+    let updatedProjects;
+    if (isAnalytical){
+      // updates project name
+      updatedProjects = analyticalProjects.map((project: ProjectType, index: number) =>
+        index === selectedIndex ? { ...project, name: projectName } : project
+      );
+      setAnalyticalProjects(updatedProjects);
+    }else{
+      updatedProjects = projects.map((project: projectFetchReturn, index: number) =>
+        index === selectedIndex ? {project: { ...project.project, name: projectName, description: description }, projectData: project.projectData} : project
+      );
+      setProjects(updatedProjects)
+    }
 
-    // updates project name
-    const updatedProjects = analyticalProjects.map((project: ProjectType, index: number) =>
-      index === selectedIndex ? { ...project, name: projectName } : project
-    );
-
-    setAnalyticalProjects(updatedProjects);
 
     createNotificationEvent(
       "Project Updated",
@@ -214,6 +221,10 @@ const Dashboard: React.FC = () => {
                   setProjects={setProjects}
                   openProjectIndex={openProjectIndex}
                   setOpenProjectIndex={setOpenProjectIndex}
+                  setSelectedDocID={setSelectedDocID}
+                  setSelectedProjectConfig={setSelectedProjectConfig}
+                  setIsAnalytical={setIsAnalytical}
+                  setSelectedIndex={setSelectedIndex}
                 />
               )})}
             </div>
