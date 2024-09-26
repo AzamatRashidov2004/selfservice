@@ -26,6 +26,7 @@ const Dashboard: React.FC = () => {
   const [selectedProjectConfig, setSelectedProjectConfig] =
     useState<SettingsType | null>(null);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // States for Project Details
   const [projectName, setProjectName] = useState("");
@@ -61,6 +62,9 @@ const Dashboard: React.FC = () => {
   };
   // Initial projects fetch
   useEffect(() => {
+    const fetchData = async () => {
+      await fetchProjectsData(setProjects, setLoading);
+    };
     fetchData();
   }, []);
 

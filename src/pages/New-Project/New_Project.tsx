@@ -14,6 +14,7 @@ const New_Project: React.FC = () => {
   const [files, setFiles] = useState<FileList | null>(null);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
   const [notationFile, setNotationFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // States for Project Details
   const [projectName, setProjectName] = useState("");

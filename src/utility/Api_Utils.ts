@@ -1,6 +1,6 @@
 import {
   uploadAnalyticalProject,
-  updateAnalyticalProject
+  updateAnalyticalProject,
 } from "../api/analyst/postAnalyst.ts";
 import { getSinglPdfConfig, getAllPdfProjects, getAllPdfsFromProject } from "../api/kronos/getKronos.ts";
 import { updatePdfConfig, createKronosProject, uploadMultiplePdfs  } from "../api/kronos/postKronos.ts";
@@ -14,21 +14,26 @@ import { SettingsType } from "./types.ts";
 import getFileExstension from "../utility/File_Exstension.ts";
 import { deletePdfProject } from "../api/kronos/deleteKronos.ts";
 
-
-export async function handleGetSingleConfig(project: ProjectType): Promise<SettingsType | null> {
+export async function handleGetSingleConfig(
+  project: ProjectType,
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
+): Promise<SettingsType | null> {
+  if (setLoading) setLoading(true);
   const fileExstension = getFileExstension(project.filename);
   let config: SettingsType | null;
 
-  if (fileExstension === "pdf" && project.projectId){
+  if (fileExstension === "pdf" && project.projectId) {
     config = await getSinglPdfConfig(project.projectId, project.docId);
-  }else{
+  } else {
     config = await getSingleAnalyticalConfig(project.docId);
   }
 
-  if (!config || !config.attributes){
+  if (setLoading) setLoading(false);
+  if (!config || !config.attributes) {
     console.error("Error config not found");
-    return null
+    return null;
   }
+
   return config;
 }
 
@@ -79,7 +84,7 @@ export async function fetchProjectsData(setInitial: (data: fetchProjectsDataRetu
     setInitial({analytical: allAnalytical, project: allProjects});
   }
 
-  if (allProjects.length === 0){
+  if (allProjects.length === 0) {
     console.error("No pdf/analytical documents found!");
     return null;
   }
@@ -87,28 +92,35 @@ export async function fetchProjectsData(setInitial: (data: fetchProjectsDataRetu
   return {analytical: allAnalytical, project: allProjects};
 }
 
-export async function fetchAnalyticalConfigs(): Promise<ProjectType[] | null> {
+export async function fetchAnalyticalConfigs(
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
+): Promise<ProjectType[] | null> {
   // Get all ids
+  if (setLoading) setLoading(true);
   const analyst_all_ids = await getAllAnalyticalIDs();
   if (!analyst_all_ids) {
     console.error("Failed to retrieve config ID's");
-    return null
+    if (setLoading) setLoading(false);
+    return null;
   }
 
   // Get all configs
-  const analyst_configs: SettingsType[] | null = await getAllAnalyticalConfigs(analyst_all_ids);
+  const analyst_configs: SettingsType[] | null = await getAllAnalyticalConfigs(
+    analyst_all_ids
+  );
   if (!analyst_configs) {
     console.error("Failed to retrieve config data");
+    if (setLoading) setLoading(false);
     return null;
   }
-  
+
   const result: ProjectType[] = analyst_configs.map((config: SettingsType) => ({
     name: config.attributes?.project_name || "Unknown Project",
     lastUpdate: config.attributes?.last_update || "Unknown Date",
     filename: config.attributes?.doc_name || "Unknown File",
-    docId: config.attributes?.doc_id || "Unknown ID"
+    docId: config.attributes?.doc_id || "Unknown ID",
   }));
-
+  if (setLoading) setLoading(true);
   return result;
 }
 
@@ -148,8 +160,8 @@ export async function createInitialKronosProject(settings: SettingsType, project
 export async function handleUpdateConfig(isAnalytical: boolean, newConfig: SettingsType, docID: string, projectID: string | null): Promise<boolean | null>{
   let result: boolean | null = false;
   const attributes = newConfig.attributes;
-  console.log("id", projectID)
-  if (isAnalytical){
+  console.log("id", projectID);
+  if (isAnalytical) {
     // Analytical documents update
     result = await updateAnalyticalProject(docID, newConfig);
     
@@ -161,10 +173,9 @@ export async function handleUpdateConfig(isAnalytical: boolean, newConfig: Setti
       docID,
       newConfig
     );
-
   }
-  
-  return result
+  if (setLoading) setLoading(false);
+  return result;
 }
 
 // function getLocale(language?: string): string {
