@@ -153,12 +153,12 @@ export async function handleUpdateConfig(isAnalytical: boolean, newConfig: Setti
     // Analytical documents update
     result = await updateAnalyticalProject(docID, newConfig);
     
-  }else if (projectID){
+  }else{
     // PDF documents update
     result = await updatePdfConfig(
       attributes.project_name, 
       attributes.description, 
-      getLocale(attributes.language),
+      docID,
       newConfig
     );
 
@@ -167,20 +167,20 @@ export async function handleUpdateConfig(isAnalytical: boolean, newConfig: Setti
   return result
 }
 
-function getLocale(language?: string): string {
-  switch (language?.toLowerCase()) {
-    case 'deutsch':
-    case 'german':
-      return 'de-DE';
-    case 'czech':
-    case 'čeština':
-    case 'česky':
-      return 'cs-CZ';
-    case 'english':
-    case 'angličtina':
-      return 'en-US';
-    default:
-      return 'en-US';  // Default to 'en-US' if undefined or unknown
-  }
-}
+// function getLocale(language?: string): string {
+//   switch (language?.toLowerCase()) {
+//     case 'deutsch':
+//     case 'german':
+//       return 'de-DE';
+//     case 'czech':
+//     case 'čeština':
+//     case 'česky':
+//       return 'cs-CZ';
+//     case 'english':
+//     case 'angličtina':
+//       return 'en-US';
+//     default:
+//       return 'en-US';  // Default to 'en-US' if undefined or unknown
+//   }
+// }
 

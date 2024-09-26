@@ -70,7 +70,7 @@ export async function updatePdfConfig(
   ): Promise<boolean | null>{
 
     try{
-      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}`, {
+      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -87,10 +87,6 @@ export async function updatePdfConfig(
         console.error("Error while trying to update knowledge base" + projectResponse.statusText);
         return false;
       }
-    
-      const result = await projectResponse.json();
-    
-      console.log("RESULT", result);
     
       return true;
       
