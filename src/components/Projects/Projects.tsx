@@ -1,11 +1,18 @@
 import React, { useRef, useEffect } from "react";
 import "./Projects.css";
 import ProjectFiles from "./sub-components/Project_Files";
-import { kronosKnowledgeBaseType, KronosProjectType, projectFetchReturn, SettingsType } from "../../utility/types";
+import {
+  kronosKnowledgeBaseType,
+  KronosProjectType,
+  projectFetchReturn,
+  SettingsType,
+} from "../../utility/types";
 import { formatKronosDate } from "../../utility/Date_Util";
-import { createNotificationEvent, createPopupEvent } from "../../utility/Modal_Util";
+import {
+  createNotificationEvent,
+  createPopupEvent,
+} from "../../utility/Modal_Util";
 import { deletePdfProject } from "../../api/kronos/deleteKronos";
-
 
 interface ProjectsProps {
   project: KronosProjectType;
@@ -15,14 +22,16 @@ interface ProjectsProps {
   openProjectIndex: number | null;
   setOpenProjectIndex: React.Dispatch<React.SetStateAction<number | null>>;
   setSelectedDocID: React.Dispatch<React.SetStateAction<string | null>>;
-  setSelectedProjectConfig: React.Dispatch<React.SetStateAction<SettingsType | null>>;
+  setSelectedProjectConfig: React.Dispatch<
+    React.SetStateAction<SettingsType | null>
+  >;
   setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedIndex: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const Project: React.FC<ProjectsProps> = ({ 
-  index, 
-  project, 
+const Project: React.FC<ProjectsProps> = ({
+  index,
+  project,
   projectData,
   setProjects,
   openProjectIndex,
@@ -30,8 +39,8 @@ const Project: React.FC<ProjectsProps> = ({
   setSelectedDocID,
   setSelectedProjectConfig,
   setIsAnalytical,
-  setSelectedIndex
- }) => {
+  setSelectedIndex,
+}) => {
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Toggle function to handle accordion behavior
@@ -51,12 +60,15 @@ const Project: React.FC<ProjectsProps> = ({
       if (openProjectIndex === index) {
         contentRef.current.style.maxHeight = `${contentRef.current.scrollHeight}px`;
       } else {
-        contentRef.current.style.maxHeight = '0px';
+        contentRef.current.style.maxHeight = "0px";
       }
     }
   }, [openProjectIndex, index]);
 
-  const handleDeleteProjectClick = (project: KronosProjectType, index: number) => {
+  const handleDeleteProjectClick = (
+    project: KronosProjectType,
+    index: number
+  ) => {
     createPopupEvent(
       "Delete project",
       `Are you sure you want to delete the project with id ${project._id}?`,
@@ -72,7 +84,6 @@ const Project: React.FC<ProjectsProps> = ({
     if (!response) return;
 
     const result = await deletePdfProject(project._id);
-    
 
     if (!result) {
       console.error("Something went wrong while deleting project");
@@ -82,7 +93,11 @@ const Project: React.FC<ProjectsProps> = ({
         "danger"
       );
     } else {
-      createNotificationEvent("File Deleted", "Succesfully deleted the file", "success");
+      createNotificationEvent(
+        "File Deleted",
+        "Succesfully deleted the file",
+        "success"
+      );
       setProjects((prevProjects) => prevProjects.filter((_, i) => i !== index));
       setOpenProjectIndex(null);
     }
@@ -94,36 +109,49 @@ const Project: React.FC<ProjectsProps> = ({
     setSelectedDocID(project._id);
     setSelectedProjectConfig(project.chatbot_config);
     setIsAnalytical(false);
-    setSelectedIndex(index)
-  }
+    setSelectedIndex(index);
+  };
 
   return (
     <div className="accordion-item">
-      <div className={`accordion-header-container bg-primary ${openProjectIndex === index ? "expanded" : ""}`}  id={`heading${index}`}>
+      <div
+        className={`accordion-header-container bg-primary ${
+          openProjectIndex === index ? "expanded" : ""
+        }`}
+        id={`heading${index}`}
+      >
         <button
           onClick={toggleAccordion}
-          className={`accordion-button ${index % 2 === 0 ? "odd" : ""} ${openProjectIndex === index ? "" : "collapsed"}`}
+          className={`accordion-button ${index % 2 === 0 ? "odd" : ""} ${
+            openProjectIndex === index ? "" : "collapsed"
+          }`}
           type="button"
           aria-expanded={openProjectIndex === index}
           aria-controls={`collapse${index}`}
         >
           <div className="accordion-project-name">{project.name}</div>
-          <div className="accordion-project-update">{formatKronosDate(new Date(project.created_at))}</div>
+          <div className="accordion-project-update">
+            {formatKronosDate(new Date(project.created_at))}
+          </div>
           <div className="accordion-project-id">{project._id}</div>
           <div className="accordion-project-action">&nbsp;</div>
         </button>
-        
       </div>
       <div
         id={`collapse${index}`}
-        className={`accordion-collapse ${openProjectIndex === index ? "expanded" : ""}`}
+        className={`accordion-collapse ${
+          openProjectIndex === index ? "expanded" : ""
+        }`}
         aria-labelledby={`heading${index}`}
         ref={contentRef}
       >
         <div className="accordion-body">
-          <b>ID: </b> {project._id}<br />
-          <b>Description: </b> {project.description}<br />
-          <b>Files </b> ({projectData.length} {projectData.length <= 1 ? "file" : "files"})<br />
+          <b>ID: </b> {project._id}
+          <br />
+          <b>Description: </b> {project.description}
+          <br />
+          <b>Files </b> ({projectData.length}{" "}
+          {projectData.length <= 1 ? "file" : "files"})<br />
           <ProjectFiles
             projectId={project._id}
             projectData={projectData}
@@ -133,10 +161,19 @@ const Project: React.FC<ProjectsProps> = ({
           />
         </div>
         <div className="accordion-action-buttons-container">
-          <button className="btn btn-danger" onClick={() => {handleDeleteProjectClick(project, index)}}>Delete Project</button>
-          <button className="btn btn-secondary" onClick={handleEditClick}>Edit Project</button>
+          <button
+            className="btn btn-danger"
+            onClick={() => {
+              handleDeleteProjectClick(project, index);
+            }}
+          >
+            Delete Project
+          </button>
+          <button className="btn btn-secondary" onClick={handleEditClick}>
+            Edit Project
+          </button>
           <button className="btn btn-primary">Launch Project</button>
-      </div>
+        </div>
       </div>
     </div>
   );
