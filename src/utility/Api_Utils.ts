@@ -2,9 +2,23 @@ import {
   uploadAnalyticalProject,
   updateAnalyticalProject,
 } from "../api/analyst/postAnalyst.ts";
-import { getSinglPdfConfig, getAllPdfProjects, getAllPdfsFromProject } from "../api/kronos/getKronos.ts";
-import { updatePdfConfig, createKronosProject, uploadMultiplePdfs  } from "../api/kronos/postKronos.ts";
-import { fetchProjectsDataReturn, kronosKnowledgeBaseType, KronosProjectType, projectFetchReturn, ProjectType } from "./types";
+import {
+  getSinglPdfConfig,
+  getAllPdfProjects,
+  getAllPdfsFromProject,
+} from "../api/kronos/getKronos.ts";
+import {
+  updatePdfConfig,
+  createKronosProject,
+  uploadMultiplePdfs,
+} from "../api/kronos/postKronos.ts";
+import {
+  fetchProjectsDataReturn,
+  kronosKnowledgeBaseType,
+  KronosProjectType,
+  projectFetchReturn,
+  ProjectType,
+} from "./types";
 import {
   getAllAnalyticalConfigs,
   getAllAnalyticalIDs,
@@ -37,8 +51,6 @@ export async function handleGetSingleConfig(
   return config;
 }
 
-
-
 async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
   let allResults: projectFetchReturn[] = [];
   const allProjects: KronosProjectType[] | null = await getAllPdfProjects();
@@ -48,8 +60,9 @@ async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
   if (allProjects.length > 0) {
     // Create an array of promises to fetch project data for each project
     const projectDataPromises = allProjects.map(async (project) => {
-      const projectData: kronosKnowledgeBaseType[] | null = await getAllPdfsFromProject(project._id);
-      
+      const projectData: kronosKnowledgeBaseType[] | null =
+        await getAllPdfsFromProject(project._id);
+
       // If projectData is null, return an empty array for projectData
       return {
         project,
@@ -64,24 +77,26 @@ async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
   return allResults; // Return the collected results
 }
 
-
-
-export async function fetchProjectsData(setInitial: (data: fetchProjectsDataReturn) => void): Promise<fetchProjectsDataReturn | null> {
+export async function fetchProjectsData(
+  setInitial: (data: fetchProjectsDataReturn) => void
+): Promise<fetchProjectsDataReturn | null> {
   let allProjects: projectFetchReturn[] = [];
   let allAnalytical: ProjectType[] = [];
 
   // Fetch all pdfs (Faster api call first)
-  const pdfProjects: projectFetchReturn[] = await getAllProjectsAndProjectData();
-  if (pdfProjects){
+  const pdfProjects: projectFetchReturn[] =
+    await getAllProjectsAndProjectData();
+  if (pdfProjects) {
     allProjects = pdfProjects;
-    setInitial({analytical: allAnalytical, project: allProjects});
+    setInitial({ analytical: allAnalytical, project: allProjects });
   }
 
   // Fetch all analytical files (Slower api call last)
-  const analyticalProjects: ProjectType[] | null = await fetchAnalyticalConfigs();
-  if (analyticalProjects){
+  const analyticalProjects: ProjectType[] | null =
+    await fetchAnalyticalConfigs();
+  if (analyticalProjects) {
     allAnalytical = analyticalProjects;
-    setInitial({analytical: allAnalytical, project: allProjects});
+    setInitial({ analytical: allAnalytical, project: allProjects });
   }
 
   if (allProjects.length === 0) {
@@ -89,7 +104,7 @@ export async function fetchProjectsData(setInitial: (data: fetchProjectsDataRetu
     return null;
   }
 
-  return {analytical: allAnalytical, project: allProjects};
+  return { analytical: allAnalytical, project: allProjects };
 }
 
 export async function fetchAnalyticalConfigs(
@@ -124,8 +139,14 @@ export async function fetchAnalyticalConfigs(
   return result;
 }
 
-export async function createInitialAnalyticalProject(settings: SettingsType, files: FileList, notationFile: File): Promise<boolean>{
+export async function createInitialAnalyticalProject(
+  settings: SettingsType,
+  files: FileList,
+  notationFile: File,
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
+): Promise<boolean> {
   // Upload files to create the analytical project
+  if (setLoading) setLoading(true);
   const uploadResult = await uploadAnalyticalProject(files[0], notationFile);
 
   if (!uploadResult) return false;
@@ -133,48 +154,63 @@ export async function createInitialAnalyticalProject(settings: SettingsType, fil
   const docID = uploadResult.docID;
 
   const response = await updateAnalyticalProject(docID, settings);
-
+  if (setLoading) setLoading(false);
   if (!response) return false;
 
   return true;
 }
 
-export async function createInitialKronosProject(settings: SettingsType, projectName: string, description: string, files: FileList): Promise<boolean>{
-  const kronosProject = await createKronosProject(projectName, description, settings);
+export async function createInitialKronosProject(
+  settings: SettingsType,
+  projectName: string,
+  description: string,
+  files: FileList,
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
+): Promise<boolean> {
+  const kronosProject = await createKronosProject(
+    projectName,
+    description,
+    settings
+  );
 
   if (!kronosProject) return false;
+  if (setLoading) setLoading(true);
 
   const filesUpload = await uploadMultiplePdfs(files, kronosProject._id);
-
 
   if (!filesUpload) {
     // Delete the created project if file upload fails
     await deletePdfProject(kronosProject._id);
-    return false
-  };
+    if (setLoading) setLoading(false);
+    return false;
+  }
 
-  return true
+  if (setLoading) setLoading(false);
+
+  return true;
 }
 
-
-export async function handleUpdateConfig(isAnalytical: boolean, newConfig: SettingsType, docID: string, projectID: string | null): Promise<boolean | null>{
+export async function handleUpdateConfig(
+  isAnalytical: boolean,
+  newConfig: SettingsType,
+  docID: string,
+  projectID: string | null
+): Promise<boolean | null> {
   let result: boolean | null = false;
   const attributes = newConfig.attributes;
   console.log("id", projectID);
   if (isAnalytical) {
     // Analytical documents update
     result = await updateAnalyticalProject(docID, newConfig);
-    
-  }else{
+  } else {
     // PDF documents update
     result = await updatePdfConfig(
-      attributes.project_name, 
-      attributes.description, 
+      attributes.project_name,
+      attributes.description,
       docID,
       newConfig
     );
   }
-  if (setLoading) setLoading(false);
   return result;
 }
 
@@ -194,4 +230,3 @@ export async function handleUpdateConfig(isAnalytical: boolean, newConfig: Setti
 //       return 'en-US';  // Default to 'en-US' if undefined or unknown
 //   }
 // }
-
