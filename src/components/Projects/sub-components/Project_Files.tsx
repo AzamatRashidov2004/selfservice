@@ -43,6 +43,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
   setProjects,
 }) => {
   const addFileRef = useRef<HTMLTableRowElement | null>(null);
+  const addFileInputRef = useRef<HTMLInputElement | null>(null);
   const newFileInputRef = useRef<HTMLTableRowElement | null>(null);
   const [files, setFiles] = useState<FileList | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -121,6 +122,13 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
       "success"
     );
 
+    // Adjust UI of the file input
+    if (addFileInputRef.current && newFileInputRef.current && addFileRef.current){
+      addFileInputRef.current.value = ""
+      newFileInputRef.current.classList.add("hidden")
+      addFileRef.current.classList.remove("hidden");
+    }
+
     const getNewFiles = await getAllPdfsFromProject(projectId);
 
     if (!getNewFiles) {
@@ -141,6 +149,8 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
         ...allProjects.slice(projectIndex + 1),
       ];
     });
+
+    setFiles(null);
   };
 
   const handleDeleteClick = (knowledgeBase: kronosKnowledgeBaseType) => {
@@ -277,6 +287,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
                     multiple
                     aria-label="Upload"
                     accept=".pdf"
+                    ref={addFileInputRef}
                     onChange={handleFileChange}
                   />
                   <button

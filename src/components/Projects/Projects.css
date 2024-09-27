@@ -85,12 +85,16 @@
   }
 
   .accordion-header-container.expanded{
-    border: 3px solid #38444f !important;
+    border: 4px solid #0D6EFD !important;
+    border-top-left-radius: 5px !important;
+    border-top-right-radius: 5px !important;
   }
 
   .accordion-collapse.expanded{
     border-radius: 0 !important;
-    border: 3px solid #38444f;
+    border: 4px solid #0D6EFD;
+    border-bottom-left-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
     border-top: none;
   }
 
