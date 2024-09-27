@@ -4,7 +4,7 @@
     "sop-generator": {
       "hosting": {
         "slf-service-preview": [
-          "slf-service-preview"
+          "selfservice-react"
         ]
       }
     }
