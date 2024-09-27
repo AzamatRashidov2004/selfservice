@@ -11,8 +11,10 @@ import {
   createInitialAnalyticalProject,
   createInitialKronosProject,
 } from "../../utility/Api_Utils";
+import { useNavigate } from "react-router-dom";
 
 const New_Project: React.FC = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [files, setFiles] = useState<FileList | null>(null);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
@@ -92,6 +94,7 @@ const New_Project: React.FC = () => {
       "Project successfully created with your configurations",
       "success"
     );
+    navigate("/dashboard");
   };
 
   return (
