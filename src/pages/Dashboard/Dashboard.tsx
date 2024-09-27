@@ -63,7 +63,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
+  console.log("xxx")
   const scrollIntoEditSection = useCallback(() => {
     const topMargin = 80;
     if (
