@@ -2,7 +2,12 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import "./Dashboard.css";
 import ProjectRow from "../../components/Project-Row/Project_Row"; // Import the new component
 import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
-import { fetchProjectsDataReturn, projectFetchReturn, ProjectType, SettingsType } from "../../utility/types.ts";
+import {
+  fetchProjectsDataReturn,
+  projectFetchReturn,
+  ProjectType,
+  SettingsType,
+} from "../../utility/types.ts";
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
 import getDate from "../../utility/Date_Util.ts";
 import {
@@ -11,10 +16,13 @@ import {
 } from "../../utility/Api_Utils.ts";
 import { createNotificationEvent } from "../../utility/Modal_Util.ts";
 import Project from "../../components/Projects/Projects.tsx";
+import Loader from "../../components/Loader/Loader.tsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
-  const [analyticalProjects, setAnalyticalProjects] = useState<ProjectType[]>([]);
+  const [analyticalProjects, setAnalyticalProjects] = useState<ProjectType[]>(
+    []
+  );
   const [selectedDocID, setSelectedDocID] = useState<string | null>(null);
   const [selectedProjectID, setSelectedProjectID] = useState<string | null>(
     null
@@ -26,6 +34,7 @@ const Dashboard: React.FC = () => {
   const [selectedProjectConfig, setSelectedProjectConfig] =
     useState<SettingsType | null>(null);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // States for Project Details
   const [projectName, setProjectName] = useState("");
@@ -52,12 +61,17 @@ const Dashboard: React.FC = () => {
   }, [selectedProjectConfig]);
 
   const fetchData = async () => {
+    setLoading(true);
     await fetchProjectsData((allProjects: fetchProjectsDataReturn | null) => {
-      if (!allProjects) return;
+      if (!allProjects) {
+        setLoading(false);
+        return;
+      }
 
       setAnalyticalProjects(allProjects.analytical);
       setProjects(allProjects.project);
     });
+    setLoading(false);
   };
   // Initial projects fetch
   useEffect(() => {
@@ -136,19 +150,29 @@ const Dashboard: React.FC = () => {
       return;
     }
     let updatedProjects;
-    if (isAnalytical){
+    if (isAnalytical) {
       // updates project name
-      updatedProjects = analyticalProjects.map((project: ProjectType, index: number) =>
-        index === selectedIndex ? { ...project, name: projectName } : project
+      updatedProjects = analyticalProjects.map(
+        (project: ProjectType, index: number) =>
+          index === selectedIndex ? { ...project, name: projectName } : project
       );
       setAnalyticalProjects(updatedProjects);
-    }else{
-      updatedProjects = projects.map((project: projectFetchReturn, index: number) =>
-        index === selectedIndex ? {project: { ...project.project, name: projectName, description: description }, projectData: project.projectData} : project
+    } else {
+      updatedProjects = projects.map(
+        (project: projectFetchReturn, index: number) =>
+          index === selectedIndex
+            ? {
+                project: {
+                  ...project.project,
+                  name: projectName,
+                  description: description,
+                },
+                projectData: project.projectData,
+              }
+            : project
       );
-      setProjects(updatedProjects)
+      setProjects(updatedProjects);
     }
-
 
     createNotificationEvent(
       "Project Updated",
@@ -159,32 +183,44 @@ const Dashboard: React.FC = () => {
     setSelectedDocID(null);
   };
 
-    // Synchronize the height of .kronos-projects-wrapper with .accordion using ResizeObserver
-    useEffect(() => {
-      const observer = new ResizeObserver(() => {
-        if (!kronosProjectsWrapperRef.current || !accordionRef.current) return;
-        const accordionHeight = accordionRef.current.offsetHeight;
-        kronosProjectsWrapperRef.current.style.height = `${accordionHeight}px`;
-      });
-  
-      if (accordionRef.current) {
-        observer.observe(accordionRef.current);
-      }
-  
-      return () => {
-        observer.disconnect();
-      };
-    }, []);
+  // Synchronize the height of .kronos-projects-wrapper with .accordion using ResizeObserver
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      if (!kronosProjectsWrapperRef.current || !accordionRef.current) return;
+      const accordionHeight = accordionRef.current.offsetHeight;
+      kronosProjectsWrapperRef.current.style.height = `${accordionHeight}px`;
+    });
+
+    if (accordionRef.current) {
+      observer.observe(accordionRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (!projects) return;
 
-    if (projects.length % 2 === 0){
+    if (projects.length % 2 === 0) {
       const root = document.documentElement;
-      root.style.setProperty('--even-analytical-project-bg', "#FFFFFF");
-      root.style.setProperty('--odd-analytical-project-bg', "#F2F2F2");
+      root.style.setProperty("--even-analytical-project-bg", "#FFFFFF");
+      root.style.setProperty("--odd-analytical-project-bg", "#F2F2F2");
     }
-  }, [projects])
+  }, [projects]);
+
+  useEffect(() => {
+    const table = document.getElementsByTagName("table");
+    const loader = document.getElementsByClassName("loader-container");
+    if (loading) {
+      table[0].classList.add("hidden");
+      loader[0].classList.remove("hidden");
+    } else {
+      table[0].classList.remove("hidden");
+      loader[0].classList.add("hidden");
+    }
+  });
 
   return (
     <main className="container-fluid main-container">
@@ -193,6 +229,9 @@ const Dashboard: React.FC = () => {
         <p className="text-light">Choose a project to edit or delete</p>
       </div>
       <br />
+      <div className="loader-container">
+        <Loader />
+      </div>
       <table className="table main-table w-100">
         <thead>
           <tr>
@@ -203,25 +242,38 @@ const Dashboard: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          <tr ref={kronosProjectsWrapperRef} className="kronos-projects-wrapper">
-            <div ref={accordionRef} className="accordion" id="projectsAccordion">
+          <tr
+            ref={kronosProjectsWrapperRef}
+            className="kronos-projects-wrapper"
+          >
+            <div
+              ref={accordionRef}
+              className="accordion"
+              id="projectsAccordion"
+            >
               {projects.map((project, index) => {
-                if (!project.project || !project.project.name || !project.projectData) return null
+                if (
+                  !project.project ||
+                  !project.project.name ||
+                  !project.projectData
+                )
+                  return null;
                 return (
-                <Project
-                  key={project.project._id} // Assuming _id is unique
-                  projectData={project.projectData}
-                  project={project.project}
-                  index={index}
-                  setProjects={setProjects}
-                  openProjectIndex={openProjectIndex}
-                  setOpenProjectIndex={setOpenProjectIndex}
-                  setSelectedDocID={setSelectedDocID}
-                  setSelectedProjectConfig={setSelectedProjectConfig}
-                  setIsAnalytical={setIsAnalytical}
-                  setSelectedIndex={setSelectedIndex}
-                />
-              )})}
+                  <Project
+                    key={project.project._id} // Assuming _id is unique
+                    projectData={project.projectData}
+                    project={project.project}
+                    index={index}
+                    setProjects={setProjects}
+                    openProjectIndex={openProjectIndex}
+                    setOpenProjectIndex={setOpenProjectIndex}
+                    setSelectedDocID={setSelectedDocID}
+                    setSelectedProjectConfig={setSelectedProjectConfig}
+                    setIsAnalytical={setIsAnalytical}
+                    setSelectedIndex={setSelectedIndex}
+                  />
+                );
+              })}
             </div>
           </tr>
           {analyticalProjects &&
