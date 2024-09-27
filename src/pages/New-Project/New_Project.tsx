@@ -7,7 +7,10 @@ import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
 import { SettingsType } from "../../utility/types.ts";
 import getDate from "../../utility/Date_Util";
 import "./New_Project.css";
-import { createInitialAnalyticalProject, createInitialKronosProject } from "../../utility/Api_Utils";
+import {
+  createInitialAnalyticalProject,
+  createInitialKronosProject,
+} from "../../utility/Api_Utils";
 
 const New_Project: React.FC = () => {
   const [step, setStep] = useState(0);
@@ -40,7 +43,7 @@ const New_Project: React.FC = () => {
 
   useEffect(() => {
     console.log("FILES; ", files);
-  }, [files])
+  }, [files]);
 
   const saveSettings = async (settings: SettingsType) => {
     settings.attributes = {
@@ -53,17 +56,28 @@ const New_Project: React.FC = () => {
     };
 
     let response;
-    if (!files) return
-    if (isAnalytical && !notationFile) return
+    if (!files) return;
+    if (isAnalytical && !notationFile) return;
     // API save the config here
-    if (isAnalytical && notationFile){
+    if (isAnalytical && notationFile) {
       // Handle analytical files
-      response = await createInitialAnalyticalProject(settings, files, notationFile);
-    }else{
-      response = await createInitialKronosProject(settings, projectName, description, files)
+      response = await createInitialAnalyticalProject(
+        settings,
+        files,
+        notationFile,
+        setLoading
+      );
+    } else {
+      response = await createInitialKronosProject(
+        settings,
+        projectName,
+        description,
+        files,
+        setLoading
+      );
     }
-    
-    if (!response){
+
+    if (!response) {
       createNotificationEvent(
         "Something Went Wrong",
         "While setting up your project, something went wrong. Please try again later...",
@@ -116,7 +130,9 @@ const New_Project: React.FC = () => {
         />
       ) : null}
 
-      {step === 2 ? <CustomizeBot saveSettings={saveSettings} /> : null}
+      {step === 2 ? (
+        <CustomizeBot saveSettings={saveSettings} loading={loading} />
+      ) : null}
     </main>
   );
 };
