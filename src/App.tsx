@@ -21,12 +21,14 @@ import Try_Now from './pages/Try-Now/Try_Now';
 import Modals from './components/Modals/Modals';
 import Footer from './components/Footer/Footer'; // Import the footer
 
+// Import AuthProvider
+import { AuthProvider } from './context/authContext'; // Adjust the path as necessary
+
 // Import css
 import './App.css';
-import "./responsive.css";
+import './responsive.css';
 
 const App: React.FC = () => {
-
   // Window size listener for Scrollbar width styling
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -44,7 +46,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <>
+    <AuthProvider>
       <Router>
         <Navbar />
         <Modals />
@@ -56,7 +58,7 @@ const App: React.FC = () => {
         </Routes>
         <Footer />
       </Router>
-    </>
+    </AuthProvider>
   );
 }
 
