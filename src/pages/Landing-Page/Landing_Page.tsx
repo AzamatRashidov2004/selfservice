@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./Landing_Page.css";
-import GoogleLoginButton from "../../components/Google-Auth/login";
+import { useAuth } from '../../context/authContext';
+// import GoogleLoginButton from "../../components/Google-Auth/login";
 
 const Landing_Page: React.FC = () => {
   useEffect(() => {
@@ -89,6 +90,26 @@ const FeaturesSection: React.FC = () => {
 };
 
 const LoginSection: React.FC = () => {
+  const { login, authenticated, checkAuthenticated, logout } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+
+  // Only log auth status after Keycloak is initialized
+  useEffect(() => {
+    console.log("auth", checkAuthenticated());
+  }, [checkAuthenticated]);
+
+  const handleSubmit = async () => {
+    setError(null); // Reset error state
+    try {
+      // Attempt to login using Keycloak
+      await login();
+    } catch (err) {
+      // Handle any errors that occur during login
+      setError('Login failed.');
+      console.error('Login error:', err);
+    }
+  };
+
   return (
     <section className="login-section py-5 bg-light" id="login">
       <div className="container pb-5">
@@ -97,42 +118,23 @@ const LoginSection: React.FC = () => {
             <div className="card">
               <div className="card-body">
                 <h2 className="card-title text-center mb-4">Login</h2>
-                <form>
-                  <div className="form-group mb-3">
-                    <label htmlFor="username">Username</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      id="username"
-                      placeholder="Enter your username"
-                    />
-                  </div>
-                  <div className="form-group mb-3">
-                    <label htmlFor="password">Password</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      id="password"
-                      placeholder="Enter your password"
-                    />
-                  </div>
-                  <div className="d-grid gap-2">
-                    <button type="submit" className="btn btn-primary btn-block">
-                      Login
-                    </button>
-                    <div className="text-center mt-4">
-                      <div className="d-flex align-items-center my-4">
-                        {/* Left horizontal line */}
-                        <hr className="flex-grow-1" />
-                        {/* Text in the middle */}
-                        <span className="px-3">or</span>
-                        {/* Right horizontal line */}
-                        <hr className="flex-grow-1" />
-                      </div>
-                      <GoogleLoginButton />
+                <button onClick={handleSubmit}>Login</button>
+                <button onClick={async () => {await logout()}}>Logout</button>
+                {authenticated ? (
+                  <div className="alert alert-success">You are already logged in!</div>
+                ) : (
+                  <>
+                    {error && <div className="alert alert-danger">{error}</div>}
+                    <div className="d-grid gap-2">
+                      <button
+                        onClick={handleSubmit}
+                        className="btn btn-primary btn-block"
+                      >
+                        Login with Keycloak
+                      </button>
                     </div>
-                  </div>
-                </form>
+                  </>
+                )}
               </div>
             </div>
           </div>
