@@ -92,7 +92,6 @@ const FeaturesSection: React.FC = () => {
 const LoginSection: React.FC = () => {
   const { login, authenticated, checkAuthenticated, logout } = useAuth();
   const [error, setError] = useState<string | null>(null);
-
   // Only log auth status after Keycloak is initialized
   useEffect(() => {
     console.log("auth", checkAuthenticated());

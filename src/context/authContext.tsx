@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import keycloak from '../keycloak'; // Adjust the path as necessary
+import Keycloak from 'keycloak-js';
 
 // Define the shape of your context data
 interface AuthContextType {
@@ -8,6 +9,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
   checkAuthenticated: () => boolean;
+  keycloak: Keycloak;
 }
 
 // Create the context with the initial value
@@ -57,6 +59,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async () => {
     try {
       await keycloak.login({ redirectUri: window.location.origin + '/dashboard' });
+      console.log("token", keycloak.token);
       setAuthenticated(checkAuthenticated()); // Update state after login
     } catch (error) {
       console.error('Login failed', error);
@@ -87,6 +90,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     logout,
     refresh,
     checkAuthenticated,
+    keycloak,
   };
 
   return (
