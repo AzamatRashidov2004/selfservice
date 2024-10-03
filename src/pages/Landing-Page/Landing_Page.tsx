@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Landing_Page.css";
 import { useAuth } from '../../context/authContext';
-// import GoogleLoginButton from "../../components/Google-Auth/login";
 
 const Landing_Page: React.FC = () => {
   useEffect(() => {
@@ -90,8 +89,9 @@ const FeaturesSection: React.FC = () => {
 };
 
 const LoginSection: React.FC = () => {
-  const { login, authenticated, checkAuthenticated, logout } = useAuth();
+  const { login, authenticated, checkAuthenticated, logout, keycloak } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  console.log(keycloak.token);
   // Only log auth status after Keycloak is initialized
   useEffect(() => {
     console.log("auth", checkAuthenticated());
