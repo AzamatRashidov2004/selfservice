@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./Landing_Page.css";
-import { useAuth } from '../../context/authContext';
+import { useAuth } from "../../context/authContext";
 
 const Landing_Page: React.FC = () => {
   useEffect(() => {
@@ -89,7 +89,8 @@ const FeaturesSection: React.FC = () => {
 };
 
 const LoginSection: React.FC = () => {
-  const { login, authenticated, checkAuthenticated, logout, keycloak } = useAuth();
+  const { login, authenticated, checkAuthenticated, logout, keycloak } =
+    useAuth();
   const [error, setError] = useState<string | null>(null);
   console.log(keycloak.token);
   // Only log auth status after Keycloak is initialized
@@ -104,8 +105,8 @@ const LoginSection: React.FC = () => {
       await login();
     } catch (err) {
       // Handle any errors that occur during login
-      setError('Login failed.');
-      console.error('Login error:', err);
+      setError("Login failed.");
+      console.error("Login error:", err);
     }
   };
 
@@ -113,14 +114,33 @@ const LoginSection: React.FC = () => {
     <section className="login-section py-5 bg-light" id="login">
       <div className="container pb-5">
         <div className="row justify-content-center">
-          <div className="col-md-12">
+          <div className="col-md-12" style={{ marginTop: "25%" }}>
             <div className="card">
               <div className="card-body">
-                <h2 className="card-title text-center mb-4">Login</h2>
-                <button onClick={handleSubmit}>Login</button>
-                <button onClick={async () => {await logout()}}>Logout</button>
                 {authenticated ? (
-                  <div className="alert alert-success">You are already logged in!</div>
+                  <h2 className="card-title text-center mb-4">Welcome</h2>
+                ) : (
+                  <h2 className="card-title text-center mb-4">Login</h2>
+                )}
+                <br />
+                {/* Added Keycloak Logo */}
+                <img
+                  src="https://www.xpand-it.com/wp-content/uploads/2020/06/Keycloak-logo.png"
+                  alt="Keycloak Logo"
+                  className="d-block mx-auto"
+                  style={{ width: "180px", marginBottom: "20px" }}
+                />
+                {authenticated ? (
+                  <div className="d-grid gap-2">
+                    <button
+                      onClick={async () => {
+                        await logout();
+                      }}
+                      className="btn btn-primary btn-block"
+                    >
+                      Logout
+                    </button>
+                  </div>
                 ) : (
                   <>
                     {error && <div className="alert alert-danger">{error}</div>}

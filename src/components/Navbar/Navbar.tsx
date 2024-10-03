@@ -1,8 +1,12 @@
-import React  from 'react';
-import { Link } from 'react-router-dom'; // Import Link component
-import './Navbar.css';
+import React, { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom"; // Import Link component
+import "./Navbar.css";
+import { useAuth } from "../../context/authContext";
 
 const Navbar: React.FC = () => {
+  const { authenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <>
@@ -15,12 +19,21 @@ const Navbar: React.FC = () => {
 
           {/* Right-aligned buttons */}
           <div className="d-flex ms-auto">
-            <Link className="btn btn-link custom-link me-2" to="/new-project">
-              New
-            </Link>
-            <Link className="btn btn-link custom-link me-2" to="/dashboard">
-              Dashboard
-            </Link>
+            {authenticated ? (
+              <>
+                <Link
+                  className="btn btn-link custom-link me-2"
+                  to="/new-project"
+                >
+                  New
+                </Link>
+                <Link className="btn btn-link custom-link me-2" to="/dashboard">
+                  Dashboard
+                </Link>
+              </>
+            ) : (
+              <></>
+            )}
             <Link className="btn btn-primary" to="/try-now">
               Try Now
             </Link>
