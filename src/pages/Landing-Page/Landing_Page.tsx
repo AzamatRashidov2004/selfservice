@@ -149,7 +149,7 @@ const LoginSection: React.FC = () => {
                   <>
                     <h2 className="card-title text-center">Login</h2>
                     <p className="card-title text-center mb-4 bold">
-                      To access dashboard
+                      To access dashboard and other features
                     </p>
                     <div className="d-flex justify-content-center align-items-center mb-4">
                       <svg
@@ -180,6 +180,7 @@ const LoginSection: React.FC = () => {
                 {authenticated ? (
                   <div className="d-grid gap-2">
                     <button
+                      id="logout-button"
                       onClick={async () => {
                         await logout();
                       }}
