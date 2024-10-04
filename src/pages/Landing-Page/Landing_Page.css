@@ -129,3 +129,26 @@ body {
   border: none;
   background-color: #fff;
 }
+
+.lock-icon {
+  display: inline-block;
+  animation: shake 0.7s ease-in-out infinite;
+  transform-origin: center;
+}
+@keyframes shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(4deg);
+  }
+  50% {
+    transform: rotate(-4deg);
+  }
+  75% {
+    transform: rotate(4deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
