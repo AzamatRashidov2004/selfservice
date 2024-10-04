@@ -1,20 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom"; // Import Link component
 import "./Navbar.css";
 import { useAuth } from "../../context/authContext";
 
 const Navbar: React.FC = () => {
-  const { authenticated } = useAuth();
-  const { logout, login } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const { logout, login, authenticated } = useAuth();
   const handleSubmit = async () => {
-    setError(null); // Reset error state
     try {
-      // Attempt to login using Keycloak
       await login();
     } catch (err) {
-      // Handle any errors that occur during login
-      setError("Login failed.");
       console.error("Login error:", err);
     }
   };
