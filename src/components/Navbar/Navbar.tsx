@@ -1,12 +1,23 @@
-import React, { useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom"; // Import Link component
+import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Import Link component
 import "./Navbar.css";
 import { useAuth } from "../../context/authContext";
 
 const Navbar: React.FC = () => {
   const { authenticated } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
+  const { logout, login } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const handleSubmit = async () => {
+    setError(null); // Reset error state
+    try {
+      // Attempt to login using Keycloak
+      await login();
+    } catch (err) {
+      // Handle any errors that occur during login
+      setError("Login failed.");
+      console.error("Login error:", err);
+    }
+  };
 
   return (
     <>
@@ -30,13 +41,28 @@ const Navbar: React.FC = () => {
                 <Link className="btn btn-link custom-link me-2" to="/dashboard">
                   Dashboard
                 </Link>
+                <button
+                  className="btn btn-primary"
+                  onClick={async () => {
+                    await logout();
+                  }}
+                >
+                  Logout
+                </button>
               </>
             ) : (
-              <></>
+              <>
+                <button
+                  className="btn btn-link custom-link me-2"
+                  onClick={handleSubmit}
+                >
+                  Login
+                </button>
+                <Link className="btn btn-primary" to="/try-now">
+                  Try Now
+                </Link>
+              </>
             )}
-            <Link className="btn btn-primary" to="/try-now">
-              Try Now
-            </Link>
           </div>
         </div>
       </nav>
