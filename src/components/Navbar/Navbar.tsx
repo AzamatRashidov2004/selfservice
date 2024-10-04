@@ -1,8 +1,17 @@
-import React  from 'react';
-import { Link } from 'react-router-dom'; // Import Link component
-import './Navbar.css';
+import React from "react";
+import { Link } from "react-router-dom"; // Import Link component
+import "./Navbar.css";
+import { useAuth } from "../../context/authContext";
 
 const Navbar: React.FC = () => {
+  const { logout, login, authenticated } = useAuth();
+  const handleSubmit = async () => {
+    try {
+      await login();
+    } catch (err) {
+      console.error("Login error:", err);
+    }
+  };
 
   return (
     <>
@@ -15,15 +24,39 @@ const Navbar: React.FC = () => {
 
           {/* Right-aligned buttons */}
           <div className="d-flex ms-auto">
-            <Link className="btn btn-link custom-link me-2" to="/new-project">
-              New
-            </Link>
-            <Link className="btn btn-link custom-link me-2" to="/dashboard">
-              Dashboard
-            </Link>
-            <Link className="btn btn-primary" to="/try-now">
-              Try Now
-            </Link>
+            {authenticated ? (
+              <>
+                <Link
+                  className="btn btn-link custom-link me-2"
+                  to="/new-project"
+                >
+                  New
+                </Link>
+                <Link className="btn btn-link custom-link me-2" to="/dashboard">
+                  Dashboard
+                </Link>
+                <button
+                  className="btn btn-primary"
+                  onClick={async () => {
+                    await logout();
+                  }}
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="btn btn-link custom-link me-2"
+                  onClick={handleSubmit}
+                >
+                  Login
+                </button>
+                <Link className="btn btn-primary" to="/try-now">
+                  Try Now
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>

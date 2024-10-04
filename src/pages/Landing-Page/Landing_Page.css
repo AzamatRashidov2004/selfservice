@@ -122,3 +122,10 @@ body {
 .btn-call-to-action:hover {
   background-color: #0056b3;
 }
+
+.card {
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  background-color: #fff;
+}

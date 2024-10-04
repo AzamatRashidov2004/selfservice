@@ -17,6 +17,8 @@ import {
 import { createNotificationEvent } from "../../utility/Modal_Util.ts";
 import Project from "../../components/Projects/Projects.tsx";
 import Loader from "../../components/Loader/Loader.tsx";
+import { useAuth } from "../../context/authContext.tsx";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -48,6 +50,14 @@ const Dashboard: React.FC = () => {
   const [customizeStep, setCustomizeStep] = useState<number>(0);
 
   const customizeSectionRef = useRef<HTMLHeadingElement>(null);
+  const { authenticated } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!authenticated) {
+      navigate("/");
+    }
+  });
 
   useEffect(() => {
     // With changes to selected project, set states

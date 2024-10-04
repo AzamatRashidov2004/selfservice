@@ -12,6 +12,7 @@ import {
   createInitialKronosProject,
 } from "../../utility/Api_Utils";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/authContext.tsx";
 
 const New_Project: React.FC = () => {
   const navigate = useNavigate();
@@ -27,6 +28,15 @@ const New_Project: React.FC = () => {
   const [language, setLanguage] = useState("English");
   const [introMessage, setIntroMessage] = useState("");
   const [introImage, setIntroImage] = useState("");
+
+  // Authentication
+  const { authenticated } = useAuth();
+
+  useEffect(() => {
+    if (!authenticated) {
+      navigate("/");
+    }
+  });
 
   // API upload file here
   const fileUploadNextButtonClick = async () => {
