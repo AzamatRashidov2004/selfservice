@@ -30,7 +30,7 @@ const New_Project: React.FC = () => {
   const [introImage, setIntroImage] = useState("");
 
   // Authentication
-  const { authenticated } = useAuth();
+  const { authenticated, keycloak } = useAuth();
 
   useEffect(() => {
     if (!authenticated) {
@@ -85,6 +85,7 @@ const New_Project: React.FC = () => {
         projectName,
         description,
         files,
+        keycloak.token,
         setLoading
       );
     }
