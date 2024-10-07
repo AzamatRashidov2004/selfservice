@@ -67,6 +67,10 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   }
 
   useEffect(() => {
+    (window as any).isBotMounted = false;
+  }, [])
+
+  useEffect(() => {
     let botSettings: SettingsType = defaultSettings;
 
     // On dashboard page, if a project is selected this config is passed down
