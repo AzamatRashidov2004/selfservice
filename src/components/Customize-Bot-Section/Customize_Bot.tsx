@@ -1,6 +1,6 @@
 import "../../assets/bot/453.88f55f10.chunk.js";
-import "../../assets/bot/main.b8456701.js";
-import "../../assets/bot/main.af361184.css";
+import "../../assets/bot/main.3beca214.css";
+import "../../assets/bot/main.6fd757ab.js";
 import {
   botStaticDisplayConfig,
   defaultSettings,
@@ -28,7 +28,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
         settings,
       },
     });
-
+  
     // Function to create a delay
     function sleep(ms: number): Promise<void> {
       return new Promise((resolve) => {
@@ -37,11 +37,32 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
         }, ms);
       });
     }
-
+  
     const time = 500; // Delay time in milliseconds
+    const maxAttempts = 5; // Maximum number of attempts
+  
+    // Function to keep dispatching event until bot is mounted or max attempts reached
+    async function dispatchUntilMounted() {
+      let attempts = 0;
+      
+      while (!(window as any).isBotMounted && attempts < maxAttempts) {
+        attempts++;
+        console.log(`Attempt ${attempts}: Bot is not mounted, dispatching initFsBot event...`);
+        document.dispatchEvent(initFsBotEvent);
+        await sleep(time); // Wait for 500ms before the next check
+      }
+      console.log("is bot mounted", (window as any).isBotMounted)
+      if ((window as any).isBotMounted) {
+        console.log("Bot is successfully mounted!");
+      } else {
+        console.log(`Bot failed to mount after ${maxAttempts} attempts.`);
+      }
+    }
+  
+    // Start the process
     sleep(time).then(() => {
       console.log(`Initialized bot after ${time} ms!`);
-      document.dispatchEvent(initFsBotEvent);
+      dispatchUntilMounted(); // Start dispatching events until bot is mounted or max attempts are reached
     });
   }
 
