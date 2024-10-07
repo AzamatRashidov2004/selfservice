@@ -13,6 +13,7 @@ import {
   createPopupEvent,
 } from "../../utility/Modal_Util";
 import { deletePdfProject } from "../../api/kronos/deleteKronos";
+import { useAuth } from "../../context/authContext";
 
 interface ProjectsProps {
   project: KronosProjectType;
@@ -42,6 +43,7 @@ const Project: React.FC<ProjectsProps> = ({
   setSelectedIndex,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const { keycloak } = useAuth();
 
   // Toggle function to handle accordion behavior
   const toggleAccordion = () => {
@@ -81,9 +83,9 @@ const Project: React.FC<ProjectsProps> = ({
   };
 
   const handleDeleteProject = async (response: boolean, index: number) => {
-    if (!response) return;
+    if (!response || !keycloak.token) return;
 
-    const result = await deletePdfProject(project._id);
+    const result = await deletePdfProject(project._id, keycloak.token);
 
     if (!result) {
       console.error("Something went wrong while deleting project");
