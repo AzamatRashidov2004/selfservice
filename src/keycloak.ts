@@ -11,6 +11,4 @@ const keycloak = new Keycloak({
   clientId: isLocalhost() ? import.meta.env.VITE_KEYCLOACK_CLIENT_ID : import.meta.env.VITE_KEYCLOACK_PRODUCTION_CLIENT_ID,
 });
 
-console.log("IS LOCAL", isLocalhost())
-
 export default keycloak;
