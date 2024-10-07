@@ -27,6 +27,7 @@ import {
 } from "../../../api/kronos/getKronos.ts";
 import Loader from "../../Loader/Loader.tsx";
 import "./Project_Files.css";
+import { useAuth } from "../../../context/authContext.tsx";
 
 interface ProjectFilesProps {
   projectId: string;
@@ -42,6 +43,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
   projectData,
   setProjects,
 }) => {
+  const { keycloak } = useAuth();
   const addFileRef = useRef<HTMLTableRowElement | null>(null);
   const addFileInputRef = useRef<HTMLInputElement | null>(null);
   const newFileInputRef = useRef<HTMLTableRowElement | null>(null);
@@ -103,10 +105,10 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
   projectData = projectData.sort(sortBySourceType); // Sort the project files to have the same types next to one another
 
   const handleUploadFiles = async () => {
-    if (!files) return;
+    if (!files || !keycloak.token) return;
     setLoading(true);
 
-    const response = await uploadMultiplePdfs(files, projectId);
+    const response = await uploadMultiplePdfs(files, projectId, keycloak.token);
 
     if (!response) {
       setLoading(false);
@@ -129,7 +131,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
       addFileRef.current.classList.remove("hidden");
     }
 
-    const getNewFiles = await getAllPdfsFromProject(projectId);
+    const getNewFiles = await getAllPdfsFromProject(projectId, keycloak.token);
 
     if (!getNewFiles) {
       setLoading(false);
@@ -169,9 +171,9 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
     response: boolean,
     knowledgeBase: kronosKnowledgeBaseType
   ) => {
-    if (!response) return;
+    if (!response || !keycloak.token) return;
 
-    const result = await deletePdf(projectId, knowledgeBase._id);
+    const result = await deletePdf(projectId, knowledgeBase._id, keycloak.token);
 
     if (!result) {
       return createNotificationEvent(
