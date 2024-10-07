@@ -5,6 +5,9 @@
       "hosting": {
         "slf-service-preview": [
           "selfservice-react"
+        ],
+        "mf-admin-cz": [
+          "mfAdmin"
         ]
       }
     }
