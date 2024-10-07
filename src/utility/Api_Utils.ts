@@ -30,14 +30,16 @@ import { deletePdfProject } from "../api/kronos/deleteKronos.ts";
 
 export async function handleGetSingleConfig(
   project: ProjectType,
-  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
+  token: string | undefined,
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>,
 ): Promise<SettingsType | null> {
   if (setLoading) setLoading(true);
   const fileExstension = getFileExstension(project.filename);
   let config: SettingsType | null;
 
   if (fileExstension === "pdf" && project.projectId) {
-    config = await getSinglPdfConfig(project.projectId, project.docId);
+    if (!token) return null;
+    config = await getSinglPdfConfig(project.projectId, project.docId, token);
   } else {
     config = await getSingleAnalyticalConfig(project.docId);
   }
@@ -51,9 +53,9 @@ export async function handleGetSingleConfig(
   return config;
 }
 
-async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
+async function getAllProjectsAndProjectData(token: string): Promise<projectFetchReturn[]> {
   let allResults: projectFetchReturn[] = [];
-  const allProjects: KronosProjectType[] | null = await getAllPdfProjects();
+  const allProjects: KronosProjectType[] | null = await getAllPdfProjects(token);
 
   if (!allProjects) return []; // Return an empty array if allProjects is null
 
@@ -61,7 +63,7 @@ async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
     // Create an array of promises to fetch project data for each project
     const projectDataPromises = allProjects.map(async (project) => {
       const projectData: kronosKnowledgeBaseType[] | null =
-        await getAllPdfsFromProject(project._id);
+        await getAllPdfsFromProject(project._id, token);
 
       // If projectData is null, return an empty array for projectData
       return {
@@ -78,14 +80,17 @@ async function getAllProjectsAndProjectData(): Promise<projectFetchReturn[]> {
 }
 
 export async function fetchProjectsData(
-  setInitial: (data: fetchProjectsDataReturn) => void
+  setInitial: (data: fetchProjectsDataReturn) => void,
+  token: string | undefined
 ): Promise<fetchProjectsDataReturn | null> {
   let allProjects: projectFetchReturn[] = [];
   let allAnalytical: ProjectType[] = [];
+  let pdfProjects: projectFetchReturn[] = []
 
   // Fetch all pdfs (Faster api call first)
-  const pdfProjects: projectFetchReturn[] =
-    await getAllProjectsAndProjectData();
+  if (token){
+    pdfProjects = await getAllProjectsAndProjectData(token);
+  }
   if (pdfProjects) {
     allProjects = pdfProjects;
     setInitial({ analytical: allAnalytical, project: allProjects });
@@ -165,22 +170,25 @@ export async function createInitialKronosProject(
   projectName: string,
   description: string,
   files: FileList,
+  token: string | undefined,
   setLoading?: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<boolean> {
+  if (!token) return false;
   const kronosProject = await createKronosProject(
     projectName,
     description,
-    settings
+    settings,
+    token
   );
 
   if (!kronosProject) return false;
   if (setLoading) setLoading(true);
 
-  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id);
+  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id, token);
 
   if (!filesUpload) {
     // Delete the created project if file upload fails
-    await deletePdfProject(kronosProject._id);
+    await deletePdfProject(kronosProject._id, token);
     if (setLoading) setLoading(false);
     return false;
   }
@@ -194,7 +202,8 @@ export async function handleUpdateConfig(
   isAnalytical: boolean,
   newConfig: SettingsType,
   docID: string,
-  projectID: string | null
+  projectID: string | null,
+  token: string | undefined
 ): Promise<boolean | null> {
   let result: boolean | null = false;
   const attributes = newConfig.attributes;
@@ -202,13 +211,14 @@ export async function handleUpdateConfig(
   if (isAnalytical) {
     // Analytical documents update
     result = await updateAnalyticalProject(docID, newConfig);
-  } else {
+  } else if (token){
     // PDF documents update
     result = await updatePdfConfig(
       attributes.project_name,
       attributes.description,
       docID,
-      newConfig
+      newConfig,
+      token
     );
   }
   return result;

@@ -10,6 +10,7 @@ import { deletePdfProject } from "../../api/kronos/deleteKronos.ts";
 import { handleGetSingleConfig } from "../../utility/Api_Utils";
 import { ProjectType } from "../../utility/types";
 import "./Project_Row.css";
+import { useAuth } from "../../context/authContext.tsx";
 
 interface ProjectRowProps {
   project: ProjectType;
@@ -38,6 +39,8 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
   setSelectedProjectID,
   setSelectedIndex,
 }) => {
+  const {keycloak} = useAuth();
+
   const deleteProject = async (response: boolean) => {
     if (!response) return;
 
@@ -46,9 +49,9 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
     if (fileExtension !== "pdf") {
       // Analytical delete
       result = await deleteAnalyticalProject(project.docId);
-    } else if (project.projectId) {
+    } else if (project.projectId && keycloak.token) {
       // Pdf delete
-      result = await deletePdfProject(project.projectId);
+      result = await deletePdfProject(project.projectId, keycloak.token);
     }
 
     if (!result) {
@@ -105,7 +108,7 @@ const ProjectRow: React.FC<ProjectRowProps> = ({
     setIsAnalytical(!(getFileExstension(project.filename) === "pdf"));
     if (project.projectId) setSelectedProjectID(project.projectId);
     // API get project config here, set it below and please clean the defaultSettings code
-    const config = await handleGetSingleConfig(project);
+    const config = await handleGetSingleConfig(project, keycloak.token);
     if (config) {
       setSelectedProjectConfig(config);
       scrollIntoEditSection();

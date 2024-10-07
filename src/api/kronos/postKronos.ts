@@ -1,7 +1,7 @@
 import { kronosApiUrl as apiUrl, kronosApiKey as apiKey, handleError } from "../apiEnv";
 import { SettingsType, KronosProjectType } from "../../utility/types";
 
-export async function createKronosProject(projectName="", description="", chatbot_config: SettingsType): Promise<KronosProjectType | null>{
+export async function createKronosProject(projectName="", description="", chatbot_config: SettingsType, token: string): Promise<KronosProjectType | null>{
 
   try{
     // Create new kronos project
@@ -9,7 +9,8 @@ export async function createKronosProject(projectName="", description="", chatbo
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': apiKey
+        'Authorization': `Bearer + ${token}`,
+        'x-api-key': apiKey
       },
       body: JSON.stringify({name: projectName, description, chatbot_config})
     });
@@ -33,7 +34,7 @@ export async function createKronosProject(projectName="", description="", chatbo
   }
 }
 
-export async function uploadPdfToKronosProject(projectID: string, file: File): Promise<string | null> {
+export async function uploadPdfToKronosProject(projectID: string, file: File, token: string): Promise<string | null> {
 
   try{
     const formData = new FormData();
@@ -43,7 +44,8 @@ export async function uploadPdfToKronosProject(projectID: string, file: File): P
     const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/pdf`, {
       method: 'POST',
       headers: {
-        'Authorization': apiKey
+        'Authorization': `Bearer + ${token}`,
+        'x-api-key': apiKey
       },
       body: formData // Add the file
     });
@@ -67,6 +69,7 @@ export async function updatePdfConfig(
     description: string,
     projectID: string,
     settings: SettingsType,
+    token: string
   ): Promise<boolean | null>{
 
     try{
@@ -74,7 +77,8 @@ export async function updatePdfConfig(
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': apiKey
+          'Authorization': `Bearer + ${token}`,
+          'x-api-key': apiKey
         },
         body: JSON.stringify({
           name, 
@@ -96,7 +100,7 @@ export async function updatePdfConfig(
   
   }
 
-  export async function uploadMultiplePdfs(files: FileList, projectID: string): Promise<boolean> {
+  export async function uploadMultiplePdfs(files: FileList, projectID: string, token: string): Promise<boolean> {
     try {
       const fileArray = Array.from(files);
       const MAX_BATCH_SIZE = 200 * 1024 * 1024; // 200MB in bytes
@@ -108,7 +112,7 @@ export async function updatePdfConfig(
         // Check if adding the next file exceeds the batch size limit
         if (currentBatchSize + file.size > MAX_BATCH_SIZE) {
           // Upload the current batch
-          const success = await uploadBatch(currentBatch, projectID);
+          const success = await uploadBatch(currentBatch, projectID, token);
           if (!success) return false; // If upload fails, return false
   
           // Reset for the next batch
@@ -122,7 +126,7 @@ export async function updatePdfConfig(
   
       // Upload any remaining files in the last batch
       if (currentBatch.length > 0) {
-        const success = await uploadBatch(currentBatch, projectID);
+        const success = await uploadBatch(currentBatch, projectID, token);
         if (!success) return false; // If upload fails, return false
       }
   
@@ -133,7 +137,7 @@ export async function updatePdfConfig(
     }
   }
   
-  async function uploadBatch(files: File[], projectID: string): Promise<boolean> {
+  async function uploadBatch(files: File[], projectID: string, token: string): Promise<boolean> {
     try {
       // Create a new FormData object for the current batch
       const formData = new FormData();
@@ -146,8 +150,8 @@ export async function updatePdfConfig(
       const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/file/bulk`, {
         method: 'POST',
         headers: {
-          'Authorization': apiKey,
-          // Do not set Content-Type; let the browser set it automatically
+          'Authorization': `Bearer + ${token}`,
+          'x-api-key': apiKey
         },
         body: formData
       });

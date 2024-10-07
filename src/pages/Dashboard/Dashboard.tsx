@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
   const [customizeStep, setCustomizeStep] = useState<number>(0);
 
   const customizeSectionRef = useRef<HTMLHeadingElement>(null);
-  const { authenticated } = useAuth();
+  const { authenticated, keycloak } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
     setLanguage(attributes.language);
   }, [selectedProjectConfig]);
 
-  const fetchData = async () => {
+  const fetchData = async (token: string | undefined) => {
     setLoading(true);
     await fetchProjectsData((allProjects: fetchProjectsDataReturn | null) => {
       if (!allProjects) {
@@ -80,12 +80,12 @@ const Dashboard: React.FC = () => {
 
       setAnalyticalProjects(allProjects.analytical);
       setProjects(allProjects.project);
-    });
+    }, token);
     setLoading(false);
   };
   // Initial projects fetch
   useEffect(() => {
-    fetchData();
+    fetchData(keycloak.token);
   }, []);
   const scrollIntoEditSection = useCallback(() => {
     const topMargin = 80;
@@ -148,7 +148,8 @@ const Dashboard: React.FC = () => {
       isAnalytical,
       settings,
       selectedDocID,
-      selectedProjectID
+      selectedProjectID,
+      keycloak.token
     );
     if (!result) {
       console.error("Something went wrong while updating project");

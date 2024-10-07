@@ -2,7 +2,7 @@ import { kronosApiUrl as apiUrl, kronosApiKey as apiKey, handleError } from "../
 import { KronosProjectType, kronosKnowledgeBaseType, ProjectType, SettingsType } from "../../utility/types";
 import { formatKronosDate } from "../../utility/Date_Util";
 
-export async function getAllPdfsFromProject(projectId: string): Promise<kronosKnowledgeBaseType[] | null>{
+export async function getAllPdfsFromProject(projectId: string, token: string): Promise<kronosKnowledgeBaseType[] | null>{
 
   try{
     const _url = `${apiUrl}/projects/${projectId}/knowledge_base/`
@@ -11,7 +11,8 @@ export async function getAllPdfsFromProject(projectId: string): Promise<kronosKn
         method: "GET",
         headers: {
           accept: "application/json",
-          Authorization: apiKey,
+          'Authorization': `Bearer + ${token}`,
+          'x-api-key': apiKey
         },
       }
     );
@@ -35,18 +36,18 @@ export async function getAllPdfsFromProject(projectId: string): Promise<kronosKn
   }
   }
 
-  export async function getAllPdfs(): Promise<ProjectType[] | null>{
+  export async function getAllPdfs(token: string): Promise<ProjectType[] | null>{
 
     try{
       let allPdfs:kronosKnowledgeBaseType[] | null = [];
     
       // Get all projects
-      const allProjects:KronosProjectType[] | null = await getAllPdfProjects();
+      const allProjects:KronosProjectType[] | null = await getAllPdfProjects(token);
       if (!allProjects) return null;
     
       // Get all pdf files from all projects
       for (const project of allProjects) {
-        const projectPdfs = await getAllPdfsFromProject(project._id);
+        const projectPdfs = await getAllPdfsFromProject(project._id, token);
     
         if (projectPdfs){
           allPdfs = [...allPdfs, ...projectPdfs];
@@ -73,7 +74,7 @@ export async function getAllPdfsFromProject(projectId: string): Promise<kronosKn
     }
   }
 
-export async function getAllPdfProjects(): Promise<KronosProjectType[] | null> {
+export async function getAllPdfProjects(token: string): Promise<KronosProjectType[] | null> {
 
     const _url = `${apiUrl}/projects/?page_no=1&per_page=100000`; // Big number per page to get all the projects
     try{
@@ -82,7 +83,8 @@ export async function getAllPdfProjects(): Promise<KronosProjectType[] | null> {
             method: "GET",
             headers: {
               accept: "application/json",
-              Authorization: apiKey,
+              'Authorization': `Bearer + ${token}`,
+              'x-api-key': apiKey
             },
           }
         );
@@ -95,13 +97,14 @@ export async function getAllPdfProjects(): Promise<KronosProjectType[] | null> {
     }
   }
 
-export async function getKronosProject(projectId: string): Promise<KronosProjectType | null>{
+export async function getKronosProject(projectId: string, token: string): Promise<KronosProjectType | null>{
   try{
     const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': apiKey
+        'Authorization': `Bearer + ${token}`,
+        'x-api-key': apiKey
       }
     });
   
@@ -125,7 +128,7 @@ export async function getKronosProject(projectId: string): Promise<KronosProject
   
   }
 
-  export async function getSinglPdfConfig(projectId: string, docId: string): Promise<SettingsType | null>{
+  export async function getSinglPdfConfig(projectId: string, docId: string, token: string): Promise<SettingsType | null>{
     try{
       const _url = `${apiUrl}/projects/${projectId}/knowledge_base/${docId}/`
       const response: Response = await fetch(_url,
@@ -133,7 +136,8 @@ export async function getKronosProject(projectId: string): Promise<KronosProject
           method: "GET",
           headers: {
             accept: "application/json",
-            Authorization: apiKey,
+            'Authorization': `Bearer + ${token}`,
+            'x-api-key': apiKey
           },
         }
       );
@@ -169,13 +173,14 @@ export async function getKronosProject(projectId: string): Promise<KronosProject
     }
   }
 
-  export async function getKronosConfig(projectId: string, docId: string): Promise<kronosKnowledgeBaseType | null>{
+  export async function getKronosConfig(projectId: string, docId: string, token: string): Promise<kronosKnowledgeBaseType | null>{
     try{
       const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectId}/knowledge_base/${docId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': apiKey
+          'Authorization': `Bearer + ${token}`,
+          'x-api-key': apiKey
         }
       });
     

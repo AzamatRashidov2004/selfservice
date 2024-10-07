@@ -1,11 +1,12 @@
 import { kronosApiUrl as apiUrl, kronosApiKey as apiKey, handleError } from "../apiEnv";
 
-export async function deletePdfProject(projectID: string): Promise<boolean | null>{
+export async function deletePdfProject(projectID: string, token: string): Promise<boolean | null>{
   try{
     const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/`, {
       method: 'DELETE',
       headers: {
-        'Authorization': apiKey
+        'Authorization': `Bearer + ${token}`,
+        'x-api-key': apiKey
       }
     });
   
@@ -21,12 +22,13 @@ export async function deletePdfProject(projectID: string): Promise<boolean | nul
   }
 }
 
-export async function deletePdf(projectID: string, docID: string): Promise<boolean>{
+export async function deletePdf(projectID: string, docID: string, token: string): Promise<boolean>{
   try{
     const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/${docID}/`, {
       method: 'DELETE',
       headers: {
-        'Authorization': apiKey
+        'Authorization': `Bearer + ${token}`,
+        'x-api-key': apiKey
       }
     });
   
