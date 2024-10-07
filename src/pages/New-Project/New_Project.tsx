@@ -53,10 +53,6 @@ const New_Project: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    console.log("FILES; ", files);
-  }, [files]);
-
   const saveSettings = async (settings: SettingsType) => {
     settings.attributes = {
       description,
