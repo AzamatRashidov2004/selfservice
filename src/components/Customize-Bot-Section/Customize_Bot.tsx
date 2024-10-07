@@ -1,6 +1,6 @@
 import "../../assets/bot/453.88f55f10.chunk.js";
-import "../../assets/bot/main.3beca214.css";
-import "../../assets/bot/main.6fd757ab.js";
+import "../../assets/bot/main.9fd2091d.css";
+import "../../assets/bot/main.daa918cd.js";
 import {
   botStaticDisplayConfig,
   defaultSettings,
@@ -28,8 +28,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
         settings,
       },
     });
-  
-    // Function to create a delay
+
     function sleep(ms: number): Promise<void> {
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -37,29 +36,28 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
         }, ms);
       });
     }
-  
+
     const time = 500; // Delay time in milliseconds
     const maxAttempts = 5; // Maximum number of attempts
-  
-    // Function to keep dispatching event until bot is mounted or max attempts reached
+
     async function dispatchUntilMounted() {
       let attempts = 0;
-      
+      console.log(id, settings);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       while (!(window as any).isBotMounted && attempts < maxAttempts) {
         attempts++;
         console.log(`Attempt ${attempts}: Bot is not mounted, dispatching initFsBot event...`);
         document.dispatchEvent(initFsBotEvent);
         await sleep(time); // Wait for 500ms before the next check
       }
-      console.log("is bot mounted", (window as any).isBotMounted)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((window as any).isBotMounted) {
         console.log("Bot is successfully mounted!");
       } else {
         console.log(`Bot failed to mount after ${maxAttempts} attempts.`);
       }
     }
-  
-    // Start the process
+
     sleep(time).then(() => {
       console.log(`Initialized bot after ${time} ms!`);
       dispatchUntilMounted(); // Start dispatching events until bot is mounted or max attempts are reached
@@ -67,13 +65,13 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   }
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).isBotMounted = false;
-  }, [])
+  }, []);
 
   useEffect(() => {
     let botSettings: SettingsType = defaultSettings;
 
-    // On dashboard page, if a project is selected this config is passed down
     if (selectedProjectConfig) {
       botSettings = { ...botSettings, ...selectedProjectConfig };
     }
@@ -82,6 +80,12 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     botSettings.save_callback = saveSettings;
 
     initBot("bot-container", botSettings);
+
+    // Cleanup function to remove the listener if needed
+    return () => {
+      // Optionally, you could remove the listener here if you add one in this component
+      // document.removeEventListener("initFsBot", yourEventListener);
+    };
   }, [saveSettings, selectedProjectConfig]);
 
   return (
