@@ -61,6 +61,20 @@ export interface ProjectType {
     Bot?: string;
   };
   
+  export interface TreeNode {
+    id: string;
+    parent: string;
+    droppable?: boolean;
+    text: string;
+    data: {
+      fileType: string;
+      title?: string;
+      fileSize?: string
+    };
+    depth?: number;
+    hasChild?: boolean;
+}
+
   // Define Settings interface
   export type SettingsType = {
     title: string; // Title of the bot
