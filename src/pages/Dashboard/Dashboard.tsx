@@ -19,6 +19,7 @@ import Project from "../../components/Projects/Projects.tsx";
 import Loader from "../../components/Loader/Loader.tsx";
 import { useAuth } from "../../context/authContext.tsx";
 import { useNavigate } from "react-router-dom";
+import FileTree from "../../components/File-Tree/FileTree.jsx"
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -235,6 +236,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <main className="container-fluid main-container">
+      <FileTree />
       <div className="bg-primary p-4 rounded mb-4 text-center">
         <h1 className="text-light">Available Projects</h1>
         <p className="text-light">Choose a project to edit or delete</p>

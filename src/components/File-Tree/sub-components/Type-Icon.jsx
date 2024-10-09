@@ -4,17 +4,12 @@ import ImageIcon from "@mui/icons-material/Image";
 import ListAltIcon from "@mui/icons-material/ListAlt";
 import DescriptionIcon from "@mui/icons-material/Description";
 
-interface TypeIconProps {
-    type?: string;
-    droppable: boolean
-  }
-
-export const TypeIcon: React.FC<TypeIconProps> = ({type, droppable}) => {
-  if (droppable) {
+export const TypeIcon = (props) => {
+  if (props.droppable) {
     return <FolderIcon />;
   }
 
-  switch (type) {
+  switch (props.fileType) {
     case "image":
       return <ImageIcon />;
     case "csv":

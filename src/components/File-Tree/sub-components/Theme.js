@@ -6,20 +6,20 @@ export const theme = createTheme({
       styleOverrides: {
         "*": {
           margin: 0,
-          padding: 0
+          padding: 0,
         },
         "html, body, #root": {
-          height: "100%"
+          height: "100%",
         },
         ul: {
-          listStyle: "none"
-        }
-      }
+          listStyle: "none",
+        },
+      },
     },
     MuiSvgIcon: {
       styleOverrides: {
-        root: { verticalAlign: "middle" }
-      }
-    }
-  }
+        root: { verticalAlign: "middle" },
+      },
+    },
+  },
 });
