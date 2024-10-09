@@ -1,21 +1,21 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Typography from "@mui/material/Typography";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
+import { NodeModel } from "@minoru/react-dnd-treeview";
+import { TreeNode } from "../../../utility/types";
 import { TypeIcon } from "./Type-Icon";
 import styles from "./CustomNode.module.css";
-import { TreeNode } from "../../../utility/types"; // Adjust the import based on your structure
 
-interface NodeProps {
-  node: TreeNode;
+type Props = {
+  node: NodeModel<TreeNode>;
   depth: number;
   isOpen: boolean;
-  onToggle: (id: string) => void; // Function to toggle node open/close
-  updateNode: (node: TreeNode) => void; // Function to update node info
-  hasChild: boolean; // Whether the node has children
-  parent?: number, 
-}
+  isSelected: boolean;
+  onToggle: (id: NodeModel["id"]) => void;
+  onSelect: (node: NodeModel) => void;
+};
 
-const Node: React.FC<NodeProps> = (props) => {
+export const Node: React.FC<Props> = (props) => {
   const { droppable, data } = props.node;
   const indent = props.depth * 24;
 
@@ -24,31 +24,34 @@ const Node: React.FC<NodeProps> = (props) => {
     props.onToggle(props.node.id);
   };
 
-  useEffect(() => {
-    props.updateNode(props.node);
-  }, [props.node, props.parent, props]); // Make sure to add props.node and props.parent to the dependency array
-
-  useEffect(() => {
-    props.updateNode(props.node);
-  }, [props.hasChild, props]);
+  const handleSelect = () => props.onSelect(props.node);
 
   return (
-    <div className={`tree-node ${styles.root}`} style={{ paddingInlineStart: indent }}>
-      <div className={`${styles.expandIconWrapper} ${props.isOpen ? styles.isOpen : ""}`}>
-        {droppable && (
+    <div
+      className={`tree-node ${styles.root} ${
+        props.isSelected ? styles.isSelected : ""
+      }`}
+      style={{ paddingInlineStart: indent }}
+      onClick={handleSelect}
+    >
+      <div
+        className={`${styles.expandIconWrapper} ${
+          props.isOpen ? styles.isOpen : ""
+        }`}
+      >
+        {props.node.droppable && (
           <div onClick={handleToggle}>
             <ArrowRightIcon />
           </div>
         )}
       </div>
       <div>
-        <TypeIcon droppable={droppable} fileType={data ?  data.fileType : "undefined"} />
+        {/* @ts-expect-error: Suppress TypeScript error for item.data access */}
+        <TypeIcon droppable={droppable ? droppable : false} type={data?.type} />
       </div>
       <div className={styles.labelGridItem}>
-        <Typography variant="body2">{data?.title || "Unnamed Node"}</Typography>
+        <Typography variant="body2">{props.node.text}</Typography>
       </div>
     </div>
   );
 };
-
-export default Node

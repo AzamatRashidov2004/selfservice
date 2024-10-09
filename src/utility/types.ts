@@ -61,18 +61,23 @@ export interface ProjectType {
     Bot?: string;
   };
   
-  export interface TreeNode {
-    id: string;
-    parent: string;
-    droppable?: boolean;
-    text: string;
-    data: {
-      fileType: string;
-      title?: string;
-      fileSize?: string
-    };
-    depth?: number;
-    hasChild?: boolean;
+
+// Define the shape of the data
+interface DragItemData {
+  type: string;
+  title?: string;
+  fileSize?: string;
+}
+
+// Define the TreeNode type
+export interface TreeNode {
+  id: string;
+  parent: string;
+  droppable: boolean;
+  text: string;
+  data: DragItemData; // Ensure the data property aligns with DragItemData
+  depth?: number;
+  hasChild?: boolean;
 }
 
   // Define Settings interface

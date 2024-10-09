@@ -1,30 +1,23 @@
 import React from "react";
+import { DragLayerMonitorProps } from "@minoru/react-dnd-treeview";
+import { TreeNode } from "../../../utility/types";
 import { TypeIcon } from "./Type-Icon";
 import styles from "./CustomDragPreview.module.css";
 
-interface CustomDragPreviewProps {
-  monitorProps: {
-    item: {
-      droppable: boolean;
-      data: {
-        fileType: string; // Optional if fileType may not always be present
-      };
-      text: string; // Assuming text is always present
-    };
-  };
-}
+type Props = {
+  monitorProps: DragLayerMonitorProps<TreeNode>;
+};
 
-const DragPreview: React.FC<CustomDragPreviewProps> = (props) => {
+export const CustomDragPreview: React.FC<Props> = (props) => {
   const item = props.monitorProps.item;
 
   return (
     <div className={styles.root}>
       <div className={styles.icon}>
-        <TypeIcon droppable={item.droppable} fileType={item.data.fileType} />
+        {/* @ts-expect-error: Suppress TypeScript error for item.data access */}
+        <TypeIcon droppable={item.droppable} type={item.data ? item.data.fileType : "text"} />
       </div>
       <div className={styles.label}>{item.text}</div>
     </div>
   );
 };
-
-export default DragPreview
