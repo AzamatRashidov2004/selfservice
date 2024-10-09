@@ -13,6 +13,7 @@ import SampleData from "./sub-components/sampleData.json";
 import "./FileTree.css"
 
 function FileTree() {
+  const MAX_DEPTH = 3;
   const [treeData, setTreeData] = useState(SampleData);
   const handleDrop = (newTree) => setTreeData(newTree);
   const [draggingNode, setDraggingNode] = useState();
@@ -112,13 +113,12 @@ function FileTree() {
 
                 if (dropT != null) {
                   if (dropT.data.fileType != "text") {
-                    if (dropT.depth >= 2) {
+                    if (dropT.depth >= MAX_DEPTH - 1) {
                       if (dragSource.data.fileType == "text") {
                         return true;
                       } else {
                         return false;
                       }
-                      //return false;
                     } else {
                       if (dragT.hasChild) {
                         if (checkChildIsFolder(dragSourceId)) {
