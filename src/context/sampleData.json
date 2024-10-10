@@ -12,7 +12,7 @@
     "id": 11,
     "parent": 0,
     "droppable": true,
-    "text": "Folder 1",
+    "text": "Folder 123",
     "data": {
       "fileType": "qweqwe"
     }
@@ -21,7 +21,7 @@
     "id": 12,
     "parent": 0,
     "droppable": true,
-    "text": "Folder 1",
+    "text": "Folder 455",
     "data": {
       "fileType": "qweqwe"
     }

@@ -14,13 +14,12 @@ import "./FileTree.css";
 
 function FileTree() {
   const MAX_DEPTH = 3;
-  const { getFileStructure } = useFiles(); // Access the context
+  const { getFileStructure, dragAndDropFile } = useFiles(); // Access the context
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
 
-  const handleDrop = (newTree) => {
-    // Update node list and reflect the changes in the context
-    setNodeList(newTree);
+  const handleDrop = (newTree, { dragSourceId, dropTargetId }) => {
+    dragAndDropFile(dragSourceId, dropTargetId); // Update context
   };
 
   function updateNode(node, depth, hasChild) {
@@ -93,18 +92,15 @@ function FileTree() {
               if (dragSource !== dropTarget) {
                 let dropT = getDropTarget(dropTargetId);
                 let dragT = getDragTarget(dragSourceId);
-
+            
                 if (dropT) {
-                  if (dropT.data.fileType !== "text") {
-                    if (dropT.depth >= MAX_DEPTH - 1) {
-                      return dragSource.data.fileType === "text";
-                    } else if (dragT && dragT.hasChild){
-                      return dragT.hasChild ? !checkChildIsFolder(dragSourceId) : true;
-                    }
+                  // Only allow dropping into folders with fileType "qweqwe"
+                  if (dropT.data.fileType === "qweqwe" && dropT.depth + dragT.depth < 3) {
+                    return true; // Allow drop only inside folders and with depth less than 3
                   }
                 }
               }
-              return false; // Default to not allowing drop
+              return false; // Disallow drop if it exceeds depth 3 or isn't a folder
             }}
             classes={{
               root: "treeRoot",

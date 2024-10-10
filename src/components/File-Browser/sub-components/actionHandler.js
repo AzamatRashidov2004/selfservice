@@ -13,7 +13,7 @@ const handleAction = (data, setCurrentFolder, fileContext) => {
 
   if (data.id === ChonkyActions.EndDragNDrop.id) {
     const { destination, draggedFile } = data.payload;
-    fileContext.dragFromFileBrowser(draggedFile.id, destination.id);
+    fileContext.dragAndDropFile(draggedFile.id, destination.id);
   }
 };
 
