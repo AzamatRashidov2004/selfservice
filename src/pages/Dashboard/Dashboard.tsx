@@ -20,7 +20,7 @@ import Loader from "../../components/Loader/Loader.tsx";
 import { useAuth } from "../../context/authContext.tsx";
 import { useNavigate } from "react-router-dom";
 import FileTree from "../../components/File-Tree/FileTree.jsx"
-import FileBrowser from "../../components/File-Browser/FileBrowser.tsx";
+import FileBrowser from "../../components/File-Browser/FileBrowser.jsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
