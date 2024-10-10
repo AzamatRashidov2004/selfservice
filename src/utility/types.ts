@@ -47,7 +47,7 @@ export interface ProjectType {
   type positions = "absolute" | "static";
   
   // Define CustomComponents type
-  type CustomComponents = {
+export type CustomComponents = {
     // Custom components for the bot
     Bubble?: string;
     Messages?: string;
@@ -60,6 +60,25 @@ export interface ProjectType {
     Icon?: string;
     Bot?: string;
   };
+
+export type FileItem = {
+    id: string;
+    name: string;
+    isDir?: boolean;
+    modDate?: string;
+    childrenIds?: string[];
+    childrenCount?: number;
+    parentId?: string;
+    size?: number;
+    thumbnailUrl?: string;
+};
+
+type FileMap = Record<string, FileItem>;
+
+export type FilesData = {
+    rootFolderId: string;
+    fileMap: FileMap;
+};
 
   // Define Settings interface
   export type SettingsType = {

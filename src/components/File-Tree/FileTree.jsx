@@ -135,9 +135,9 @@ function FileTree() {
               }
             }}
             classes={{
-              root: "treeRoot",              // Now referencing normal CSS class
-              draggingSource: "draggingSource", // Now referencing normal CSS class
-              dropTarget: "dropTarget"         // Now referencing normal CSS class
+              root: "treeRoot",
+              draggingSource: "draggingSource",
+              dropTarget: "dropTarget"
             }}
           />
         </div>
