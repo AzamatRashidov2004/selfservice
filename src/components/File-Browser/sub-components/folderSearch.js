@@ -1,6 +1,4 @@
 const folderSearch = (data1, folderChainTemp, currentFolder) => {
-  console.log("search", data1, folderChainTemp, currentFolder);
-
   let filesTemp = [];
   for (let i = 0; i < data1.length; i++) {
     const folder = data1[i];
@@ -8,9 +6,7 @@ const folderSearch = (data1, folderChainTemp, currentFolder) => {
       ...folderChainTemp,
       { id: folder.id, name: folder.name },
     ];
-    console.log("id", folder.id, currentFolder);
     if (folder.id === currentFolder) {
-      console.log("inside");
       if (folder?.files) {
         folder.files.forEach((file) => {
           filesTemp = [
@@ -19,7 +15,6 @@ const folderSearch = (data1, folderChainTemp, currentFolder) => {
           ];
         });
       }
-      console.log([true, filesTemp, folderChainTemp]);
       return [true, filesTemp, folderChainTemp];
     } else if (folder?.files) {
       let returnValues = folderSearch(
@@ -27,7 +22,6 @@ const folderSearch = (data1, folderChainTemp, currentFolder) => {
         folderChainTemp,
         currentFolder
       );
-      console.log("found", returnValues);
       if (returnValues[0]) {
         return returnValues;
       }
@@ -38,7 +32,6 @@ const folderSearch = (data1, folderChainTemp, currentFolder) => {
 };
 
 export const findFile = (data, fileId) => {
-  console.log("filesearch", data);
   for (let i = 0; i < data.length; i++) {
     const folder = data[i];
     if (folder.id === fileId) {

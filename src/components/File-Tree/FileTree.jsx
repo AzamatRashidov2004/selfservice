@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { DndProvider } from "react-dnd";
 import {
@@ -9,20 +9,24 @@ import {
 import { CustomNode } from "./sub-components/Node";
 import { CustomDragPreview } from "./sub-components/DragPreview";
 import { theme } from "./sub-components/Theme";
-import SampleData from "./sub-components/sampleData.json";
-import "./FileTree.css"
+import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
+import "./FileTree.css";
 
 function FileTree() {
   const MAX_DEPTH = 3;
-  const [treeData, setTreeData] = useState(SampleData);
-  const handleDrop = (newTree) => setTreeData(newTree);
+  const { getFileStructure } = useFiles(); // Access the context
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
+
+  const handleDrop = (newTree) => {
+    // Update node list and reflect the changes in the context
+    setNodeList(newTree);
+  };
 
   function updateNode(node, depth, hasChild) {
     let checkExist = false;
     nodeList.map((value) => {
-      if (value.id == node.id) {
+      if (value.id === node.id) {
         value.depth = depth;
         value.hasChild = hasChild;
         value.parent = node.parent;
@@ -40,45 +44,24 @@ function FileTree() {
   }
 
   function checkChildIsFolder(parentID) {
-    let fileExist = false;
-
-    nodeList.map((value) => {
-      if (value.parent == parentID) {
-        if (value.data.fileType != "text") {
-          fileExist = true;
-        }
-      }
-    });
-    return fileExist;
+    return nodeList.some((value) => value.parent === parentID && value.data.fileType !== "text");
   }
-  function getDropTarget(dropTargetId) {
-    let dropTarget;
 
-    nodeList.map((value) => {
-      if (value.id == dropTargetId) {
-        dropTarget = value;
-      }
-    });
-    return dropTarget;
+  function getDropTarget(dropTargetId) {
+    return nodeList.find((value) => value.id === dropTargetId);
   }
 
   function getDragTarget(dragTargetId) {
-    let dragTarget;
-
-    nodeList.map((value) => {
-      if (value.id == dragTargetId) {
-        dragTarget = value;
-      }
-    });
-    return dragTarget;
+    return nodeList.find((value) => value.id === dragTargetId);
   }
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <DndProvider backend={MultiBackend} options={getBackendOptions()}>
         <div className="FileTree-Container">
           <Tree
-            tree={treeData}
+            tree={getFileStructure(false)} // Call with true to transform the data each render
             rootId={0}
             initialOpen={true}
             render={(
@@ -107,32 +90,21 @@ function FileTree() {
               treeData,
               { dragSource, dropTarget, dropTargetId, dragSourceId }
             ) => {
-              if (dragSource != dropTarget) {
+              if (dragSource !== dropTarget) {
                 let dropT = getDropTarget(dropTargetId);
                 let dragT = getDragTarget(dragSourceId);
 
-                if (dropT != null) {
-                  if (dropT.data.fileType != "text") {
+                if (dropT) {
+                  if (dropT.data.fileType !== "text") {
                     if (dropT.depth >= MAX_DEPTH - 1) {
-                      if (dragSource.data.fileType == "text") {
-                        return true;
-                      } else {
-                        return false;
-                      }
-                    } else {
-                      if (dragT.hasChild) {
-                        if (checkChildIsFolder(dragSourceId)) {
-                          return false;
-                        } else {
-                          return true;
-                        }
-                      } else {
-                        return true;
-                      }
+                      return dragSource.data.fileType === "text";
+                    } else if (dragT && dragT.hasChild){
+                      return dragT.hasChild ? !checkChildIsFolder(dragSourceId) : true;
                     }
                   }
                 }
               }
+              return false; // Default to not allowing drop
             }}
             classes={{
               root: "treeRoot",

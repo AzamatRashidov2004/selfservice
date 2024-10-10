@@ -34,8 +34,4 @@ const viewFileAction = defineFileAction({
   },
 });
 
-export const customActions = [
-  viewFileAction,
-  delegateFileAction,
-  uploadFileAction,
-];
+export const customActions = [];
