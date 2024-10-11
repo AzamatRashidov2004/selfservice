@@ -26,6 +26,8 @@ interface FilesContextType {
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
   dragAndDropFile: (draggedFileId: string, destinationFolderId: string) => void;
+  droppableTypes: string[]
+  draggableTypes: string[]
 }
 
 // Create the context with the initial value
@@ -79,7 +81,6 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   // Function to handle drag-and-drop changes
   const dragAndDropFile = (draggedFileId: string, destinationFolderId: string) => {
-    console.log("here")
     // Convert IDs to numbers as the filesData uses numeric IDs
     const draggedId = parseInt(draggedFileId);
     const destinationId = parseInt(destinationFolderId);
@@ -95,10 +96,15 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     });
   };
 
+  const droppableTypes = ["folder", "project", "program"];
+  const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"]
+
   const contextValue: FilesContextType = {
     getFileStructure,
     setFileStructure,
     dragAndDropFile,
+    droppableTypes,
+    draggableTypes
   };
 
   return (

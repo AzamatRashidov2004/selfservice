@@ -14,11 +14,12 @@ import "./FileTree.css";
 
 function FileTree() {
   const MAX_DEPTH = 3;
-  const { getFileStructure, dragAndDropFile } = useFiles(); // Access the context
+  const { getFileStructure, dragAndDropFile, draggableTypes, droppableTypes } = useFiles(); // Access the context
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
 
   const handleDrop = (newTree, { dragSourceId, dropTargetId }) => {
+    if (dragSourceId === dropTargetId) return;
     dragAndDropFile(dragSourceId, dropTargetId); // Update context
   };
 
@@ -95,7 +96,7 @@ function FileTree() {
             
                 if (dropT) {
                   // Only allow dropping into folders with fileType "qweqwe"
-                  if (dropT.data.fileType === "qweqwe") {
+                  if (droppableTypes.includes(dropT.data.fileType) && draggableTypes.includes(dragT.data.fileType)) {
                     return true; // Allow drop only inside folders and with depth less than 3
                   }
                 }
