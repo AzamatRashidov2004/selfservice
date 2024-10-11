@@ -237,119 +237,127 @@ const Dashboard: React.FC = () => {
   });
 
   return (
-    <main className="container-fluid main-container">
-      <FilesProvider>
-        <FileTree />
-        <FileBrowser />
-      </FilesProvider>
-      <div className="bg-primary p-4 rounded mb-4 text-center">
-        <h1 className="text-light">Available Projects</h1>
-        <p className="text-light">Choose a project to edit or delete</p>
-      </div>
-      <br />
-      <div className="loader-container">
-        <Loader />
-      </div>
-      <table className="table main-table w-100">
-        <thead>
-          <tr>
-            <th className="project-name text-start">Project Name</th>
-            <th className="project-last-update text-start">Last Update</th>
-            <th className="project-id text-start">Project ID</th>
-            <th className="project-actions text-start">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            ref={kronosProjectsWrapperRef}
-            className="kronos-projects-wrapper"
-          >
-            <div
-              ref={accordionRef}
-              className="accordion"
-              id="projectsAccordion"
-            >
-              {projects.map((project, index) => {
-                if (
-                  !project.project ||
-                  !project.project.name ||
-                  !project.projectData
-                )
-                  return null;
-                return (
-                  <Project
-                    key={project.project._id} // Assuming _id is unique
-                    projectData={project.projectData}
-                    project={project.project}
-                    index={index}
-                    setProjects={setProjects}
-                    openProjectIndex={openProjectIndex}
-                    setOpenProjectIndex={setOpenProjectIndex}
-                    setSelectedDocID={setSelectedDocID}
-                    setSelectedProjectConfig={setSelectedProjectConfig}
-                    setIsAnalytical={setIsAnalytical}
-                    setSelectedIndex={setSelectedIndex}
-                  />
-                );
-              })}
+    <section className="dashboard-section">
+        <FilesProvider>
+          <div className="file-browser-wrapper">
+            <div className="file-tree-container">
+              <FileTree />
             </div>
-          </tr>
-          {analyticalProjects &&
-            analyticalProjects.map((project: ProjectType, index: number) => (
-              <ProjectRow
-                key={index}
-                project={project}
-                index={index}
-                setSelectedIndex={setSelectedIndex}
-                setSelectedProjectID={setSelectedProjectID}
-                setSelectedProject={setSelectedDocID}
-                setSelectedProjectConfig={setSelectedProjectConfig}
-                setCustomizeStep={setCustomizeStep}
-                scrollIntoEditSection={scrollIntoEditSection}
-                setIsAnalytical={setIsAnalytical}
-                setProjects={setAnalyticalProjects}
-              />
-            ))}
-        </tbody>
-      </table>
-      {selectedDocID && selectedProjectConfig ? (
-        <>
-          <div
-            ref={customizeSectionRef}
-            className="bg-primary p-4 rounded mb-4 text-center"
-          >
-            <h1 className="text-light">Customize Project</h1>
-            <p className="text-light">
-              Customize the project with the following id:{" "}
-              <em>{selectedDocID}</em>
-            </p>
+            <div className="file-browser-container">
+              <FileBrowser />
+            </div>
           </div>
+        </FilesProvider>
+        <main className="container-fluid main-container">
+          <div className="bg-primary p-4 rounded mb-4 text-center">
+            <h1 className="text-light">Available Projects</h1>
+            <p className="text-light">Choose a project to edit or delete</p>
+          </div>
+          <br />
+          <div className="loader-container">
+            <Loader />
+          </div>
+          <table className="table main-table w-100">
+            <thead>
+              <tr>
+                <th className="project-name text-start">Project Name</th>
+                <th className="project-last-update text-start">Last Update</th>
+                <th className="project-id text-start">Project ID</th>
+                <th className="project-actions text-start">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                ref={kronosProjectsWrapperRef}
+                className="kronos-projects-wrapper"
+              >
+                <div
+                  ref={accordionRef}
+                  className="accordion"
+                  id="projectsAccordion"
+                >
+                  {projects.map((project, index) => {
+                    if (
+                      !project.project ||
+                      !project.project.name ||
+                      !project.projectData
+                    )
+                      return null;
+                    return (
+                      <Project
+                        key={project.project._id} // Assuming _id is unique
+                        projectData={project.projectData}
+                        project={project.project}
+                        index={index}
+                        setProjects={setProjects}
+                        openProjectIndex={openProjectIndex}
+                        setOpenProjectIndex={setOpenProjectIndex}
+                        setSelectedDocID={setSelectedDocID}
+                        setSelectedProjectConfig={setSelectedProjectConfig}
+                        setIsAnalytical={setIsAnalytical}
+                        setSelectedIndex={setSelectedIndex}
+                      />
+                    );
+                  })}
+                </div>
+              </tr>
+              {analyticalProjects &&
+                analyticalProjects.map((project: ProjectType, index: number) => (
+                  <ProjectRow
+                    key={index}
+                    project={project}
+                    index={index}
+                    setSelectedIndex={setSelectedIndex}
+                    setSelectedProjectID={setSelectedProjectID}
+                    setSelectedProject={setSelectedDocID}
+                    setSelectedProjectConfig={setSelectedProjectConfig}
+                    setCustomizeStep={setCustomizeStep}
+                    scrollIntoEditSection={scrollIntoEditSection}
+                    setIsAnalytical={setIsAnalytical}
+                    setProjects={setAnalyticalProjects}
+                  />
+                ))}
+            </tbody>
+          </table>
+          {selectedDocID && selectedProjectConfig ? (
+            <>
+              <div
+                ref={customizeSectionRef}
+                className="bg-primary p-4 rounded mb-4 text-center"
+              >
+                <h1 className="text-light">Customize Project</h1>
+                <p className="text-light">
+                  Customize the project with the following id:{" "}
+                  <em>{selectedDocID}</em>
+                </p>
+              </div>
 
-          {customizeStep === 0 ? (
-            <ProjectDetails
-              projectName={projectName}
-              setProjectName={setProjectName}
-              description={description}
-              setDescription={setDescription}
-              language={language}
-              setLanguage={setLanguage}
-              introMessage={introMessage}
-              setIntroMessage={setIntroMessage}
-              introImage={introImage}
-              setIntroImage={setIntroImage}
-              handleNextButtonClick={handleProjectDetailsNext}
-            />
-          ) : null}
+              {customizeStep === 0 ? (
+                <ProjectDetails
+                  projectName={projectName}
+                  setProjectName={setProjectName}
+                  description={description}
+                  setDescription={setDescription}
+                  language={language}
+                  setLanguage={setLanguage}
+                  introMessage={introMessage}
+                  setIntroMessage={setIntroMessage}
+                  introImage={introImage}
+                  setIntroImage={setIntroImage}
+                  handleNextButtonClick={handleProjectDetailsNext}
+                />
+              ) : null}
 
-          {customizeStep === 1 ? (
-            <CustomizeBot
-              saveSettings={updateSettings}
-              selectedProjectConfig={selectedProjectConfig}
-            />
+              {customizeStep === 1 ? (
+                <CustomizeBot
+                  saveSettings={updateSettings}
+                  selectedProjectConfig={selectedProjectConfig}
+                />
+              ) : null}
+            </>
           ) : null}
-        </>
-      ) : null}
-    </main>
+        </main>
+    </section>
   );
 };
 

@@ -9,6 +9,32 @@
   cursor: pointer;
 }
 
+.dashboard-section{
+  width: 100vw;
+  padding: 0 !important;
+  margin-top: 90px;
+}
+
+
+body{
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.file-browser-wrapper{
+  display: flex;
+  justify-content: space-between;
+  width: 100vw;
+}
+
+.file-tree-container{
+  width: 20%;
+}
+
+.file-browser-container{
+  width: 80%;
+}
+
 .gray-bg {
   background-color: #f2f2f2 !important;
 }

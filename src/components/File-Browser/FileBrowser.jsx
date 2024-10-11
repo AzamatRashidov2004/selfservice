@@ -8,7 +8,7 @@ import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 
 export default function FileBrowser() {
-  const { getFileStructure, dragAndDropFile } = useFiles(); // Get the context function
+  const { getFileStructure, dragAndDropFile, currentFolder, setCurrentFolder } = useFiles(); // Get the context function
 
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
@@ -20,17 +20,8 @@ export default function FileBrowser() {
 
   // Set the Chonky icon set
   setChonkyDefaults({ iconComponent: ChonkyIconFA });
-
-  const [currentFolder, setCurrentFolder] = useState("0");
   const [files, setFiles] = useState(null);
   const [folderChain, setFolderChain] = useState(null);
-  
-  // Setup ref for folder ID
-  const currentFolderIdRef = useRef(currentFolder);
-
-  const resetFileMap = useCallback(() => {
-    setCurrentFolder("0"); // Reset to the root folder (or any default value)
-  }, []);
 
   const fileActions = useMemo(() => [
     ChonkyActions.EnableListView,
@@ -63,7 +54,7 @@ export default function FileBrowser() {
 
   return (
     <>
-      <div style={{ width: "1300px", height: "400px" }}>
+      <div style={{ height: "400px" }}>
         <FullFileBrowser
           files={files}
           folderChain={folderChain}

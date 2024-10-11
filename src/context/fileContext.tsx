@@ -26,8 +26,10 @@ interface FilesContextType {
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
   dragAndDropFile: (draggedFileId: string, destinationFolderId: string) => void;
-  droppableTypes: string[]
-  draggableTypes: string[]
+  droppableTypes: string[];
+  draggableTypes: string[];
+  currentFolder: string;
+  setCurrentFolder: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Create the context with the initial value
@@ -61,6 +63,7 @@ const transformData = (inputData: FileData[]): TreeNode[] => {
 // Create a provider component
 export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [filesData, setFilesData] = useState<FileData[]>([]);
+  const [currentFolder, setCurrentFolder] = useState("0");
 
   useEffect(() => {
     setFileStructure(sampleData); // Transform and set the initial state
@@ -104,7 +107,9 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setFileStructure,
     dragAndDropFile,
     droppableTypes,
-    draggableTypes
+    draggableTypes,
+    currentFolder,
+    setCurrentFolder
   };
 
   return (
