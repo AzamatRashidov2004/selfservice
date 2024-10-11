@@ -19,9 +19,11 @@ import Project from "../../components/Projects/Projects.tsx";
 import Loader from "../../components/Loader/Loader.tsx";
 import { useAuth } from "../../context/authContext.tsx";
 import { useNavigate } from "react-router-dom";
-import FileTree from "../../components/File-Tree/FileTree.jsx"
+import FileTree from "../../components/File-Tree/FileTree.jsx";
 import FileBrowser from "../../components/File-Browser/FileBrowser.jsx";
 import { FilesProvider } from "../../context/fileContext.tsx";
+import { ResizableBox } from "react-resizable";
+import "react-resizable/css/styles.css";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -236,127 +238,152 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  const [width, setWidth] = useState(window.innerWidth * 0.8);
+  const [position, setPosition] = useState(0);
+
+  const handleResize = (
+    event: React.SyntheticEvent,
+    data: ResizeCallbackData
+  ) => {
+    const deltaWidth = width - data.size.width;
+    setWidth(data.size.width);
+    setPosition(position + deltaWidth);
+  };
+
   return (
     <section className="dashboard-section">
-        <FilesProvider>
-          <div className="file-browser-wrapper">
-            <div className="file-tree-container">
-              <FileTree />
-            </div>
-            <div className="file-browser-container">
-              <FileBrowser />
-            </div>
+      <FilesProvider>
+        <div className="file-browser-wrapper">
+          <div className="file-tree-container">
+            <FileTree />
           </div>
-        </FilesProvider>
-        <main className="container-fluid main-container">
-          <div className="bg-primary p-4 rounded mb-4 text-center">
-            <h1 className="text-light">Available Projects</h1>
-            <p className="text-light">Choose a project to edit or delete</p>
-          </div>
-          <br />
-          <div className="loader-container">
-            <Loader />
-          </div>
-          <table className="table main-table w-100">
-            <thead>
-              <tr>
-                <th className="project-name text-start">Project Name</th>
-                <th className="project-last-update text-start">Last Update</th>
-                <th className="project-id text-start">Project ID</th>
-                <th className="project-actions text-start">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                ref={kronosProjectsWrapperRef}
-                className="kronos-projects-wrapper"
-              >
-                <div
-                  ref={accordionRef}
-                  className="accordion"
-                  id="projectsAccordion"
-                >
-                  {projects.map((project, index) => {
-                    if (
-                      !project.project ||
-                      !project.project.name ||
-                      !project.projectData
-                    )
-                      return null;
-                    return (
-                      <Project
-                        key={project.project._id} // Assuming _id is unique
-                        projectData={project.projectData}
-                        project={project.project}
-                        index={index}
-                        setProjects={setProjects}
-                        openProjectIndex={openProjectIndex}
-                        setOpenProjectIndex={setOpenProjectIndex}
-                        setSelectedDocID={setSelectedDocID}
-                        setSelectedProjectConfig={setSelectedProjectConfig}
-                        setIsAnalytical={setIsAnalytical}
-                        setSelectedIndex={setSelectedIndex}
-                      />
-                    );
-                  })}
-                </div>
-              </tr>
-              {analyticalProjects &&
-                analyticalProjects.map((project: ProjectType, index: number) => (
-                  <ProjectRow
-                    key={index}
-                    project={project}
-                    index={index}
-                    setSelectedIndex={setSelectedIndex}
-                    setSelectedProjectID={setSelectedProjectID}
-                    setSelectedProject={setSelectedDocID}
-                    setSelectedProjectConfig={setSelectedProjectConfig}
-                    setCustomizeStep={setCustomizeStep}
-                    scrollIntoEditSection={scrollIntoEditSection}
-                    setIsAnalytical={setIsAnalytical}
-                    setProjects={setAnalyticalProjects}
-                  />
-                ))}
-            </tbody>
-          </table>
-          {selectedDocID && selectedProjectConfig ? (
-            <>
-              <div
-                ref={customizeSectionRef}
-                className="bg-primary p-4 rounded mb-4 text-center"
-              >
-                <h1 className="text-light">Customize Project</h1>
-                <p className="text-light">
-                  Customize the project with the following id:{" "}
-                  <em>{selectedDocID}</em>
-                </p>
+          <div className="file-browser-container">
+            <ResizableBox
+              width={window.innerWidth * 0.8}
+              height={401}
+              axis="x" // Restrict resizing to horizontal direction
+              minConstraints={[500, 401]} // Minimum size constraints
+              maxConstraints={[window.innerWidth * 0.8, 401]} // Maximum size constraints
+              resizeHandles={["w", "nw", "sw"]} // Set handle to east side for horizontal resizing
+              onResize={handleResize}
+              style={{ left: position, position: "relative" }}
+            >
+              <div style={{ width: "100%", height: "100%", overflow: "auto" }}>
+                <FileBrowser />
               </div>
-
-              {customizeStep === 0 ? (
-                <ProjectDetails
-                  projectName={projectName}
-                  setProjectName={setProjectName}
-                  description={description}
-                  setDescription={setDescription}
-                  language={language}
-                  setLanguage={setLanguage}
-                  introMessage={introMessage}
-                  setIntroMessage={setIntroMessage}
-                  introImage={introImage}
-                  setIntroImage={setIntroImage}
-                  handleNextButtonClick={handleProjectDetailsNext}
+            </ResizableBox>
+          </div>
+        </div>
+      </FilesProvider>
+      <main className="container-fluid main-container">
+        <div className="bg-primary p-4 rounded mb-4 text-center">
+          <h1 className="text-light">Available Projects</h1>
+          <p className="text-light">Choose a project to edit or delete</p>
+        </div>
+        <br />
+        <div className="loader-container">
+          <Loader />
+        </div>
+        <table className="table main-table w-100">
+          <thead>
+            <tr>
+              <th className="project-name text-start">Project Name</th>
+              <th className="project-last-update text-start">Last Update</th>
+              <th className="project-id text-start">Project ID</th>
+              <th className="project-actions text-start">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              ref={kronosProjectsWrapperRef}
+              className="kronos-projects-wrapper"
+            >
+              <div
+                ref={accordionRef}
+                className="accordion"
+                id="projectsAccordion"
+              >
+                {projects.map((project, index) => {
+                  if (
+                    !project.project ||
+                    !project.project.name ||
+                    !project.projectData
+                  )
+                    return null;
+                  return (
+                    <Project
+                      key={project.project._id} // Assuming _id is unique
+                      projectData={project.projectData}
+                      project={project.project}
+                      index={index}
+                      setProjects={setProjects}
+                      openProjectIndex={openProjectIndex}
+                      setOpenProjectIndex={setOpenProjectIndex}
+                      setSelectedDocID={setSelectedDocID}
+                      setSelectedProjectConfig={setSelectedProjectConfig}
+                      setIsAnalytical={setIsAnalytical}
+                      setSelectedIndex={setSelectedIndex}
+                    />
+                  );
+                })}
+              </div>
+            </tr>
+            {analyticalProjects &&
+              analyticalProjects.map((project: ProjectType, index: number) => (
+                <ProjectRow
+                  key={index}
+                  project={project}
+                  index={index}
+                  setSelectedIndex={setSelectedIndex}
+                  setSelectedProjectID={setSelectedProjectID}
+                  setSelectedProject={setSelectedDocID}
+                  setSelectedProjectConfig={setSelectedProjectConfig}
+                  setCustomizeStep={setCustomizeStep}
+                  scrollIntoEditSection={scrollIntoEditSection}
+                  setIsAnalytical={setIsAnalytical}
+                  setProjects={setAnalyticalProjects}
                 />
-              ) : null}
+              ))}
+          </tbody>
+        </table>
+        {selectedDocID && selectedProjectConfig ? (
+          <>
+            <div
+              ref={customizeSectionRef}
+              className="bg-primary p-4 rounded mb-4 text-center"
+            >
+              <h1 className="text-light">Customize Project</h1>
+              <p className="text-light">
+                Customize the project with the following id:{" "}
+                <em>{selectedDocID}</em>
+              </p>
+            </div>
 
-              {customizeStep === 1 ? (
-                <CustomizeBot
-                  saveSettings={updateSettings}
-                  selectedProjectConfig={selectedProjectConfig}
-                />
-              ) : null}
-            </>
-          ) : null}
-        </main>
+            {customizeStep === 0 ? (
+              <ProjectDetails
+                projectName={projectName}
+                setProjectName={setProjectName}
+                description={description}
+                setDescription={setDescription}
+                language={language}
+                setLanguage={setLanguage}
+                introMessage={introMessage}
+                setIntroMessage={setIntroMessage}
+                introImage={introImage}
+                setIntroImage={setIntroImage}
+                handleNextButtonClick={handleProjectDetailsNext}
+              />
+            ) : null}
+
+            {customizeStep === 1 ? (
+              <CustomizeBot
+                saveSettings={updateSettings}
+                selectedProjectConfig={selectedProjectConfig}
+              />
+            ) : null}
+          </>
+        ) : null}
+      </main>
     </section>
   );
 };
