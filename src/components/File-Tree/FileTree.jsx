@@ -95,7 +95,7 @@ function FileTree() {
             
                 if (dropT) {
                   // Only allow dropping into folders with fileType "qweqwe"
-                  if (dropT.data.fileType === "qweqwe" && dropT.depth + dragT.depth < 3) {
+                  if (dropT.data.fileType === "qweqwe") {
                     return true; // Allow drop only inside folders and with depth less than 3
                   }
                 }

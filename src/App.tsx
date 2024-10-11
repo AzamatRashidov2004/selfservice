@@ -19,7 +19,7 @@ import Dashboard from './pages/Dashboard/Dashboard';
 import Landing_Page from './pages/Landing-Page/Landing_Page';
 import Try_Now from './pages/Try-Now/Try_Now';
 import Modals from './components/Modals/Modals';
-import Footer from './components/Footer/Footer'; // Import the footer
+// import Footer from './components/Footer/Footer';
 
 // Import AuthProvider
 import { AuthProvider } from './context/authContext'; // Adjust the path as necessary
@@ -56,7 +56,7 @@ const App: React.FC = () => {
           <Route path="/new-project" element={<New_Project />} />
           <Route path="/try-now" element={<Try_Now />} />
         </Routes>
-        <Footer />
+        {/* <Footer /> */}
       </Router>
     </AuthProvider>
   );
