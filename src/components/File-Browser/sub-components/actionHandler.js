@@ -1,3 +1,6 @@
+import { ChonkyActions } from "chonky";
+import { findFile } from "./folderSearch";
+
 const handleAction = (data, setCurrentFolder, fileContext) => {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
