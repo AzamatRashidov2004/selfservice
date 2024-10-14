@@ -6,7 +6,7 @@ interface CreateFolderModalProps {
   handleCreate: (folderName: string) => void;
 }
 
-const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
+const CreateFolder: React.FC<CreateFolderModalProps> = ({
   show,
   handleClose,
   handleCreate,
@@ -74,4 +74,4 @@ const CreateFolderModal: React.FC<CreateFolderModalProps> = ({
   );
 };
 
-export default CreateFolderModal;
+export default CreateFolder;

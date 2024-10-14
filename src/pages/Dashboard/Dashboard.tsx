@@ -22,8 +22,9 @@ import { useNavigate } from "react-router-dom";
 import FileTree from "../../components/File-Tree/FileTree.jsx";
 import FileBrowser from "../../components/File-Browser/FileBrowser.jsx";
 import { FilesProvider } from "../../context/fileContext.tsx";
-import { ResizableBox } from "react-resizable";
+import { ResizableBox, ResizeCallbackData  } from "react-resizable";
 import "react-resizable/css/styles.css";
+import { createUploadFileModalEvent, createFolderModalEvent } from "../../utility/Modal_Util.ts";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -249,6 +250,8 @@ const Dashboard: React.FC = () => {
     setWidth(data.size.width);
     setPosition(position + deltaWidth);
   };
+
+  createFolderModalEvent((file) => {console.log(file)})
 
   return (
     <section className="dashboard-section">

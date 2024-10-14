@@ -55,3 +55,15 @@ import {
       window.removeEventListener('showNotification', handleCustomEvent as EventListener);
     };
   };
+
+  export const setupUploadFileModalListener = (callback: () => void) => {
+    const listener = () => callback();
+    window.addEventListener('showUploadFileModal', listener);
+    return () => window.removeEventListener('showUploadFileModal', listener);
+  };
+  
+  export const setupFolderModalListener = (callback: () => void) => {
+    const listener = () => callback();
+    window.addEventListener('showCreateFolderModal', listener);
+    return () => window.removeEventListener('showCreateFolderModal', listener);
+  };

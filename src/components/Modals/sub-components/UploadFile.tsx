@@ -6,7 +6,7 @@ interface UploadFileModalProps {
   handleUpload: (files: File[]) => void;
 }
 
-const UploadFileModal: React.FC<UploadFileModalProps> = ({
+const UploadFile: React.FC<UploadFileModalProps> = ({
   show,
   handleClose,
   handleUpload,
@@ -141,4 +141,4 @@ const UploadFileModal: React.FC<UploadFileModalProps> = ({
   );
 };
 
-export default UploadFileModal;
+export default UploadFile;
