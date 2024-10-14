@@ -26,6 +26,8 @@ interface FilesContextType {
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
   dragAndDropFile: (draggedFileId: string, destinationFolderId: string) => void;
+  addFolder: (parentId: number, folderName: string) => void; // Newly added
+  addFiles: (parentId: number, files: File[]) => void; // Change this to accept File[]
   droppableTypes: string[];
   draggableTypes: string[];
   currentFolder: string;
@@ -37,7 +39,6 @@ const FilesContext = createContext<FilesContextType | undefined>(undefined);
 
 // Function to transform the files data into a file browser structure
 const transformData = (inputData: FileData[]): TreeNode[] => {
-  // Helper function to build the tree structure
   const buildTree = (items: FileData[], parentId: number = 0): TreeNode[] => {
     return items
       .filter((item) => item.parent === parentId)
@@ -49,7 +50,6 @@ const transformData = (inputData: FileData[]): TreeNode[] => {
       }));
   };
 
-  // Create the root node
   return [
     {
       id: "0",
@@ -69,28 +69,23 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setFileStructure(sampleData); // Transform and set the initial state
   }, []);
 
-  // Function to get the file structure
   const getFileStructure = (isFileBrowserObject: boolean = false): FileData[] | TreeNode[] => {
     if (isFileBrowserObject) {
-      return transformData(filesData); // Transform to file browser object
+      return transformData(filesData);
     }
-    return filesData; // Return original files data
+    return filesData;
   };
 
-  // Function to set the file structure
   const setFileStructure = (newFilesData: FileData[]) => {
-    setFilesData(newFilesData); // Update files data
+    setFilesData(newFilesData);
   };
 
-  // Function to handle drag-and-drop changes
   const dragAndDropFile = (draggedFileId: string, destinationFolderId: string) => {
-    // Convert IDs to numbers as the filesData uses numeric IDs
     const draggedId = parseInt(draggedFileId);
     const destinationId = parseInt(destinationFolderId);
 
     setFilesData((prevFilesData) => {
       return prevFilesData.map((file) => {
-        // Update the parent of the dragged file to the destination folder
         if (file.id === draggedId) {
           return { ...file, parent: destinationId };
         }
@@ -99,17 +94,59 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     });
   };
 
+  // Function to add a folder
+  const addFolder = (parentId: number, folderName: string) => {
+    const newId = Math.max(...filesData.map(file => file.id)) + 1;
+
+    const newFolder: FileData = {
+      id: newId,
+      parent: parentId,
+      droppable: true,
+      text: folderName,
+      data: {
+        fileType: "folder",
+      },
+    };
+
+    setFilesData((prevFilesData) => [...prevFilesData, newFolder]);
+  };
+
+  // New function to add files
+  const addFiles = (parentId: number, files: File[]) => {
+    // Create new files based on the input files
+    const newFiles = files.map((file, index) => {
+      // Extract the base file type (e.g., "pdf" from "application/pdf")
+      const fileType = file.type.split('/')[1]; 
+  
+      return {
+        id: Math.max(...filesData.map(f => f.id)) + index + 1, // Assign new unique ID
+        parent: parentId, // Set parent to the given parentId
+        droppable: false, // Files are not droppable
+        text: file.name, // Use the file name for the text
+        data: {
+          fileType: fileType, // Set the file type from the file object
+          fileSize: `${(file.size / (1024 * 1024)).toFixed(2)}MB`, // Convert file size to string and format
+        },
+      };
+    });
+  
+    // Update the state with the new files
+    setFilesData((prevFilesData) => [...prevFilesData, ...newFiles]);
+  };
+
   const droppableTypes = ["folder", "project", "program"];
-  const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"]
+  const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"];
 
   const contextValue: FilesContextType = {
     getFileStructure,
     setFileStructure,
     dragAndDropFile,
+    addFolder,
+    addFiles,
     droppableTypes,
     draggableTypes,
     currentFolder,
-    setCurrentFolder
+    setCurrentFolder,
   };
 
   return (

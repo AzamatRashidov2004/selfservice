@@ -8,12 +8,12 @@ import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 
 export default function FileBrowser() {
-  const { getFileStructure, dragAndDropFile, currentFolder, setCurrentFolder } = useFiles(); // Get the context function
+  const { getFileStructure, dragAndDropFile, currentFolder, setCurrentFolder, addFolder, addFiles } = useFiles(); // Get the context function
 
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
-      handleAction(data, setCurrentFolder, { getFileStructure, dragAndDropFile });
+      handleAction(data, setCurrentFolder, { getFileStructure, dragAndDropFile, addFolder, addFiles }, currentFolder);
     },
     [getFileStructure, dragAndDropFile]
   );

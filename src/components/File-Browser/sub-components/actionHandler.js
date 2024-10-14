@@ -1,7 +1,11 @@
 import { ChonkyActions } from "chonky";
 import { findFile } from "./folderSearch";
+import {
+  createFolderModalEvent,
+  createUploadFileModalEvent,
+} from "../../../utility/Modal_Util";
 
-const handleAction = (data, setCurrentFolder, fileContext) => {
+const handleAction = (data, setCurrentFolder, fileContext, currentFolder) => {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
 
@@ -18,13 +22,17 @@ const handleAction = (data, setCurrentFolder, fileContext) => {
   }
 
   // Handle Create File custom action
-  if (data.id === "create_file") {
-    const newFile = {
-      id: `file_${Math.random().toString(36).substr(2, 9)}`, // Generate unique ID
-      name: "New File.txt",
-      isDir: false,
-    };
-    fileContext.createFile(newFile, currentFolderIdRef.current); // Add file to the current folder
+  if (data.id === "create_folder") {
+    createFolderModalEvent((folderName) => {
+      fileContext.addFolder(parseInt(currentFolder), folderName);
+    });
+  }
+
+  // Handle Create File custom action
+  if (data.id === "upload") {
+    createUploadFileModalEvent((files) => {
+      fileContext.addFiles(parseInt(currentFolder), files);
+    });
   }
 };
 
