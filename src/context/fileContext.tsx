@@ -26,8 +26,9 @@ interface FilesContextType {
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
   dragAndDropFile: (draggedFileId: string, destinationFolderId: string) => void;
-  addFolder: (parentId: number, folderName: string) => void; // Newly added
-  addFiles: (parentId: number, files: File[]) => void; // Change this to accept File[]
+  addFolder: (parentId: number, folderName: string) => void; 
+  addFiles: (parentId: number, files: File[]) => void; 
+  deleteFiles: (ids: number[]) => void; // Add deleteFiles to the context type
   droppableTypes: string[];
   draggableTypes: string[];
   currentFolder: string;
@@ -98,13 +99,24 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const addFolder = (parentId: number, folderName: string) => {
     const newId = Math.max(...filesData.map(file => file.id)) + 1;
 
+    // Determine the file type based on the parent ID
+    const parentFile = filesData.find(file => file.id === parentId);
+    let folderFileType = "folder"; // Default file type
+
+    if (parentId === 0) {
+      folderFileType = "project";
+    }
+    if (parentFile && parentFile.data.fileType === "project") {
+      folderFileType = "program"; // If added under a project, set type to program
+    }
+
     const newFolder: FileData = {
       id: newId,
       parent: parentId,
       droppable: true,
       text: folderName,
       data: {
-        fileType: "folder",
+        fileType: folderFileType,
       },
     };
 
@@ -134,6 +146,11 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setFilesData((prevFilesData) => [...prevFilesData, ...newFiles]);
   };
 
+  // Function to delete files by IDs
+  const deleteFiles = (ids: number[]) => {
+    setFilesData((prevFilesData) => prevFilesData.filter(file => !ids.includes(file.id)));
+  };
+
   const droppableTypes = ["folder", "project", "program"];
   const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"];
 
@@ -143,6 +160,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     dragAndDropFile,
     addFolder,
     addFiles,
+    deleteFiles,
     droppableTypes,
     draggableTypes,
     currentFolder,

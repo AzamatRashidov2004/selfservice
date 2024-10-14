@@ -34,6 +34,12 @@ const handleAction = (data, setCurrentFolder, fileContext, currentFolder) => {
       fileContext.addFiles(parseInt(currentFolder), files);
     });
   }
+
+  if (data.id === "delete_files") {
+    fileContext.deleteFiles(
+      data.state.selectedFiles.map((file) => parseInt(file.id))
+    );
+  }
 };
 
 export default handleAction;
