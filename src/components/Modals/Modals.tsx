@@ -9,7 +9,7 @@ import {
   getDefaultPopupState,
   setupNotificationEventListener, 
   getDefaultNotificationState,
-  setupFolderModalListener,
+  setupCreateFolderListener,
   setupUploadFileModalListener
 } from './Modals_Util';
 
@@ -21,10 +21,8 @@ import {
 const Modals: React.FC = () => {
   const [popup, setPopup] = useState<PopupState>(getDefaultPopupState());
   const [notification, setNotification] = useState<NotificationState>(getDefaultNotificationState());
-  const [uploadFileModal, setUploadFileModal] = useState(false); // Upload file modal visibility
-  const [createFolderModal, setCreateFolderModal] = useState(false); // Create folder modal visibility
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]); // Selected files for upload
-  const [folderName, setFolderName] = useState(''); // Folder name for creation
+  const [uploadFileModal, setUploadFileModal] = useState({callback: (files: File[]) => {console.log(files)}, isVisible: false});
+  const [createFolderModal, setCreateFolderModal] = useState({isVisible: false, callback: (folderName: string) => {console.log(folderName)}});
 
   // Memoize the showPopup function
   const showPopup = useCallback((title: string, text: string, buttons: PopupState['buttons'], callback?: (success: boolean) => void) => {
@@ -36,40 +34,26 @@ const Modals: React.FC = () => {
     setNotification({ isVisible: true, title, text, type, notification_time });
   }, []);
 
+  // Memoize the showPopup function
+  const showUploadFile = useCallback((callback: (files: File[]) => void) => {
+    setUploadFileModal({callback: callback, isVisible: true});
+  }, []);
+
+   // Memoize the showPopup function
+   const showCreateFolder = useCallback((callback: (folderName: string) => void) => {
+    setCreateFolderModal({callback: callback, isVisible: true});
+  }, []);
+
   const handleNotificationClose = () => {
     setNotification(prev => ({ ...prev, isVisible: false }));
   };
-
-  // Function to show the Upload File modal
-  const showUploadFileModal = useCallback(() => {
-    setUploadFileModal(true);
-  }, []);
-
-  // Function to show the Create Folder modal
-  const showCreateFolderModal = useCallback(() => {
-    setCreateFolderModal(true);
-  }, []);
-
-  // Function to handle file upload and pass state through callback
-  const handleUploadFiles = useCallback((callback?: (uploadedFiles: File[]) => void) => {
-    if (callback) {
-      callback(selectedFiles); // Pass selected files through callback
-    }
-  }, [selectedFiles]);
-
-  // Function to handle folder creation and pass state through callback
-  const handleCreateFolder = useCallback((callback?: (createdFolderName: string) => void) => {
-    if (callback) {
-      callback(folderName); // Pass folder name through callback
-    }
-  }, [folderName]);
 
   // Setup popup, notification, and modal listeners
   useEffect(() => {
     const cleanupPopupListener = setupPopupEventListener(showPopup);
     const cleanupNotificationListener = setupNotificationEventListener(showNotification);
-    const cleanupUploadFileListener = setupUploadFileModalListener(showUploadFileModal);
-    const cleanupFolderListener = setupFolderModalListener(showCreateFolderModal);
+    const cleanupUploadFileListener = setupUploadFileModalListener(showUploadFile);
+    const cleanupFolderListener = setupCreateFolderListener(showCreateFolder);
 
     return () => {
       cleanupPopupListener();
@@ -77,7 +61,7 @@ const Modals: React.FC = () => {
       cleanupUploadFileListener();
       cleanupFolderListener();
     };
-  }, [showPopup, showNotification, showUploadFileModal, showCreateFolderModal]);
+  }, [showPopup, showNotification, showUploadFile, showCreateFolder]);
 
   return (
     <>
@@ -102,25 +86,18 @@ const Modals: React.FC = () => {
 
       {/* Upload File Modal */}
       <UploadFile
-        show={uploadFileModal}
-        handleClose={() => setUploadFileModal(false)}
+        show={uploadFileModal.isVisible}
+        handleClose={() => setUploadFileModal({...uploadFileModal, isVisible: false})}
         handleUpload={(files) => {
-          setSelectedFiles(files); // Update state with selected files
-          handleUploadFiles((uploadedFiles) => {
-            console.log('Files uploaded:', uploadedFiles); // Callback with uploaded files
-          });
+          uploadFileModal.callback(files); // File callback
         }}
       />
 
-      {/* Create Folder Modal */}
       <CreateFolder
-        show={createFolderModal}
-        handleClose={() => setCreateFolderModal(false)}
-        handleCreate={(name) => {
-          setFolderName(name); // Update state with folder name
-          handleCreateFolder((createdFolderName) => {
-            console.log('Folder created:', createdFolderName); // Callback with folder name
-          });
+        show={createFolderModal.isVisible}
+        handleClose={() => setCreateFolderModal({...createFolderModal, isVisible: false})}
+        handleCreate={(folderName: string) => {
+          createFolderModal.callback(folderName)
         }}
       />
     </>

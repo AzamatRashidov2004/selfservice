@@ -15,6 +15,20 @@ import {
       showPopup(title, text, buttons, callback, notification_time);
     }
   };
+
+  export const handleUploadFileCustomEvent = (event: CustomEvent, showUploadFile: (callback: (files: File[]) => void) => void) => {
+    if (event.detail) {
+      const { callback } = event.detail;
+      showUploadFile(callback);
+    }
+  };
+
+  export const handleCreateFolder = (event: CustomEvent, showCreateFolder: (callback: (folderName: string) => void) => void) => {
+    if (event.detail) {
+      const { callback } = event.detail;
+      showCreateFolder(callback);
+    }
+  };
   
   export const setupPopupEventListener = (showPopup: (title: string, text: string, buttons: PopupState['buttons'], callback?: (success: boolean) => void, notification_time?: number) => void) => {
     const handleCustomEvent = (event: CustomEvent) => handlePopupCustomEvent(event, showPopup);
@@ -56,14 +70,25 @@ import {
     };
   };
 
-  export const setupUploadFileModalListener = (callback: () => void) => {
-    const listener = () => callback();
-    window.addEventListener('showUploadFileModal', listener);
-    return () => window.removeEventListener('showUploadFileModal', listener);
-  };
+
+  export const setupUploadFileModalListener = (showUploadFile: (callback: (files: File[]) => void) => void) => {
+    const handleCustomEvent = (event: CustomEvent) => handleUploadFileCustomEvent(event, showUploadFile);
   
-  export const setupFolderModalListener = (callback: () => void) => {
-    const listener = () => callback();
-    window.addEventListener('showCreateFolderModal', listener);
-    return () => window.removeEventListener('showCreateFolderModal', listener);
+    window.addEventListener('showUploadFile', handleCustomEvent as EventListener);
+  
+    // Return cleanup function
+    return () => {
+      window.removeEventListener('showUploadFile', handleCustomEvent as EventListener);
+    };
+  };
+
+  export const setupCreateFolderListener = (showCreateFolder: (callback: (folderName: string) => void) => void) => {
+    const handleCustomEvent = (event: CustomEvent) => handleCreateFolder(event, showCreateFolder);
+  
+    window.addEventListener('showCreateFolder', handleCustomEvent as EventListener);
+  
+    // Return cleanup function
+    return () => {
+      window.removeEventListener('showCreateFolder', handleCustomEvent as EventListener);
+    };
   };

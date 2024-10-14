@@ -15,14 +15,14 @@ export const createNotificationEvent = (title: string, text: string, type: Notif
   };
 
 export const createUploadFileModalEvent = (callback: (uploadedFiles: File[]) => void) => {
-  const showUploadFileModalEvent = new CustomEvent('showUploadFileModal', { 
+  const showUploadFileModalEvent = new CustomEvent('showUploadFile', { 
     detail: { callback } 
   });
   window.dispatchEvent(showUploadFileModalEvent);
 };
 
 export const createFolderModalEvent = (callback: (folderName: string) => void) => {
-  const showCreateFolderModalEvent = new CustomEvent('showCreateFolderModal', { 
+  const showCreateFolderModalEvent = new CustomEvent('showCreateFolder', { 
     detail: { callback } 
   });
   window.dispatchEvent(showCreateFolderModalEvent);
