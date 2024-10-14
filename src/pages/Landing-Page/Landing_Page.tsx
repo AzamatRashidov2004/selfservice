@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./Landing_Page.css";
 import { useAuth } from "../../context/authContext";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import { useNavigate } from "react-router-dom";
 
 const Landing_Page: React.FC = () => {
   useEffect(() => {
@@ -23,6 +24,20 @@ const Landing_Page: React.FC = () => {
 };
 
 const HeroSection: React.FC = () => {
+  const { login, authenticated } = useAuth();
+  const navigate = useNavigate();
+  const handleSubmit = async () => {
+    if (!authenticated) {
+      try {
+        await login();
+      } catch (err) {
+        console.error("Login error:", err);
+      }
+    } else {
+      navigate("/new-project");
+    }
+  };
+
   return (
     <section className="hero bg-light text-bright d-flex custom-padding">
       <div className="container text-center">
@@ -31,16 +46,22 @@ const HeroSection: React.FC = () => {
           className="display-3 font-weight-bold highlight-text"
           style={{ color: "#DFF0D8" }}
         >
-          Build Your AI Bot in Minutes
+          {!authenticated ? "Build Your AI Bot in Minutes" : "Welcome Back!"}
         </h1>
         <p className="lead sub-heading" style={{ color: "#DFF0D8" }}>
-          Customize, upload documents, and empower it to answer questions based
-          on your content.
+          {!authenticated
+            ? "Customize, upload documents, and empower it to answer questions based on your content."
+            : "Manage your AI settings and enjoy personalized services."}
+          <br />
+          {authenticated ? "Press the button below to create your own bot" : ""}
         </p>
 
         {/* Enlarged and emphasized call-to-action button */}
-        <a href="#login" className="btn btn-primary btn-lg btn-call-to-action">
-          Get Started
+        <a
+          className="btn btn-primary btn-lg btn-call-to-action"
+          onClick={handleSubmit}
+        >
+          Create your bot
         </a>
       </div>
     </section>
