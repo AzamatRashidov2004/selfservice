@@ -24,6 +24,9 @@ const Navbar: React.FC = () => {
 
           {/* Right-aligned buttons */}
           <div className="d-flex ms-auto">
+            <Link className="btn btn-link custom-link me-2" to="/contact">
+              Contact
+            </Link>
             {authenticated ? (
               <>
                 <Link

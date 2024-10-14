@@ -1,0 +1,12 @@
+.container-fluid {
+  border-radius: 15px;
+}
+
+.show {
+  display: inline-block !important;
+  visibility: visible;
+}
+
+.custom-padding {
+  padding-top: 15px;
+}
