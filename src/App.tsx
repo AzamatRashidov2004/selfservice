@@ -27,6 +27,8 @@ import { AuthProvider } from "./context/authContext"; // Adjust the path as nece
 // Import css
 import "./App.css";
 import "./responsive.css";
+import CreateFolderModal from "./components/Modals/sub-components/CreateFolderModal";
+import UploadFileModal from "./components/Modals/sub-components/UploadFileModal";
 import Contact_Page from "./pages/Contact/Contact_page";
 
 const App: React.FC = () => {
