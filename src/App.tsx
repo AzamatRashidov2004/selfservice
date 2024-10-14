@@ -1,32 +1,33 @@
 // Import React Routing
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 // Handle scrollbar changes
-import { updateScrollbarGutter } from './utility/Scrollbar_Util';
+import { updateScrollbarGutter } from "./utility/Scrollbar_Util";
 
 // Import Bootstrap
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 // Import Font Awesome
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 // Import Pages
-import New_Project from './pages/New-Project/New_Project';
-import Navbar from './components/Navbar/Navbar';
-import Dashboard from './pages/Dashboard/Dashboard';
-import Landing_Page from './pages/Landing-Page/Landing_Page';
-import Try_Now from './pages/Try-Now/Try_Now';
-import Modals from './components/Modals/Modals';
-import Footer from './components/Footer/Footer'; // Import the footer
+import New_Project from "./pages/New-Project/New_Project";
+import Navbar from "./components/Navbar/Navbar";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import Landing_Page from "./pages/Landing-Page/Landing_Page";
+import Try_Now from "./pages/Try-Now/Try_Now";
+import Modals from "./components/Modals/Modals";
+import Footer from "./components/Footer/Footer"; // Import the footer
 
 // Import AuthProvider
-import { AuthProvider } from './context/authContext'; // Adjust the path as necessary
+import { AuthProvider } from "./context/authContext"; // Adjust the path as necessary
 
 // Import css
-import './App.css';
-import './responsive.css';
+import "./App.css";
+import "./responsive.css";
+import Contact_Page from "./pages/Contact/Contact_page";
 
 const App: React.FC = () => {
   // Window size listener for Scrollbar width styling
@@ -55,11 +56,12 @@ const App: React.FC = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-project" element={<New_Project />} />
           <Route path="/try-now" element={<Try_Now />} />
+          <Route path="/contact" element={<Contact_Page />} />
         </Routes>
         <Footer />
       </Router>
     </AuthProvider>
   );
-}
+};
 
 export default App;
