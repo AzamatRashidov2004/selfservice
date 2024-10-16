@@ -252,33 +252,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <section className="dashboard-section">
-      <FilesProvider>
-        <div className="file-browser-wrapper">
-          <div className="file-tree-container">
-            <FileTree />
-          </div>
-          <div className="file-browser-container">
-            <ResizableBox
-              width={window.innerWidth * 0.8}
-              height={401}
-              axis="x" // Restrict resizing to horizontal direction
-              minConstraints={[500, 401]} // Minimum size constraints
-              maxConstraints={[window.innerWidth * 0.8, 401]} // Maximum size constraints
-              resizeHandles={["w"]} // Set handle to east side for horizontal resizing
-              onResize={handleResize}
-              style={{ 
-                left: position, 
-                position: "relative",
-                maxWidth: '100%' // Ensure max width is also 100%
-            }}
-            >
-              <div style={{ width: "100%", height: "100%", overflow: "auto" }}>
-                <FileBrowser />
-              </div>
-            </ResizableBox>
-          </div>
-        </div>
-      </FilesProvider>
       <main className="container-fluid main-container">
         <div className="bg-primary p-4 rounded mb-4 text-center">
           <h1 className="text-light">Available Projects</h1>
@@ -288,7 +261,34 @@ const Dashboard: React.FC = () => {
         <div className="loader-container">
           <Loader />
         </div>
-        <table className="table main-table w-100">
+        <FilesProvider>
+        <div className="file-browser-wrapper">
+          <div className="file-tree-container">
+            <FileTree />
+          </div>
+          <div className="file-browser-container">
+          <ResizableBox
+            width={window.innerWidth * 0.8}
+            axis="x" // Restrict resizing to horizontal direction
+            minConstraints={[500, 0]} // Minimum width constraint, height is flexible
+            maxConstraints={[window.innerWidth * 0.8, Infinity]} // Maximum width constraint
+            resizeHandles={["w"]} // Set handle to east side for horizontal resizing
+            onResize={handleResize}
+            style={{ 
+              left: position, 
+              position: "relative",
+              maxWidth: '100%', // Ensure max width is also 100%
+              minHeight: "100% !important",
+            }}
+          >
+            <div style={{ width: "100%", height: "100%", overflow: "auto" }}>
+              <FileBrowser />
+            </div>
+          </ResizableBox>
+          </div>
+        </div>
+      </FilesProvider>
+        <table className="table main-table w-100 locked-hidden">
           <thead>
             <tr>
               <th className="project-name text-start">Project Name</th>

@@ -30,7 +30,7 @@
     grid-template-columns: auto auto 1fr auto;
     height: 32px;
     padding-inline-end: 1px;
-    padding-inline-start: 24px !important;
+    padding-inline-start: 12px !important;
   }
 
   .file-tree-border-wrapper{
@@ -38,6 +38,10 @@
     margin-left: 10px;
     margin-right: 10px;
     border-top: solid 1px #E0E0E0;
+  }
+
+  .depth-0{
+    padding-inline-start: 0px !important;
   }
   
   .expandIconWrapper.isOpen {

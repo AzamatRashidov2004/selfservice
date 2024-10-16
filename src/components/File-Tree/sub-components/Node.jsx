@@ -39,7 +39,7 @@ export const CustomNode = (props) => {
         cursor: "pointer",
         backgroundColor: props.highlightedNodeId === props.node.id ? '#e0f7fa' : 'transparent',
       }}
-      className="node-root"
+      className={`node-root depth-${props.depth}`}
       onClick={(e) => { handleToggle(e, "row"); }}
     >
       <div

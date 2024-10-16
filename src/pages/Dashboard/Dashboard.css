@@ -10,24 +10,36 @@
 }
 
 .dashboard-section{
-  width: 100vw;
+  /* width: 100vw; */
   padding: 0 !important;
   margin-top: 90px;
 }
 
 
-body{
+/* body{
   padding-left: 0 !important;
   padding-right: 0 !important;
+} */
+
+.react-resizable{
+  min-height: 100% !important;
+
+  & > div{
+    min-height: 100% !important;
+  }
 }
 
 .file-browser-wrapper{
   display: flex;
   justify-content: space-between;
-  padding-left: 10%;
-  padding-right: 10%;
   /* width: calc(100vw - 20%); */
-  width: 100vw;
+  width: 100%;
+  height: 100% !important;
+}
+
+.MuiBox-root{
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
 }
 
 .file-tree-container{
