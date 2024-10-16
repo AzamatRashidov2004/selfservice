@@ -281,9 +281,7 @@ const Dashboard: React.FC = () => {
               minHeight: "100% !important",
             }}
           >
-            <div style={{ width: "100%", height: "100%", overflow: "auto" }}>
-              <FileBrowser />
-            </div>
+           <FileBrowser />
           </ResizableBox>
           </div>
         </div>
