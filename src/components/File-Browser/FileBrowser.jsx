@@ -54,7 +54,7 @@ export default function FileBrowser() {
 
   return (
     <>
-      <div style={{ height: "400px" }}>
+      <div style={{ width: "100%", height: "400px" }}>
         <FullFileBrowser
           files={files}
           folderChain={folderChain}

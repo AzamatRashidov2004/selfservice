@@ -264,9 +264,13 @@ const Dashboard: React.FC = () => {
               axis="x" // Restrict resizing to horizontal direction
               minConstraints={[500, 401]} // Minimum size constraints
               maxConstraints={[window.innerWidth * 0.8, 401]} // Maximum size constraints
-              resizeHandles={["w", "nw", "sw"]} // Set handle to east side for horizontal resizing
+              resizeHandles={["w"]} // Set handle to east side for horizontal resizing
               onResize={handleResize}
-              style={{ left: position, position: "relative" }}
+              style={{ 
+                left: position, 
+                position: "relative",
+                maxWidth: '100%' // Ensure max width is also 100%
+            }}
             >
               <div style={{ width: "100%", height: "100%", overflow: "auto" }}>
                 <FileBrowser />

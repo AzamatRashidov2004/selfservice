@@ -223,9 +223,9 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
   const handleFilenameClick = async (
     knowledgeBase: kronosKnowledgeBaseType
   ) => {
-    if (!knowledgeBase._id) return;
+    if (!knowledgeBase._id || !keycloak.token) return;
 
-    await getPdfFile(projectId, knowledgeBase._id, knowledgeBase.source_file);
+    await getPdfFile(projectId, knowledgeBase._id, knowledgeBase.source_file, keycloak.token);
   };
 
   useEffect(() => {

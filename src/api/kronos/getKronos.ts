@@ -202,13 +202,14 @@ export async function getKronosProject(projectId: string, token: string): Promis
     }
   }
 
-  export async function getPdfFile(projectID: string, docID: string, docName: string): Promise<boolean> {
+  export async function getPdfFile(projectID: string, docID: string, docName: string, token: string): Promise<boolean> {
     try {
       const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/${docID}/source`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': apiKey
+          'Authorization': `Bearer + ${token}`,
+          'x-api-key': apiKey
         }
       });
   

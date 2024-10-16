@@ -32,6 +32,13 @@
     padding-inline-end: 1px;
     padding-inline-start: 24px !important;
   }
+
+  .file-tree-border-wrapper{
+    padding-top: 1px;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-top: solid 1px #E0E0E0;
+  }
   
   .expandIconWrapper.isOpen {
     transform: rotate(90deg);

@@ -52,56 +52,58 @@ function FileTree() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <DndProvider backend={MultiBackend} options={getBackendOptions()}>
-        <div className="FileTree-Container">
-          <Tree
-            tree={getFileStructure(false)} 
-            rootId={0}
-            initialOpen={true}
-            render={(node, { depth, isOpen, onToggle, isDragging, isDropTarget, hasChild }) => (
-              <CustomNode
-                node={node}
-                depth={depth}
-                isOpen={isOpen}
-                onToggle={onToggle}
-                isDragging={isDragging}
-                isDropTarget={isDropTarget}
-                draggingNode={draggingNode}
-                hasChild={hasChild}
-                updateNode={(value) => {
-                  updateNode(value, depth, hasChild);
-                }}
-                highlightedNodeId={highlightedNodeId} // Pass down the highlighted node id
-                setHighlightedNodeId={setHighlightedNodeId} // Pass down the setter function
-              />
-            )}
-            dragPreviewRender={(monitorProps) => (
-              <CustomDragPreview monitorProps={monitorProps} />
-            )}
-            onDrop={handleDrop}
-            canDrop={(treeData, { dragSource, dropTarget, dropTargetId, dragSourceId }) => {
-              if (dragSource !== dropTarget) {
-                let dropT = getDropTarget(dropTargetId);
-                let dragT = getDragTarget(dragSourceId);
-                if (dropT && dragT) {
-                  if (droppableTypes.includes(dropT.data.fileType) && draggableTypes.includes(dragT.data.fileType)) {
-                    return true; 
+    <div className="file-tree-border-wrapper">
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <DndProvider backend={MultiBackend} options={getBackendOptions()}>
+          <div className="FileTree-Container">
+            <Tree
+              tree={getFileStructure(false)} 
+              rootId={0}
+              initialOpen={true}
+              render={(node, { depth, isOpen, onToggle, isDragging, isDropTarget, hasChild }) => (
+                <CustomNode
+                  node={node}
+                  depth={depth}
+                  isOpen={isOpen}
+                  onToggle={onToggle}
+                  isDragging={isDragging}
+                  isDropTarget={isDropTarget}
+                  draggingNode={draggingNode}
+                  hasChild={hasChild}
+                  updateNode={(value) => {
+                    updateNode(value, depth, hasChild);
+                  }}
+                  highlightedNodeId={highlightedNodeId} // Pass down the highlighted node id
+                  setHighlightedNodeId={setHighlightedNodeId} // Pass down the setter function
+                />
+              )}
+              dragPreviewRender={(monitorProps) => (
+                <CustomDragPreview monitorProps={monitorProps} />
+              )}
+              onDrop={handleDrop}
+              canDrop={(treeData, { dragSource, dropTarget, dropTargetId, dragSourceId }) => {
+                if (dragSource !== dropTarget) {
+                  let dropT = getDropTarget(dropTargetId);
+                  let dragT = getDragTarget(dragSourceId);
+                  if (dropT && dragT) {
+                    if (droppableTypes.includes(dropT.data.fileType) && draggableTypes.includes(dragT.data.fileType)) {
+                      return true; 
+                    }
                   }
                 }
-              }
-              return false; 
-            }}
-            classes={{
-              root: "treeRoot",
-              draggingSource: "draggingSource",
-              dropTarget: "dropTarget"
-            }}
-          />
-        </div>
-      </DndProvider>
-    </ThemeProvider>
+                return false; 
+              }}
+              classes={{
+                root: "treeRoot",
+                draggingSource: "draggingSource",
+                dropTarget: "dropTarget"
+              }}
+            />
+          </div>
+        </DndProvider>
+      </ThemeProvider>
+    </div>
   );
 }
 
