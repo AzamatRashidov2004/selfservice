@@ -49,6 +49,7 @@
   border: 1px #e0e0e0 solid;
   padding-top: 84px;
   overflow-y: auto; /* Enable vertical scrolling */
+  overflow-x: hidden !important;
 }
 
 .file-browser-container {

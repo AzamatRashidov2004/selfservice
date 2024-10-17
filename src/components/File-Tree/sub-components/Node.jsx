@@ -57,7 +57,15 @@ export const CustomNode = (props) => {
         <TypeIcon droppable={droppable} fileType={data?.fileType} />
       </div>
       <div className="labelGridItem">
-        <Typography variant="body2" noWrap>
+        <Typography
+          variant="body2"
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+          sx={{ width: "100%" }}
+        >
           {props.node.text}
         </Typography>
       </div>

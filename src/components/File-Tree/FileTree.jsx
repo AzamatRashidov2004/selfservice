@@ -4,23 +4,24 @@ import { DndProvider } from "react-dnd";
 import {
   Tree,
   MultiBackend,
-  getBackendOptions
+  getBackendOptions,
 } from "@minoru/react-dnd-treeview";
 import { CustomNode } from "./sub-components/Node";
 import { CustomDragPreview } from "./sub-components/DragPreview";
 import { theme } from "./sub-components/Theme";
-import { useFiles } from "../../context/fileContext"; 
+import { useFiles } from "../../context/fileContext";
 import "./FileTree.css";
 
 function FileTree() {
-  const { getFileStructure, dragAndDropFile, draggableTypes, droppableTypes } = useFiles(); 
+  const { getFileStructure, dragAndDropFile, draggableTypes, droppableTypes } =
+    useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null); // Moved highlighted state here
 
   const handleDrop = (newTree, { dragSourceId, dropTargetId }) => {
     if (dragSourceId === dropTargetId) return;
-    dragAndDropFile(dragSourceId, dropTargetId); 
+    dragAndDropFile(dragSourceId, dropTargetId);
   };
 
   function updateNode(node, depth, hasChild) {
@@ -58,10 +59,13 @@ function FileTree() {
         <DndProvider backend={MultiBackend} options={getBackendOptions()}>
           <div className="FileTree-Container">
             <Tree
-              tree={getFileStructure(false)} 
+              tree={getFileStructure(false)}
               rootId={0}
               initialOpen={true}
-              render={(node, { depth, isOpen, onToggle, isDragging, isDropTarget, hasChild }) => (
+              render={(
+                node,
+                { depth, isOpen, onToggle, isDragging, isDropTarget, hasChild }
+              ) => (
                 <CustomNode
                   node={node}
                   depth={depth}
@@ -82,22 +86,28 @@ function FileTree() {
                 <CustomDragPreview monitorProps={monitorProps} />
               )}
               onDrop={handleDrop}
-              canDrop={(treeData, { dragSource, dropTarget, dropTargetId, dragSourceId }) => {
+              canDrop={(
+                treeData,
+                { dragSource, dropTarget, dropTargetId, dragSourceId }
+              ) => {
                 if (dragSource !== dropTarget) {
                   let dropT = getDropTarget(dropTargetId);
                   let dragT = getDragTarget(dragSourceId);
                   if (dropT && dragT) {
-                    if (droppableTypes.includes(dropT.data.fileType) && draggableTypes.includes(dragT.data.fileType)) {
-                      return true; 
+                    if (
+                      droppableTypes.includes(dropT.data.fileType) &&
+                      draggableTypes.includes(dragT.data.fileType)
+                    ) {
+                      return true;
                     }
                   }
                 }
-                return false; 
+                return false;
               }}
               classes={{
                 root: "treeRoot",
                 draggingSource: "draggingSource",
-                dropTarget: "dropTarget"
+                dropTarget: "dropTarget",
               }}
             />
           </div>
