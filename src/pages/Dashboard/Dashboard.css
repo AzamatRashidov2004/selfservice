@@ -9,58 +9,51 @@
   cursor: pointer;
 }
 
-.dashboard-section{
+.dashboard-section {
   /* width: 100vw; */
   padding: 0 !important;
   margin-top: 90px;
 }
-
 
 /* body{
   padding-left: 0 !important;
   padding-right: 0 !important;
 } */
 
-.react-resizable{
+.react-resizable {
   min-height: 100% !important;
-
-  & > div{
-    min-height: 100% !important;
-  }
 }
 
-.file-browser-wrapper{
+.react-resizable > div {
+  min-height: 100% !important;
+}
+
+.file-browser-wrapper {
   display: flex;
-  justify-content: space-between;
-  /* width: calc(100vw - 20%); */
   width: 100%;
-  height: 100% !important;
+  height: 400px !important; /* Adjust based on your header height */
+  overflow: hidden;
 }
 
-.MuiBox-root{
+.MuiBox-root {
   border-top-left-radius: 0 !important;
   border-bottom-left-radius: 0 !important;
 }
 
-.file-tree-container{
-  width: 20%;
-  border: 1px #E0E0E0 solid;
+.file-tree-container {
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 0;
+  min-width: 20%; /* Minimum width */
+  border: 1px #e0e0e0 solid;
   padding-top: 84px;
-  position: relative;
-
-  /* &::before{
-    content: "Explorer";
-    position: absolute;
-    top: 52px;
-    left: 40px;
-    font-size: larger;
-  } */
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
-
-
-.file-browser-container{
-  width: 80%;
+.file-browser-container {
+  flex-shrink: 0;
+  flex-grow: 0;
+  max-width: 80%;
 }
 
 .gray-bg {
