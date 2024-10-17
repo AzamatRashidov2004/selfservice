@@ -20,7 +20,7 @@ export const CustomNode = (props) => {
       }
       props.setHighlightedNodeId(props.node.id); // Update the highlighted node in the parent component
     }
-    
+
     props.onToggle(props.node.id);
   };
 
@@ -37,24 +37,29 @@ export const CustomNode = (props) => {
       style={{
         paddingInlineStart: indent,
         cursor: "pointer",
-        backgroundColor: props.highlightedNodeId === props.node.id ? '#e0f7fa' : 'transparent',
+        backgroundColor:
+          props.highlightedNodeId === props.node.id ? "#e0f7fa" : "transparent",
       }}
       className={`node-root depth-${props.depth}`}
-      onClick={(e) => { handleToggle(e, "row"); }}
+      onClick={(e) => {
+        handleToggle(e, "row");
+      }}
     >
       <div
         className={`expandIconWrapper ${props.isOpen ? "isOpen" : ""}`}
-        onClick={(e) => { handleToggle(e, "arrow"); }}
+        onClick={(e) => {
+          handleToggle(e, "arrow");
+        }}
       >
-        {props.node.droppable && (
-          <ArrowRightIcon />
-        )}
+        {props.node.droppable && <ArrowRightIcon />}
       </div>
       <div>
         <TypeIcon droppable={droppable} fileType={data?.fileType} />
       </div>
       <div className="labelGridItem">
-        <Typography variant="body2">{props.node.text}</Typography>
+        <Typography variant="body2" noWrap>
+          {props.node.text}
+        </Typography>
       </div>
     </div>
   );
