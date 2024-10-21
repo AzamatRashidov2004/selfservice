@@ -22,7 +22,7 @@ import { useNavigate } from "react-router-dom";
 import FileTree from "../../components/File-Tree/FileTree.jsx";
 import FileBrowser from "../../components/File-Browser/FileBrowser.jsx";
 import { FilesProvider } from "../../context/fileContext.tsx";
-import { ResizableBox, ResizeCallbackData  } from "react-resizable";
+import { ResizableBox, ResizeCallbackData } from "react-resizable";
 import "react-resizable/css/styles.css";
 
 const Dashboard: React.FC = () => {
@@ -238,17 +238,38 @@ const Dashboard: React.FC = () => {
     }
   });
 
-  const [width, setWidth] = useState(window.innerWidth * 0.8);
-  const [position, setPosition] = useState(0);
+  //const [width, setWidth] = useState(window.innerWidth * 0.8);
+  //const [position, setPosition] = useState(0);
+
+  const [fileBrowserWidth, setFileBrowserWidth] = useState<number>(
+    window.innerWidth * 0.6 // Start with 60% of the window width
+  );
+  const minFileTreeWidth = window.innerWidth * 0.2; // Minimum width of the file-tree-container
+  const parentWidth = window.innerWidth;
+  console.log("parent width: ", parentWidth);
 
   const handleResize = (
+    event: React.SyntheticEvent,
+    data: ResizeCallbackData
+  ) => {
+    if (data.size.width <= window.innerWidth * 0.6) {
+      console.log(
+        "data size widht and window inner width 80",
+        data.size.width,
+        window.innerWidth * 0.8
+      );
+      setFileBrowserWidth(data.size.width);
+    }
+  };
+
+  /*const handleResize = (
     event: React.SyntheticEvent,
     data: ResizeCallbackData
   ) => {
     const deltaWidth = width - data.size.width;
     setWidth(data.size.width);
     setPosition(position + deltaWidth);
-  };
+  };*/
 
   return (
     <section className="dashboard-section">
@@ -262,30 +283,25 @@ const Dashboard: React.FC = () => {
           <Loader />
         </div>
         <FilesProvider>
-        <div className="file-browser-wrapper">
-          <div className="file-tree-container">
-            <FileTree />
+          <div className="file-browser-wrapper">
+            <div className="file-tree-container">
+              <FileTree />
+            </div>
+            <div className="file-browser-container">
+              <ResizableBox
+                width={fileBrowserWidth}
+                axis="x"
+                minConstraints={[500, 0]}
+                maxConstraints={[parentWidth - minFileTreeWidth, Infinity]}
+                resizeHandles={["w"]}
+                onResize={handleResize}
+                style={{ minWidth: "500px" }}
+              >
+                <FileBrowser />
+              </ResizableBox>
+            </div>
           </div>
-          <div className="file-browser-container">
-          <ResizableBox
-            width={window.innerWidth * 0.8}
-            axis="x" // Restrict resizing to horizontal direction
-            minConstraints={[500, 0]} // Minimum width constraint, height is flexible
-            maxConstraints={[window.innerWidth * 0.8, Infinity]} // Maximum width constraint
-            resizeHandles={["w"]} // Set handle to east side for horizontal resizing
-            onResize={handleResize}
-            style={{ 
-              left: position, 
-              position: "relative",
-              maxWidth: '100%', // Ensure max width is also 100%
-              minHeight: "100% !important",
-            }}
-          >
-           <FileBrowser />
-          </ResizableBox>
-          </div>
-        </div>
-      </FilesProvider>
+        </FilesProvider>
         <table className="table main-table w-100 locked-hidden">
           <thead>
             <tr>
