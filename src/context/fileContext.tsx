@@ -1,11 +1,14 @@
 // FilesContext.tsx
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import sampleData from "./sampleData.json";
+import { projectFetchReturn } from '../utility/types';
+// import sampleData from "./sampleData.json";
 
 // Define the shape of your context data
 interface FileData {
   id: number;
   parent: number;
+  kronosKB_id: string | null;
+  kronosProjectId: string | null;
   droppable: boolean;
   text: string;
   data: {
@@ -23,11 +26,12 @@ interface TreeNode {
 }
 
 interface FilesContextType {
+  setProjectsContext: (projects: projectFetchReturn[]) => void;
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
   dragAndDropFile: (draggedFileId: string, destinationFolderId: string) => void;
   addFolder: (parentId: number, folderName: string) => void; 
-  addFiles: (parentId: number, files: File[]) => void; 
+  addFiles: (parentId: number, files: File[], project_id: string, kb_ids: string[]) => void; 
   deleteFiles: (ids: number[]) => void; // Add deleteFiles to the context type
   droppableTypes: string[];
   draggableTypes: string[];
@@ -67,8 +71,114 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [currentFolder, setCurrentFolder] = useState("0");
 
   useEffect(() => {
-    setFileStructure(sampleData); // Transform and set the initial state
+    setFileStructure([]); // Transform and set the initial state
   }, []);
+
+  function extractFoldersAndFile(path: string): { folders: string[], file: string } {
+    // Split the input path by the "/" delimiter
+    const parts = path.split("/");
+  
+    // The file will always be the last part of the array
+    const file = parts.pop() || ""; // Ensure we don't get undefined, fallback to an empty string
+  
+    // The remaining parts will be the folders
+    const folders = parts;
+  
+    return { folders, file };
+  }
+
+  function findFolderByName(
+    newFileStructure: FileData[], 
+    parentId: number, 
+    targetFolder: string
+  ): number | null {
+    // Find a folder that matches the parentId and the targetFolder name
+    const folder = newFileStructure.find(file => 
+      file.parent === parentId && 
+      file.droppable && // Ensure it's a folder (droppable should be true for folders)
+      file.text === targetFolder
+    );
+  
+    // If folder is found, return its id, else return null
+    return folder ? folder.id : null;
+  }
+
+  function handleSourceFile(
+    data: { source_file: string, _id: string, project_id: string },
+    projectFileStructureId: number,
+    newFileStructure: FileData[],
+    ids: number
+  ): { ids: number, newFileStructure: FileData[] } {
+    const { folders, file } = extractFoldersAndFile(data.source_file);
+  
+    if (folders) {
+      let lastFolderId = 0;
+  
+      for (let index = 0; index < folders.length; index++) {
+        const folder = folders[index];
+        const parentId = index === 0 ? projectFileStructureId : lastFolderId;
+  
+        const folderExists: number | null = findFolderByName(newFileStructure, parentId, folder);
+  
+        if (folderExists) {
+          lastFolderId = folderExists;
+        } else {
+          newFileStructure.push({
+            droppable: true,
+            id: ids,
+            parent: parentId,
+            text: folder,
+            data: { fileType: "folder" },
+            kronosKB_id: null,
+            kronosProjectId: null
+          });
+          lastFolderId = ids;
+          ids += 1;
+        }
+      }
+  
+      const fileParentId = lastFolderId !== 0 ? lastFolderId : projectFileStructureId;
+      newFileStructure.push({
+        droppable: false,
+        id: ids,
+        parent: fileParentId,
+        text: file,
+        data: { fileType: file.split(".")[file.split(".").length - 1] }, // Extract file extension
+        kronosKB_id: data._id,
+        kronosProjectId: data.project_id
+      });
+      ids += 1;
+    }
+  
+    return { ids, newFileStructure };
+  }
+  
+
+  const setProjectsContext = (projects: projectFetchReturn[]) => {
+    if (projects.length === 0) return;
+    let ids = 1;
+    let newFileStructure: FileData[] = [];
+    projects.forEach(currentProject => {
+      const project = currentProject.project;
+      const projectData = currentProject.projectData;
+      const projectText = project.name && project.name.trim() !== "" ? project.name : project._id;
+      const projectFileStructureId = ids;
+
+      // Add project folder
+      newFileStructure.push({droppable: true, id: ids, parent: 0, text: projectText, data: {fileType: "project"}, kronosKB_id: project._id, kronosProjectId: project._id})
+      ids += 1;
+
+      // Handle project data
+      projectData.forEach(data => {
+        const result = handleSourceFile(data, projectFileStructureId, newFileStructure, ids);
+        ids = result.ids;
+        newFileStructure = result.newFileStructure;
+      });
+
+    });
+
+    setFileStructure(newFileStructure);
+  }
 
   const getFileStructure = (isFileBrowserObject: boolean = false): FileData[] | TreeNode[] => {
     if (isFileBrowserObject) {
@@ -118,13 +228,15 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       data: {
         fileType: folderFileType,
       },
+      kronosKB_id: null,
+      kronosProjectId: null
     };
 
     setFilesData((prevFilesData) => [...prevFilesData, newFolder]);
   };
 
   // New function to add files
-  const addFiles = (parentId: number, files: File[]) => {
+  const addFiles = (parentId: number, files: File[], project_id: string, kb_ids: string[]) => {
     // Create new files based on the input files
     const newFiles = files.map((file, index) => {
       // Extract the base file type (e.g., "pdf" from "application/pdf")
@@ -139,6 +251,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           fileType: fileType, // Set the file type from the file object
           fileSize: `${(file.size / (1024 * 1024)).toFixed(2)}MB`, // Convert file size to string and format
         },
+        kronosKB_id: kb_ids[index], // TODO when adding files add here the 
+        kronosProjectId: project_id
       };
     });
   
@@ -155,6 +269,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"];
 
   const contextValue: FilesContextType = {
+    setProjectsContext,
     getFileStructure,
     setFileStructure,
     dragAndDropFile,

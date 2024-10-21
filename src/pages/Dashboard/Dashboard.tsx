@@ -21,9 +21,9 @@ import { useAuth } from "../../context/authContext.tsx";
 import { useNavigate } from "react-router-dom";
 import FileTree from "../../components/File-Tree/FileTree.jsx";
 import FileBrowser from "../../components/File-Browser/FileBrowser.jsx";
-import { FilesProvider } from "../../context/fileContext.tsx";
 import { ResizableBox, ResizeCallbackData } from "react-resizable";
 import "react-resizable/css/styles.css";
+import { useFiles } from "../../context/fileContext.tsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -34,6 +34,8 @@ const Dashboard: React.FC = () => {
   const [selectedProjectID, setSelectedProjectID] = useState<string | null>(
     null
   );
+
+  const { setProjectsContext } = useFiles();
 
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
   const accordionRef = useRef<HTMLDivElement>(null);
@@ -224,7 +226,9 @@ const Dashboard: React.FC = () => {
       root.style.setProperty("--even-analytical-project-bg", "#FFFFFF");
       root.style.setProperty("--odd-analytical-project-bg", "#F2F2F2");
     }
-  }, [projects]);
+    console.log("PROJECTS UPDATED", projects);
+    setProjectsContext(projects);
+  }, [projects, setProjectsContext]);
 
   useEffect(() => {
     const table = document.getElementsByTagName("table");
@@ -282,26 +286,24 @@ const Dashboard: React.FC = () => {
         <div className="loader-container">
           <Loader />
         </div>
-        <FilesProvider>
-          <div className="file-browser-wrapper">
-            <div className="file-tree-container">
-              <FileTree />
-            </div>
-            <div className="file-browser-container">
-              <ResizableBox
-                width={fileBrowserWidth}
-                axis="x"
-                minConstraints={[500, 0]}
-                maxConstraints={[parentWidth - minFileTreeWidth, Infinity]}
-                resizeHandles={["w"]}
-                onResize={handleResize}
-                style={{ minWidth: "500px" }}
-              >
-                <FileBrowser />
-              </ResizableBox>
-            </div>
+        <div className="file-browser-wrapper">
+          <div className="file-tree-container">
+            <FileTree />
           </div>
-        </FilesProvider>
+          <div className="file-browser-container">
+            <ResizableBox
+              width={fileBrowserWidth}
+              axis="x"
+              minConstraints={[500, 0]}
+              maxConstraints={[parentWidth - minFileTreeWidth, Infinity]}
+              resizeHandles={["w"]}
+              onResize={handleResize}
+              style={{ minWidth: "500px" }}
+            >
+              <FileBrowser />
+            </ResizableBox>
+          </div>
+        </div>
         <table className="table main-table w-100 locked-hidden">
           <thead>
             <tr>

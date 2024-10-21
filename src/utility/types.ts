@@ -148,8 +148,6 @@ export interface PopupState {
     source_type: string;
     created_at: string;
     model_version: number;
-
-    chatbot_config: SettingsType;
   }
 
 
