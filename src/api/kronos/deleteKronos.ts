@@ -42,6 +42,31 @@ export async function deletePdf(projectID: string, docID: string, token: string)
   }catch (e: unknown) {
     handleError({error: e, origin: "deletePdf"})
     return false 
-    
+  }
+}
+
+
+export async function deleteBulkPdf(projectID: string, docIds: string[], token:string): Promise<boolean> {
+  try{
+    const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/bulk`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer + ${token}`,
+        'x-api-key': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(docIds)
+    });
+  
+    if (!projectResponse.ok){
+      console.error("Error while trying to delete files " + projectResponse.statusText);
+      return false
+    }
+  
+    return true
+
+  }catch (e: unknown) {
+    handleError({error: e, origin: "deleteBulkPdf"})
+    return false 
   }
 }

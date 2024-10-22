@@ -8,6 +8,8 @@ import {
 import { updateSinglePath } from "../../../utility/Api_Utils";
 import handlePathChangeAtDepth from "../../../utility/FileSystem_Utils";
 import { updatePathBulk } from "../../../api/kronos/postKronos";
+import { deleteBulkPdf } from "../../../api/kronos/deleteKronos";
+import { getPdfFile } from "../../../api/kronos/getKronos";
 
 async function handleAction(
   data,
@@ -121,10 +123,50 @@ async function handleAction(
     // });
   }
 
-  if (data.id === "delete_files") {
-    fileContext.deleteFiles(
-      data.state.selectedFiles.map((file) => parseInt(file.id))
+  if (data.id === "download_files") {
+    if (!keycloak || !keycloak.token) return;
+
+    const selectedFile = data.state.selectedFiles[0];
+    const currentNode = getNodeInfo(parseInt(selectedFile.id));
+
+    if (currentNode.droppable) return;
+
+    await getPdfFile(
+      currentNode.kronosProjectId,
+      currentNode.kronosKB_id,
+      currentNode.text,
+      keycloak.token
     );
+  }
+
+  if (data.id === "delete_files") {
+    if (!keycloak || !keycloak.token) return;
+
+    const selectedFiles = data.state.selectedFiles;
+    let project_id;
+    const payload = [];
+    selectedFiles.forEach((file) => {
+      const nodeInfo = getNodeInfo(parseInt(file.id));
+      if (nodeInfo.droppable) {
+        // Droppable, extract children
+        const children = getAllChildren(nodeInfo.id);
+        children.forEach((childNode) => {
+          payload.push(childNode.kronosKB_id);
+        });
+      } else {
+        // File, add to list
+        payload.push(nodeInfo.kronosKB_id);
+      }
+      if (!project_id)
+        project_id = getProjectForNode(parseInt(file.id)).kronosProjectId;
+    });
+
+    const result = await deleteBulkPdf(project_id, payload, keycloak.token);
+    if (result) {
+      await fileContext.deleteFiles(
+        selectedFiles.map((file) => parseInt(file.id))
+      );
+    }
   }
 }
 

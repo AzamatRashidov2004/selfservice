@@ -31,16 +31,16 @@ function FileTree() {
     const newPath = getPathFromProject(parseInt(dropTargetId));
     const nodeInfo = getNodeInfo(parseInt(dragSourceId));
 
-    if (nodeInfo.droppable){
+    if (nodeInfo.droppable){ // Folder drag
       const children = getAllChildren(parseInt(nodeInfo.id));
-      if (!children || children.length === 0){
+      if (!children || children.length === 0){ // Empty folder, just change UI
         dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
         return;
       }
       const payload = [];
       const targetDepth = getDepth(parseInt(nodeInfo.id));
       
-      children.forEach((childNode) => {
+      children.forEach((childNode) => { // Update the paths of all children files
         const newChildPath = handlePathChangeAtDepth(
           targetDepth,
           newPath,
@@ -58,7 +58,7 @@ function FileTree() {
         return dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
       }
 
-    }else{
+    }else{ // Single file drag
       const result = await updateSinglePath(
         nodeInfo.kronosProjectId,
         nodeInfo.kronosKB_id,
