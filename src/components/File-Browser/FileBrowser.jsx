@@ -6,14 +6,16 @@ import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
+import { useAuth } from "../../context/authContext";
 
 export default function FileBrowser() {
-  const { getFileStructure, dragAndDropFile, currentFolder, setCurrentFolder, addFolder, addFiles, deleteFiles } = useFiles(); // Get the context function
+  const { getFileStructure, dragAndDropFile, currentFolder, setCurrentFolder, addFolder, addFiles, deleteFiles, getProjectForNode, getDepth, getAllChildren, getNodeInfo, getPathFromProject } = useFiles(); // Get the context function
+  const { keycloak } = useAuth();
 
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
-      handleAction(data, setCurrentFolder, { getFileStructure, dragAndDropFile, addFolder, addFiles, deleteFiles }, currentFolder);
+      handleAction(data, setCurrentFolder, { getFileStructure, dragAndDropFile, addFolder, addFiles, deleteFiles, getProjectForNode, getDepth, getAllChildren, getNodeInfo, getPathFromProject }, currentFolder, keycloak);
     },
     [getFileStructure, dragAndDropFile]
   );

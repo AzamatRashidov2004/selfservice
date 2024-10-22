@@ -228,7 +228,7 @@ const Dashboard: React.FC = () => {
     }
     console.log("PROJECTS UPDATED", projects);
     setProjectsContext(projects);
-  }, [projects, setProjectsContext]);
+  }, [projects]);
 
   useEffect(() => {
     const table = document.getElementsByTagName("table");

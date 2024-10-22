@@ -29,13 +29,18 @@ interface FilesContextType {
   setProjectsContext: (projects: projectFetchReturn[]) => void;
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
-  dragAndDropFile: (draggedFileId: string, destinationFolderId: string) => void;
+  dragAndDropFile: (destinationFolderId: string, selectedFilse: {id: string}[]) => void;
   addFolder: (parentId: number, folderName: string) => void; 
   addFiles: (parentId: number, files: File[], project_id: string, kb_ids: string[]) => void; 
   deleteFiles: (ids: number[]) => void; // Add deleteFiles to the context type
+  getAllChildren: (nodeId: number) => FileData[];
   droppableTypes: string[];
   draggableTypes: string[];
+  getDepth: (nodeId: number) => number;
   currentFolder: string;
+  getPathFromProject: (nodeId: number) => string;
+  getProjectForNode: (nodeId: number) => FileData | undefined;
+  getNodeInfo: (nodeId: number) => FileData | undefined;
   setCurrentFolder: React.Dispatch<React.SetStateAction<string>>;
 }
 
@@ -187,20 +192,70 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     return filesData;
   };
 
+  const getDepth = (nodeId: number): number => {
+    const nodeInfo = getNodeInfo(nodeId);
+    let parentId = nodeInfo?.parent;
+    let depth = 0;
+    while (parentId && parentId !== 0){
+      depth += 1;
+      parentId = getNodeInfo(parentId)?.parent;
+    }
+    return depth;
+  };
+
   const setFileStructure = (newFilesData: FileData[]) => {
     setFilesData(newFilesData);
   };
 
-  const dragAndDropFile = (draggedFileId: string, destinationFolderId: string) => {
-    const draggedId = parseInt(draggedFileId);
-    const destinationId = parseInt(destinationFolderId);
+  const getNodeInfo = (nodeId: number) => {
+    return filesData.find(file => file.id === nodeId);
+  }
 
+  const getAllChildren = (nodeId: number): FileData[] => {
+    // Helper function to recursively gather children
+    const findChildren = (parentId: number, allFiles: FileData[]): FileData[] => {
+      const children = allFiles.filter(file => file.parent === parentId);
+      
+      // Recursively find each child's children and append them to the result
+      return children.reduce((acc, child) => {
+        return [...acc, child, ...findChildren(child.id, allFiles)];
+      }, [] as FileData[]);
+    };
+  
+    // Start with the given nodeId and recursively gather its children
+    return findChildren(nodeId, filesData);
+  };
+
+  const getProjectForNode = (nodeId: number): FileData | undefined => {
+    const findParent = (currentId: number): FileData | undefined => {
+      const currentNode = filesData.find(file => file.id === currentId);
+      
+      if (!currentNode) return undefined; // Stop if node doesn't exist
+  
+      // Stop if the current node is a "project" and return it
+      if (currentNode.data.fileType === "project") {
+        return currentNode;
+      }
+  
+      // Recur to the parent node
+      return findParent(currentNode.parent);
+    };
+  
+    // Start the recursive parent search from the given nodeId
+    return findParent(nodeId);
+  };
+
+  const dragAndDropFile = (destinationFolderId: string, selectedFiles: {id: string}[]) => {
+    const destinationId = parseInt(destinationFolderId);
+    
     setFilesData((prevFilesData) => {
       return prevFilesData.map((file) => {
-        if (file.id === draggedId) {
+        // Check if the file is in the selectedFiles array
+        if (selectedFiles.some(selectedFile => parseInt(selectedFile.id) === file.id)) {
+          // If it is, return a new object with the updated parent
           return { ...file, parent: destinationId };
         }
-        return file;
+        return file; // Return the file unchanged if it's not selected
       });
     });
   };
@@ -217,7 +272,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       folderFileType = "project";
     }
     if (parentFile && parentFile.data.fileType === "project") {
-      folderFileType = "program"; // If added under a project, set type to program
+      folderFileType = "folder"; // If added under a project, set type to program
     }
 
     const newFolder: FileData = {
@@ -241,6 +296,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     const newFiles = files.map((file, index) => {
       // Extract the base file type (e.g., "pdf" from "application/pdf")
       const fileType = file.type.split('/')[1]; 
+      const path = getPathFromProject(parentId);
   
       return {
         id: Math.max(...filesData.map(f => f.id)) + index + 1, // Assign new unique ID
@@ -252,12 +308,49 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           fileSize: `${(file.size / (1024 * 1024)).toFixed(2)}MB`, // Convert file size to string and format
         },
         kronosKB_id: kb_ids[index], // TODO when adding files add here the 
-        kronosProjectId: project_id
+        kronosProjectId: project_id,
+        source_file: path + file.name
       };
     });
   
     // Update the state with the new files
     setFilesData((prevFilesData) => [...prevFilesData, ...newFiles]);
+  };
+
+  const getPathFromProject = (nodeId: number): string => {
+    const path: string[] = [];
+    let targetNode: FileData | undefined;
+  
+    const findParent = (currentId: number): FileData | undefined => {
+      const currentNode = filesData.find(file => file.id === currentId);
+      
+      if (!currentNode) return undefined; // Stop if node doesn't exist
+  
+      // Stop if the current node is a "project", but don't add it to the path
+      if (currentNode.data.fileType === "project") {
+        return currentNode;
+      }
+  
+      // Add current node's name to the path (we add it in reverse order)
+      path.push(currentNode.text);
+  
+      // Keep track of the target node
+      if (!targetNode) {
+        targetNode = currentNode;
+      }
+  
+      // Recur to the parent node
+      return findParent(currentNode.parent);
+    };
+  
+    // Start the recursive parent search from the given nodeId
+    findParent(nodeId);
+  
+    // Check if the target node is a file or folder
+    const isFolder = targetNode?.droppable;
+  
+    // Return the constructed path, joined by "/", and append "/" only if it's a folder
+    return path.reverse().join("/") + (isFolder ? "/" : "");
   };
 
   // Function to delete files by IDs
@@ -273,7 +366,12 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     getFileStructure,
     setFileStructure,
     dragAndDropFile,
+    getProjectForNode,
+    getPathFromProject,
+    getAllChildren,
     addFolder,
+    getNodeInfo,
+    getDepth,
     addFiles,
     deleteFiles,
     droppableTypes,

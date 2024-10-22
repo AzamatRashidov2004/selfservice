@@ -162,3 +162,57 @@ export async function updatePdfConfig(
       return false;
     }
   }
+
+  export async function updatePathBulk(projectID: string, knowledge_bases: {_id: string, project_id: string, source_file: string}[], token: string): Promise<boolean> {
+    try{
+      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/bulk`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer + ${token}`,
+          'x-api-key': apiKey
+        },
+        body: JSON.stringify(knowledge_bases)
+      });
+    
+      if (!projectResponse.ok){
+        console.error("Error while trying to update knowledge base path" + projectResponse.statusText);
+        return false;
+      }
+    
+      return true;
+      
+    }catch(e: unknown){
+      handleError({error: e, origin: "updatePdfConfig"})
+      return false
+    }
+  }
+
+  export async function updatePathSingle(projectID: string, kb_id: string, newPath: string, token: string): Promise<boolean> {
+    try{
+      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/${kb_id}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer + ${token}`,
+          'x-api-key': apiKey
+        },
+        body: JSON.stringify({
+            _id: kb_id,
+            project_id: projectID,
+            source_file: newPath
+        })
+      });
+    
+      if (!projectResponse.ok){
+        console.error("Error while trying to update knowledge base path" + projectResponse.statusText);
+        return false;
+      }
+    
+      return true;
+      
+    }catch(e: unknown){
+      handleError({error: e, origin: "updatePdfConfig"})
+      return false
+    }
+  }

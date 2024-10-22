@@ -11,6 +11,7 @@ import {
   updatePdfConfig,
   createKronosProject,
   uploadMultiplePdfs,
+  updatePathSingle,
 } from "../api/kronos/postKronos.ts";
 import {
   fetchProjectsDataReturn,
@@ -51,6 +52,16 @@ export async function handleGetSingleConfig(
   }
 
   return config;
+}
+
+// export async function updateBulkPaths()
+
+export async function updateSinglePath(projectId: string, kb_id: string, newPath: string, token: string): Promise<boolean> {
+  const result = await updatePathSingle(projectId, kb_id, newPath, token);
+  if (!result){
+    return false;
+  }
+  return true;
 }
 
 async function getAllProjectsAndProjectData(token: string): Promise<projectFetchReturn[]> {

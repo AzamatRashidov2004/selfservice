@@ -11,17 +11,64 @@ import { CustomDragPreview } from "./sub-components/DragPreview";
 import { theme } from "./sub-components/Theme";
 import { useFiles } from "../../context/fileContext";
 import "./FileTree.css";
+import { useAuth } from "../../context/authContext";
+import { updateSinglePath } from "../../utility/Api_Utils";
+import { updatePathBulk } from "../../api/kronos/postKronos";
+import handlePathChangeAtDepth from "../../utility/FileSystem_Utils";
 
 function FileTree() {
-  const { getFileStructure, dragAndDropFile, draggableTypes, droppableTypes } =
+  const { getFileStructure, dragAndDropFile, draggableTypes, droppableTypes, getPathFromProject, getNodeInfo, getAllChildren, getDepth } =
     useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null); // Moved highlighted state here
+  const { keycloak } = useAuth();
 
-  const handleDrop = (newTree, { dragSourceId, dropTargetId }) => {
+  async function handleDrop(newTree, { dragSourceId, dropTargetId }) {
     if (dragSourceId === dropTargetId) return;
-    dragAndDropFile(dragSourceId, dropTargetId);
+    if (!keycloak || !keycloak.token) return;
+
+    const newPath = getPathFromProject(parseInt(dropTargetId));
+    const nodeInfo = getNodeInfo(parseInt(dragSourceId));
+
+    if (nodeInfo.droppable){
+      const children = getAllChildren(parseInt(nodeInfo.id));
+      if (!children || children.length === 0){
+        dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+        return;
+      }
+      const payload = [];
+      const targetDepth = getDepth(parseInt(nodeInfo.id));
+      
+      children.forEach((childNode) => {
+        const newChildPath = handlePathChangeAtDepth(
+          targetDepth,
+          newPath,
+          childNode,
+          getPathFromProject
+        );
+        payload.push({
+          id: childNode.kronosKB_id,
+          project_id: childNode.kronosProjectId,
+          source_file: newChildPath,
+        });
+      });
+      const result = await updatePathBulk(nodeInfo.kronosProjectId, payload, keycloak.token);
+      if (result){
+        return dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+      }
+
+    }else{
+      const result = await updateSinglePath(
+        nodeInfo.kronosProjectId,
+        nodeInfo.kronosKB_id,
+        `${newPath}${nodeInfo.text}`,
+        keycloak.token
+      );
+      if (result){
+        return dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+      }
+    }
   };
 
   function updateNode(node, depth, hasChild) {
