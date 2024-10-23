@@ -1,6 +1,6 @@
 // FilesContext.tsx
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { projectFetchReturn } from '../utility/types';
+import { kronosKnowledgeBaseType, projectFetchReturn } from '../utility/types';
 // import sampleData from "./sampleData.json";
 
 // Define the shape of your context data
@@ -31,7 +31,7 @@ interface FilesContextType {
   setFileStructure: (newFilesData: FileData[]) => void;
   dragAndDropFile: (destinationFolderId: string, selectedFilse: {id: string}[]) => void;
   addFolder: (parentId: number, folderName: string) => void; 
-  addFiles: (parentId: number, files: File[], project_id: string, kb_ids: string[]) => void; 
+  addFiles: (parentId: number, files: File[], project_id: string, kb_ids: kronosKnowledgeBaseType[]) => void; 
   deleteFiles: (ids: number[]) => void; // Add deleteFiles to the context type
   getAllChildren: (nodeId: number) => FileData[];
   droppableTypes: string[];
@@ -291,7 +291,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   // New function to add files
-  const addFiles = (parentId: number, files: File[], project_id: string, kb_ids: string[]) => {
+  const addFiles = (parentId: number, files: File[], project_id: string, kb_ids: kronosKnowledgeBaseType[]) => {
     // Create new files based on the input files
     const newFiles = files.map((file, index) => {
       // Extract the base file type (e.g., "pdf" from "application/pdf")
@@ -307,7 +307,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           fileType: fileType, // Set the file type from the file object
           fileSize: `${(file.size / (1024 * 1024)).toFixed(2)}MB`, // Convert file size to string and format
         },
-        kronosKB_id: kb_ids[index], // TODO when adding files add here the 
+        kronosKB_id: kb_ids[index]._id, // TODO when adding files add here the 
         kronosProjectId: project_id,
         source_file: path + file.name
       };

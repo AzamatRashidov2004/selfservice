@@ -7,7 +7,10 @@ import {
 
 import { updateSinglePath } from "../../../utility/Api_Utils";
 import handlePathChangeAtDepth from "../../../utility/FileSystem_Utils";
-import { updatePathBulk } from "../../../api/kronos/postKronos";
+import {
+  updatePathBulk,
+  uploadMultiplePdfs,
+} from "../../../api/kronos/postKronos";
 import { deleteBulkPdf } from "../../../api/kronos/deleteKronos";
 import { getPdfFile } from "../../../api/kronos/getKronos";
 
@@ -115,12 +118,29 @@ async function handleAction(
 
   // Handle Create File custom action
   if (data.id === "upload") {
-    const projectInfo = getProjectForNode(parseInt(currentFolder));
-    const targetPath = getPathFromProject(parseInt(currentFolder));
-    console.log(projectInfo, targetPath);
-    // createUploadFileModalEvent((files) => {
-    //   fileContext.addFiles(parseInt(currentFolder), files);
-    // });
+    if (!keycloak || !keycloak.token) return;
+
+    let path = getPathFromProject(parseInt(currentFolder));
+    const project = getProjectForNode(parseInt(currentFolder));
+
+    if (path.lengt > 0) path = path.slice(0, -1);
+    createUploadFileModalEvent(async (files) => {
+      const result = await uploadMultiplePdfs(
+        files,
+        project.kronosProjectId,
+        path,
+        keycloak.token
+      );
+      console.log("RESULT", result);
+      if (result) {
+        fileContext.addFiles(
+          parseInt(currentFolder),
+          files,
+          project.kronosProjectId,
+          result
+        );
+      }
+    });
   }
 
   if (data.id === "download_files") {

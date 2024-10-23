@@ -195,7 +195,7 @@ export async function createInitialKronosProject(
   if (!kronosProject) return false;
   if (setLoading) setLoading(true);
 
-  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id, token);
+  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id, "", token);
 
   if (!filesUpload) {
     // Delete the created project if file upload fails

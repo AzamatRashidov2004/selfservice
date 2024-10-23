@@ -1,5 +1,5 @@
 import { kronosApiUrl as apiUrl, kronosApiKey as apiKey, handleError } from "../apiEnv";
-import { SettingsType, KronosProjectType } from "../../utility/types";
+import { SettingsType, KronosProjectType, kronosKnowledgeBaseType } from "../../utility/types";
 
 export async function createKronosProject(projectName="", description="", chatbot_config: SettingsType, token: string): Promise<KronosProjectType | null>{
 
@@ -100,21 +100,21 @@ export async function updatePdfConfig(
   
   }
 
-  export async function uploadMultiplePdfs(files: FileList, projectID: string, token: string): Promise<boolean> {
+  export async function uploadMultiplePdfs(files: FileList, projectID: string, path: string,token: string): Promise<kronosKnowledgeBaseType[] | null> {
     try {
       const fileArray = Array.from(files);
       const MAX_BATCH_SIZE = 200 * 1024 * 1024; // 200MB in bytes
   
       let currentBatch = [];
       let currentBatchSize = 0;
-  
+      let response: kronosKnowledgeBaseType[] = [];
       for (const file of fileArray) {
         // Check if adding the next file exceeds the batch size limit
         if (currentBatchSize + file.size > MAX_BATCH_SIZE) {
           // Upload the current batch
-          const success = await uploadBatch(currentBatch, projectID, token);
-          if (!success) return false; // If upload fails, return false
-  
+          const result = await uploadBatch(currentBatch, projectID, path, token);
+          if (!result) return null; // If upload fails, return false
+          response = [...response, ...result];
           // Reset for the next batch
           currentBatch = [];
           currentBatchSize = 0;
@@ -126,18 +126,22 @@ export async function updatePdfConfig(
   
       // Upload any remaining files in the last batch
       if (currentBatch.length > 0) {
-        const success = await uploadBatch(currentBatch, projectID, token);
-        if (!success) return false; // If upload fails, return false
+        const result = await uploadBatch(currentBatch, projectID, path, token);
+        if (!result) return null; // If upload fails, return false
+        response = [...response, ...result];
       }
-  
-      return true; // Return true if all batches uploaded successfully
+      return response;
     } catch (e: unknown) {
-      handleError({ error: e, origin: "uploadPdf" });
-      return false;
+      return handleError({ error: e, origin: "uploadPdf" });;
     }
   }
   
-  async function uploadBatch(files: File[], projectID: string, token: string): Promise<boolean> {
+  async function uploadBatch(
+    files: File[], 
+    projectID: string, 
+    sourcePath: string,
+    token: string
+  ): Promise<kronosKnowledgeBaseType[] | null> {
     try {
       // Create a new FormData object for the current batch
       const formData = new FormData();
@@ -147,19 +151,27 @@ export async function updatePdfConfig(
         formData.append('files', file);
       });
   
-      const projectResponse: Response = await fetch(`${apiUrl}/projects/${projectID}/knowledge_base/file/bulk`, {
+      // Create a URL object and append query parameters
+      const url = new URL(`${apiUrl}/projects/${projectID}/knowledge_base/file/bulk`);
+      url.searchParams.append('source_path', sourcePath);
+  
+      const projectResponse: Response = await fetch(url.toString(), {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer + ${token}`,
+          'Authorization': `Bearer ${token}`,
           'x-api-key': apiKey
         },
         body: formData
       });
-  
-      return projectResponse.ok; // Return true if successful, false otherwise
+      
+      if (!projectResponse.ok) {
+        return null;  // Return null if the response was not successful
+      }
+      const responseData: kronosKnowledgeBaseType[] = await projectResponse.json();
+      
+      return responseData;
     } catch (e: unknown) {
-      handleError({ error: e, origin: "uploadBatch" });
-      return false;
+      return handleError({ error: e, origin: "uploadBatch" });;
     }
   }
 

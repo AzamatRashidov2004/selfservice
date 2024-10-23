@@ -108,7 +108,7 @@ const ProjectFiles: React.FC<ProjectFilesProps> = ({
     if (!files || !keycloak.token) return;
     setLoading(true);
 
-    const response = await uploadMultiplePdfs(files, projectId, keycloak.token);
+    const response = await uploadMultiplePdfs(files, projectId, "", keycloak.token);
 
     if (!response) {
       setLoading(false);
