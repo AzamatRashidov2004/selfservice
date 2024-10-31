@@ -124,7 +124,7 @@ function FileTree() {
         <CssBaseline />
         <DndProvider backend={MultiBackend} options={getBackendOptions()}>
           {pdfVisible ? (
-            <PdfViewer setPdfVisible={setPdfVisible} pdfUrl={pdfUrl} />
+            <PdfViewer setVisible={setPdfVisible} pdfUrl={pdfUrl} />
           ) : (
             <div className="FileTree-Container">
               <Tree
