@@ -35,6 +35,20 @@ export const CustomNode = (props) => {
     props.updateNode(props.node);
   }, [props.hasChild]);
 
+  const handleDoubleClick = () => {
+    const file = data; // Ensure data is a File object or adjust if needed.
+    console.log("file is: ", data);
+
+    if (file && file.fileType === "pdf") {
+      setPdfVisible(true);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setPdfUrl(event.target.result); // Set the data URL for the PDF
+      };
+      reader.readAsDataURL(file); // Read the file as a data URL
+    }
+  };
+
   return (
     <div
       style={{
