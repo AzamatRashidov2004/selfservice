@@ -4,6 +4,9 @@
   margin-bottom: 90px !important;
   padding: 0 !important;
   margin-top: 50px !important;
+  position: absolute !important;
+  top: 0px !important;
+  right: 0px !important;
 }
 
 .overlay {
