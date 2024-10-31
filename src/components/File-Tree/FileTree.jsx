@@ -15,14 +15,26 @@ import { useAuth } from "../../context/authContext";
 import { updateSinglePath } from "../../utility/Api_Utils";
 import { updatePathBulk } from "../../api/kronos/postKronos";
 import handlePathChangeAtDepth from "../../utility/FileSystem_Utils";
+import PdfViewer from "../PDF-viewer/PdfViewer.tsx";
 
 function FileTree() {
-  const { getFileStructure, dragAndDropFile, draggableTypes, droppableTypes, getPathFromProject, getNodeInfo, getAllChildren, getDepth } =
-    useFiles();
+  const {
+    getFileStructure,
+    dragAndDropFile,
+    draggableTypes,
+    droppableTypes,
+    getPathFromProject,
+    getNodeInfo,
+    getAllChildren,
+    getDepth,
+  } = useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null); // Moved highlighted state here
   const { keycloak } = useAuth();
+
+  const [pdfVisible, setPdfVisible] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
 
   async function handleDrop(newTree, { dragSourceId, dropTargetId }) {
     if (dragSourceId === dropTargetId) return;
@@ -31,16 +43,19 @@ function FileTree() {
     const newPath = getPathFromProject(parseInt(dropTargetId));
     const nodeInfo = getNodeInfo(parseInt(dragSourceId));
 
-    if (nodeInfo.droppable){ // Folder drag
+    if (nodeInfo.droppable) {
+      // Folder drag
       const children = getAllChildren(parseInt(nodeInfo.id));
-      if (!children || children.length === 0){ // Empty folder, just change UI
-        dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+      if (!children || children.length === 0) {
+        // Empty folder, just change UI
+        dragAndDropFile(dropTargetId, [{ id: dragSourceId }]);
         return;
       }
       const payload = [];
       const targetDepth = getDepth(parseInt(nodeInfo.id));
-      
-      children.forEach((childNode) => { // Update the paths of all children files
+
+      children.forEach((childNode) => {
+        // Update the paths of all children files
         const newChildPath = handlePathChangeAtDepth(
           targetDepth,
           newPath,
@@ -53,23 +68,27 @@ function FileTree() {
           source_file: newChildPath,
         });
       });
-      const result = await updatePathBulk(nodeInfo.kronosProjectId, payload, keycloak.token);
-      if (result){
-        return dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+      const result = await updatePathBulk(
+        nodeInfo.kronosProjectId,
+        payload,
+        keycloak.token
+      );
+      if (result) {
+        return dragAndDropFile(dropTargetId, [{ id: dragSourceId }]);
       }
-
-    }else{ // Single file drag
+    } else {
+      // Single file drag
       const result = await updateSinglePath(
         nodeInfo.kronosProjectId,
         nodeInfo.kronosKB_id,
         `${newPath}${nodeInfo.text}`,
         keycloak.token
       );
-      if (result){
-        return dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+      if (result) {
+        return dragAndDropFile(dropTargetId, [{ id: dragSourceId }]);
       }
     }
-  };
+  }
 
   function updateNode(node, depth, hasChild) {
     let checkExist = false;
@@ -104,60 +123,75 @@ function FileTree() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <DndProvider backend={MultiBackend} options={getBackendOptions()}>
-          <div className="FileTree-Container">
-            <Tree
-              tree={getFileStructure(false)}
-              rootId={0}
-              initialOpen={true}
-              render={(
-                node,
-                { depth, isOpen, onToggle, isDragging, isDropTarget, hasChild }
-              ) => (
-                <CustomNode
-                  node={node}
-                  depth={depth}
-                  isOpen={isOpen}
-                  onToggle={onToggle}
-                  isDragging={isDragging}
-                  isDropTarget={isDropTarget}
-                  draggingNode={draggingNode}
-                  hasChild={hasChild}
-                  updateNode={(value) => {
-                    updateNode(value, depth, hasChild);
-                  }}
-                  highlightedNodeId={highlightedNodeId} // Pass down the highlighted node id
-                  setHighlightedNodeId={setHighlightedNodeId} // Pass down the setter function
-                />
-              )}
-              dragPreviewRender={(monitorProps) => (
-                <CustomDragPreview monitorProps={monitorProps} />
-              )}
-              onDrop={handleDrop}
-              canDrop={(
-                treeData,
-                { dragSource, dropTarget, dropTargetId, dragSourceId }
-              ) => {
-                if (dragSource !== dropTarget) {
-                  let dropT = getDropTarget(dropTargetId);
-                  let dragT = getDragTarget(dragSourceId);
-                  if (dropT && dragT) {
-                    if (
-                      droppableTypes.includes(dropT.data.fileType) &&
-                      draggableTypes.includes(dragT.data.fileType)
-                    ) {
-                      return true;
+          {pdfVisible ? (
+            <PdfViewer setPdfVisible={setPdfVisible} pdfUrl={pdfUrl} />
+          ) : (
+            <div className="FileTree-Container">
+              <Tree
+                tree={getFileStructure(false)}
+                rootId={0}
+                initialOpen={true}
+                render={(
+                  node,
+                  {
+                    depth,
+                    isOpen,
+                    onToggle,
+                    isDragging,
+                    isDropTarget,
+                    hasChild,
+                  }
+                ) => (
+                  <CustomNode
+                    node={node}
+                    depth={depth}
+                    isOpen={isOpen}
+                    onToggle={onToggle}
+                    isDragging={isDragging}
+                    isDropTarget={isDropTarget}
+                    draggingNode={draggingNode}
+                    hasChild={hasChild}
+                    updateNode={(value) => {
+                      updateNode(value, depth, hasChild);
+                    }}
+                    highlightedNodeId={highlightedNodeId} // Pass down the highlighted node id
+                    setHighlightedNodeId={setHighlightedNodeId} // Pass down the setter function
+                    setPdfVisible={setPdfVisible}
+                    pdfVisible={setPdfVisible}
+                    setPdfUrl={setPdfUrl}
+                    pdfUrl={setPdfUrl}
+                  />
+                )}
+                dragPreviewRender={(monitorProps) => (
+                  <CustomDragPreview monitorProps={monitorProps} />
+                )}
+                onDrop={handleDrop}
+                canDrop={(
+                  treeData,
+                  { dragSource, dropTarget, dropTargetId, dragSourceId }
+                ) => {
+                  if (dragSource !== dropTarget) {
+                    let dropT = getDropTarget(dropTargetId);
+                    let dragT = getDragTarget(dragSourceId);
+                    if (dropT && dragT) {
+                      if (
+                        droppableTypes.includes(dropT.data.fileType) &&
+                        draggableTypes.includes(dragT.data.fileType)
+                      ) {
+                        return true;
+                      }
                     }
                   }
-                }
-                return false;
-              }}
-              classes={{
-                root: "treeRoot",
-                draggingSource: "draggingSource",
-                dropTarget: "dropTarget",
-              }}
-            />
-          </div>
+                  return false;
+                }}
+                classes={{
+                  root: "treeRoot",
+                  draggingSource: "draggingSource",
+                  dropTarget: "dropTarget",
+                }}
+              />
+            </div>
+          )}
         </DndProvider>
       </ThemeProvider>
     </div>
