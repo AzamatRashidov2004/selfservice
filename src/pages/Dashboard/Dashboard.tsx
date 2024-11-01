@@ -325,6 +325,10 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="file-browser-wrapper">
                 <div className="file-tree-container">
+                  <div style={{ height: "80px" }}></div>
+                  <div className="scrollable-content">
+                    <FileTree />
+                  </div>
                   <FileTree />
                 </div>
                 <div className="file-browser-container">
