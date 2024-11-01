@@ -250,6 +250,12 @@ const Dashboard: React.FC = () => {
       } else if (!loading && table && loader) {
         table[0].classList.remove("hidden");
         loader[0].classList.add("hidden");
+        const array_li = document.querySelectorAll(
+          '[role="listitem"]'
+        ) as NodeListOf<HTMLLIElement>;
+        for (let i = 0; i < array_li.length; i++) {
+          array_li[i].style.whiteSpace = "nowrap";
+        }
       }
     }
   });
