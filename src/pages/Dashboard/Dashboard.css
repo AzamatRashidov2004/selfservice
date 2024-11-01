@@ -58,7 +58,7 @@
   max-width: 80%;
 }
 .scrollable-content {
-  height: 320px; /* Limit the height for scrolling */
+  height: 100%; /* Limit the height for scrolling */
   overflow-y: auto; /* Enable vertical scrolling */
 }
 
