@@ -28,6 +28,7 @@ function FileTree() {
     getNodeInfo,
     getAllChildren,
     getDepth,
+    getProjectForNode,
   } = useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
@@ -173,14 +174,14 @@ function FileTree() {
                 ) => {
                   if (dropTarget && dragSource !== dropTarget) {
                     console.log("dropTarget is: ", dropTarget);
-                    let project_id_source = getNodeInfo(
+                    let project_id_source = getProjectForNode(
                       parseInt(dragSourceId)
-                    ).kronosProjectId;
+                    );
                     let project_id_target = "";
                     if (dropTargetId) {
-                      let project_id_target = getNodeInfo(
+                      project_id_target = getProjectForNode(
                         parseInt(dropTargetId)
-                      ).kronosProjectId;
+                      );
                     }
                     if (project_id_source !== project_id_target) {
                       console.log("here");
