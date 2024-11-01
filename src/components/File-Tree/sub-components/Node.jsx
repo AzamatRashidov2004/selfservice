@@ -42,8 +42,7 @@ export const CustomNode = (props) => {
   }, [props.hasChild]);
 
   async function handleDoubleClick() {
-    setPdfVisible(false);
-    setPdfUrl("");
+    setPdfVisible(true);
     console.log("Double-clicked on PDF node.");
     if (!keycloak || !keycloak.token) return;
 

@@ -177,6 +177,7 @@ async function handleAction(
       const project_text = project.text;
 
       if (project_id) {
+        setPdfVisibleBrowser(true);
         const kb_id = await getKbId(project_id, keycloak.token);
 
         if (kb_id) {
@@ -188,7 +189,6 @@ async function handleAction(
           );
           if (pdfUrl) {
             setPdfUrlBrowser(pdfUrl);
-            setPdfVisibleBrowser(true);
           } else {
             console.log("pdfUrl not found!");
           }
