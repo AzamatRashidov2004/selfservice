@@ -328,7 +328,6 @@ const Dashboard: React.FC = () => {
                   <div className="scrollable-content">
                     <FileTree />
                   </div>
-                  <FileTree />
                 </div>
                 <div className="file-browser-container">
                   <ResizableBox
