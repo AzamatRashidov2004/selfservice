@@ -242,7 +242,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (!pdfVisibleBrowser) {
-      const table = document.getElementsByTagName("table");
+      const table = document.getElementsByClassName("file-browser-wrapper");
       const loader = document.getElementsByClassName("loader-container");
       if (loading && table && loader) {
         table[0].classList.add("hidden");
