@@ -56,6 +56,8 @@ interface FilesContextType {
   getProjectForNode: (nodeId: number) => FileData | undefined;
   getNodeInfo: (nodeId: number) => FileData | undefined;
   setCurrentFolder: React.Dispatch<React.SetStateAction<string>>;
+  fileUploadLoading: boolean;
+  setFileUploadLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Create the context with the initial value
@@ -417,6 +419,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
 
   const droppableTypes = ["folder", "project", "program"];
   const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"];
+  const [fileUploadLoading, setFileUploadLoading] = useState<boolean>(false);
 
   const contextValue: FilesContextType = {
     setProjectsContext,
@@ -435,6 +438,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     draggableTypes,
     currentFolder,
     setCurrentFolder,
+    fileUploadLoading,
+    setFileUploadLoading,
   };
 
   return (

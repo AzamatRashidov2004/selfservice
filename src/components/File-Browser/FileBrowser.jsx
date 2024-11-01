@@ -1,6 +1,7 @@
 import { setChonkyDefaults } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
+import Loader from "../Loader/Loader";
 import {
   useEffect,
   useState,
@@ -31,6 +32,8 @@ export default function FileBrowser() {
     getAllChildren,
     getNodeInfo,
     getPathFromProject,
+    fileUploadLoading,
+    setFileUploadLoading,
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
 
@@ -62,7 +65,8 @@ export default function FileBrowser() {
         currentFolder,
         keycloak,
         setPdfUrlBrowser,
-        setPdfVisibleBrowser
+        setPdfVisibleBrowser,
+        setFileUploadLoading
       );
     },
     [getFileStructure, dragAndDropFile]
@@ -111,6 +115,22 @@ export default function FileBrowser() {
         <PdfViewer pdfUrl={pdfUrlBrowser} setVisible={setPdfVisibleBrowser} />
       ) : (*/}
       <div style={{ width: "100%", height: "400px" }}>
+        {fileUploadLoading ? (
+          <div
+            className="loader-container"
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              borderRadius: "10px",
+            }}
+          >
+            <Loader loader="white" />
+          </div>
+        ) : (
+          <></>
+        )}
         <FullFileBrowser
           files={files}
           folderChain={folderChain}

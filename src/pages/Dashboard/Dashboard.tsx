@@ -329,6 +329,7 @@ const Dashboard: React.FC = () => {
                     <FileTree />
                   </div>
                 </div>
+
                 <div className="file-browser-container">
                   <ResizableBox
                     width={fileBrowserWidth}

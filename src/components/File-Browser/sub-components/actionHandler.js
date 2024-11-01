@@ -25,7 +25,8 @@ async function handleAction(
   currentFolder,
   keycloak,
   setPdfUrlBrowser,
-  setPdfVisibleBrowser
+  setPdfVisibleBrowser,
+  setFileUploadLoading
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -125,7 +126,6 @@ async function handleAction(
   // Handle Create File custom action
   if (data.id === "upload") {
     if (!keycloak || !keycloak.token) return;
-
     let path = getPathFromProject(parseInt(currentFolder));
     const project = getProjectForNode(parseInt(currentFolder));
 
@@ -135,7 +135,8 @@ async function handleAction(
         files,
         project.kronosProjectId,
         path,
-        keycloak.token
+        keycloak.token,
+        setFileUploadLoading
       );
       console.log("RESULT", result);
       if (result) {
