@@ -33,7 +33,7 @@ function FileTree() {
   const [nodeList, setNodeList] = useState([]);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null); // Moved highlighted state here
   const { keycloak } = useAuth();
-  const { pdfVisible, pdfUrl, setPdfUrl, setPdfVisible } =
+  const { pdfVisibleTree, pdfUrlTree, setPdfUrlTree, setPdfVisibleTree } =
     useContext(PDFContext);
 
   async function handleDrop(newTree, { dragSourceId, dropTargetId }) {
@@ -123,8 +123,8 @@ function FileTree() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <DndProvider backend={MultiBackend} options={getBackendOptions()}>
-          {pdfVisible ? (
-            <PdfViewer setVisible={setPdfVisible} pdfUrl={pdfUrl} />
+          {pdfVisibleTree ? (
+            <PdfViewer setVisible={setPdfVisibleTree} pdfUrl={pdfUrlTree} />
           ) : (
             <div className="FileTree-Container">
               <Tree
@@ -156,10 +156,10 @@ function FileTree() {
                     }}
                     highlightedNodeId={highlightedNodeId} // Pass down the highlighted node id
                     setHighlightedNodeId={setHighlightedNodeId} // Pass down the setter function
-                    setPdfVisible={setPdfVisible}
-                    pdfVisible={setPdfVisible}
-                    setPdfUrl={setPdfUrl}
-                    pdfUrl={setPdfUrl}
+                    setPdfVisibleTree={setPdfVisibleTree}
+                    pdfVisibleTree={setPdfVisibleTree}
+                    setPdfUrlTree={setPdfUrlTree}
+                    pdfUrlTree={setPdfUrlTree}
                   />
                 )}
                 dragPreviewRender={(monitorProps) => (

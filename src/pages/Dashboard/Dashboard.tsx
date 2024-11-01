@@ -25,14 +25,17 @@ import { ResizableBox, ResizeCallbackData } from "react-resizable";
 import "react-resizable/css/styles.css";
 import { useFiles } from "../../context/fileContext.tsx";
 import { PDFContextType } from "../../utility/types.ts";
+import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
 
 export const PDFContext = React.createContext<PDFContextType | undefined>(
   undefined
 );
 
 const Dashboard: React.FC = () => {
-  const [pdfVisible, setPdfVisible] = useState(false);
-  const [pdfUrl, setPdfUrl] = useState("");
+  const [pdfVisibleTree, setPdfVisibleTree] = useState<boolean>(false);
+  const [pdfUrlTree, setPdfUrlTree] = useState<string>("");
+  const [pdfVisibleBrowser, setPdfVisibleBrowser] = useState<boolean>(false);
+  const [pdfUrlBrowser, setPdfUrlBrowser] = useState<string>("");
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
   const [analyticalProjects, setAnalyticalProjects] = useState<ProjectType[]>(
     []
@@ -238,14 +241,16 @@ const Dashboard: React.FC = () => {
   }, [projects]);
 
   useEffect(() => {
-    const table = document.getElementsByTagName("table");
-    const loader = document.getElementsByClassName("loader-container");
-    if (loading) {
-      table[0].classList.add("hidden");
-      loader[0].classList.remove("hidden");
-    } else {
-      table[0].classList.remove("hidden");
-      loader[0].classList.add("hidden");
+    if (!pdfVisibleBrowser) {
+      const table = document.getElementsByTagName("table");
+      const loader = document.getElementsByClassName("loader-container");
+      if (loading && table && loader) {
+        table[0].classList.add("hidden");
+        loader[0].classList.remove("hidden");
+      } else if (!loading && table && loader) {
+        table[0].classList.remove("hidden");
+        loader[0].classList.add("hidden");
+      }
     }
   });
 
@@ -284,137 +289,157 @@ const Dashboard: React.FC = () => {
 
   return (
     <PDFContext.Provider
-      value={{ pdfVisible, setPdfVisible, pdfUrl, setPdfUrl }}
+      value={{
+        pdfVisibleTree,
+        setPdfVisibleTree,
+        pdfUrlTree,
+        setPdfUrlTree,
+        pdfVisibleBrowser,
+        setPdfVisibleBrowser,
+        pdfUrlBrowser,
+        setPdfUrlBrowser,
+      }}
     >
       <section className="dashboard-section">
         <main className="container-fluid main-container">
-          <div className="bg-primary p-4 rounded mb-4 text-center">
-            <h1 className="text-light">Available Projects</h1>
-            <p className="text-light">Choose a project to edit or delete</p>
-          </div>
-          <br />
-          <div className="loader-container">
-            <Loader />
-          </div>
-          <div className="file-browser-wrapper">
-            <div className="file-tree-container">
-              <FileTree />
-            </div>
-            <div className="file-browser-container">
-              <ResizableBox
-                width={fileBrowserWidth}
-                axis="x"
-                minConstraints={[500, 0]}
-                maxConstraints={[parentWidth - minFileTreeWidth, Infinity]}
-                resizeHandles={["w"]}
-                onResize={handleResize}
-                style={{ minWidth: "500px" }}
-              >
-                <FileBrowser />
-              </ResizableBox>
-            </div>
-          </div>
-          <table className="table main-table w-100 locked-hidden">
-            <thead>
-              <tr>
-                <th className="project-name text-start">Project Name</th>
-                <th className="project-last-update text-start">Last Update</th>
-                <th className="project-id text-start">Project ID</th>
-                <th className="project-actions text-start">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                ref={kronosProjectsWrapperRef}
-                className="kronos-projects-wrapper"
-              >
-                <div
-                  ref={accordionRef}
-                  className="accordion"
-                  id="projectsAccordion"
-                >
-                  {projects.map((project, index) => {
-                    if (
-                      !project.project ||
-                      !project.project.name ||
-                      !project.projectData
-                    )
-                      return null;
-                    return (
-                      <Project
-                        key={project.project._id} // Assuming _id is unique
-                        projectData={project.projectData}
-                        project={project.project}
-                        index={index}
-                        setProjects={setProjects}
-                        openProjectIndex={openProjectIndex}
-                        setOpenProjectIndex={setOpenProjectIndex}
-                        setSelectedDocID={setSelectedDocID}
-                        setSelectedProjectConfig={setSelectedProjectConfig}
-                        setIsAnalytical={setIsAnalytical}
-                        setSelectedIndex={setSelectedIndex}
-                      />
-                    );
-                  })}
-                </div>
-              </tr>
-              {analyticalProjects &&
-                analyticalProjects.map(
-                  (project: ProjectType, index: number) => (
-                    <ProjectRow
-                      key={index}
-                      project={project}
-                      index={index}
-                      setSelectedIndex={setSelectedIndex}
-                      setSelectedProjectID={setSelectedProjectID}
-                      setSelectedProject={setSelectedDocID}
-                      setSelectedProjectConfig={setSelectedProjectConfig}
-                      setCustomizeStep={setCustomizeStep}
-                      scrollIntoEditSection={scrollIntoEditSection}
-                      setIsAnalytical={setIsAnalytical}
-                      setProjects={setAnalyticalProjects}
-                    />
-                  )
-                )}
-            </tbody>
-          </table>
-          {selectedDocID && selectedProjectConfig ? (
+          {pdfVisibleBrowser ? (
+            <PdfViewer
+              pdfUrl={pdfUrlBrowser}
+              setVisible={setPdfVisibleBrowser}
+            />
+          ) : (
             <>
-              <div
-                ref={customizeSectionRef}
-                className="bg-primary p-4 rounded mb-4 text-center"
-              >
-                <h1 className="text-light">Customize Project</h1>
-                <p className="text-light">
-                  Customize the project with the following id:{" "}
-                  <em>{selectedDocID}</em>
-                </p>
+              <div className="bg-primary p-4 rounded mb-4 text-center">
+                <h1 className="text-light">Available Projects</h1>
+                <p className="text-light">Choose a project to edit or delete</p>
               </div>
+              <br />
+              <div className="loader-container">
+                <Loader />
+              </div>
+              <div className="file-browser-wrapper">
+                <div className="file-tree-container">
+                  <FileTree />
+                </div>
+                <div className="file-browser-container">
+                  <ResizableBox
+                    width={fileBrowserWidth}
+                    axis="x"
+                    minConstraints={[500, 0]}
+                    maxConstraints={[parentWidth - minFileTreeWidth, Infinity]}
+                    resizeHandles={["w"]}
+                    onResize={handleResize}
+                    style={{ minWidth: "500px" }}
+                  >
+                    <FileBrowser />
+                  </ResizableBox>
+                </div>
+              </div>
+              <table className="table main-table w-100 locked-hidden">
+                <thead>
+                  <tr>
+                    <th className="project-name text-start">Project Name</th>
+                    <th className="project-last-update text-start">
+                      Last Update
+                    </th>
+                    <th className="project-id text-start">Project ID</th>
+                    <th className="project-actions text-start">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    ref={kronosProjectsWrapperRef}
+                    className="kronos-projects-wrapper"
+                  >
+                    <div
+                      ref={accordionRef}
+                      className="accordion"
+                      id="projectsAccordion"
+                    >
+                      {projects.map((project, index) => {
+                        if (
+                          !project.project ||
+                          !project.project.name ||
+                          !project.projectData
+                        )
+                          return null;
+                        return (
+                          <Project
+                            key={project.project._id} // Assuming _id is unique
+                            projectData={project.projectData}
+                            project={project.project}
+                            index={index}
+                            setProjects={setProjects}
+                            openProjectIndex={openProjectIndex}
+                            setOpenProjectIndex={setOpenProjectIndex}
+                            setSelectedDocID={setSelectedDocID}
+                            setSelectedProjectConfig={setSelectedProjectConfig}
+                            setIsAnalytical={setIsAnalytical}
+                            setSelectedIndex={setSelectedIndex}
+                          />
+                        );
+                      })}
+                    </div>
+                  </tr>
+                  {analyticalProjects &&
+                    analyticalProjects.map(
+                      (project: ProjectType, index: number) => (
+                        <ProjectRow
+                          key={index}
+                          project={project}
+                          index={index}
+                          setSelectedIndex={setSelectedIndex}
+                          setSelectedProjectID={setSelectedProjectID}
+                          setSelectedProject={setSelectedDocID}
+                          setSelectedProjectConfig={setSelectedProjectConfig}
+                          setCustomizeStep={setCustomizeStep}
+                          scrollIntoEditSection={scrollIntoEditSection}
+                          setIsAnalytical={setIsAnalytical}
+                          setProjects={setAnalyticalProjects}
+                        />
+                      )
+                    )}
+                </tbody>
+              </table>
+              {selectedDocID && selectedProjectConfig ? (
+                <>
+                  <div
+                    ref={customizeSectionRef}
+                    className="bg-primary p-4 rounded mb-4 text-center"
+                  >
+                    <h1 className="text-light">Customize Project</h1>
+                    <p className="text-light">
+                      Customize the project with the following id:{" "}
+                      <em>{selectedDocID}</em>
+                    </p>
+                  </div>
 
-              {customizeStep === 0 ? (
-                <ProjectDetails
-                  projectName={projectName}
-                  setProjectName={setProjectName}
-                  description={description}
-                  setDescription={setDescription}
-                  language={language}
-                  setLanguage={setLanguage}
-                  introMessage={introMessage}
-                  setIntroMessage={setIntroMessage}
-                  introImage={introImage}
-                  setIntroImage={setIntroImage}
-                  handleNextButtonClick={handleProjectDetailsNext}
-                />
-              ) : null}
+                  {customizeStep === 0 ? (
+                    <ProjectDetails
+                      projectName={projectName}
+                      setProjectName={setProjectName}
+                      description={description}
+                      setDescription={setDescription}
+                      language={language}
+                      setLanguage={setLanguage}
+                      introMessage={introMessage}
+                      setIntroMessage={setIntroMessage}
+                      introImage={introImage}
+                      setIntroImage={setIntroImage}
+                      handleNextButtonClick={handleProjectDetailsNext}
+                    />
+                  ) : null}
 
-              {customizeStep === 1 ? (
-                <CustomizeBot
-                  saveSettings={updateSettings}
-                  selectedProjectConfig={selectedProjectConfig}
-                />
+                  {customizeStep === 1 ? (
+                    <CustomizeBot
+                      saveSettings={updateSettings}
+                      selectedProjectConfig={selectedProjectConfig}
+                    />
+                  ) : null}
+                </>
               ) : null}
             </>
-          ) : null}
+          )}
         </main>
       </section>
     </PDFContext.Provider>

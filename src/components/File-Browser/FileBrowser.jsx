@@ -1,21 +1,69 @@
 import { setChonkyDefaults } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useContext,
+} from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
+import { PDFContext } from "../../pages/Dashboard/Dashboard";
+import PdfViewer from "../PDF-viewer/PdfViewer";
 
 export default function FileBrowser() {
-  const { getFileStructure, dragAndDropFile, currentFolder, setCurrentFolder, addFolder, addFiles, deleteFiles, getProjectForNode, getDepth, getAllChildren, getNodeInfo, getPathFromProject } = useFiles(); // Get the context function
+  const {
+    getFileStructure,
+    dragAndDropFile,
+    currentFolder,
+    setCurrentFolder,
+    addFolder,
+    addFiles,
+    deleteFiles,
+    getProjectForNode,
+    getDepth,
+    getAllChildren,
+    getNodeInfo,
+    getPathFromProject,
+  } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
+
+  const {
+    pdfVisibleBrowser,
+    setPdfVisibleBrowser,
+    pdfUrlBrowser,
+    setPdfUrlBrowser,
+  } = useContext(PDFContext);
 
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
-      handleAction(data, setCurrentFolder, { getFileStructure, dragAndDropFile, addFolder, addFiles, deleteFiles, getProjectForNode, getDepth, getAllChildren, getNodeInfo, getPathFromProject }, currentFolder, keycloak);
+      handleAction(
+        data,
+        setCurrentFolder,
+        {
+          getFileStructure,
+          dragAndDropFile,
+          addFolder,
+          addFiles,
+          deleteFiles,
+          getProjectForNode,
+          getDepth,
+          getAllChildren,
+          getNodeInfo,
+          getPathFromProject,
+        },
+        currentFolder,
+        keycloak,
+        setPdfUrlBrowser,
+        setPdfVisibleBrowser
+      );
     },
     [getFileStructure, dragAndDropFile]
   );
@@ -25,14 +73,17 @@ export default function FileBrowser() {
   const [files, setFiles] = useState(null);
   const [folderChain, setFolderChain] = useState(null);
 
-  const fileActions = useMemo(() => [
-    ChonkyActions.EnableListView,
-    ChonkyActions.EnableGridView,
-    ChonkyActions.CreateFolder,  // Make sure this is included
-    ...customActions,
-    ChonkyActions.DownloadFiles,
-    ChonkyActions.DeleteFiles,
-], []);
+  const fileActions = useMemo(
+    () => [
+      ChonkyActions.EnableListView,
+      ChonkyActions.EnableGridView,
+      ChonkyActions.CreateFolder, // Make sure this is included
+      ...customActions,
+      ChonkyActions.DownloadFiles,
+      ChonkyActions.DeleteFiles,
+    ],
+    []
+  );
 
   // Fetch the folder data and set the file and folder chain states
   useEffect(() => {
@@ -56,6 +107,9 @@ export default function FileBrowser() {
 
   return (
     <>
+      {/*{pdfVisibleBrowser ? (
+        <PdfViewer pdfUrl={pdfUrlBrowser} setVisible={setPdfVisibleBrowser} />
+      ) : (*/}
       <div style={{ width: "100%", height: "400px" }}>
         <FullFileBrowser
           files={files}
@@ -66,6 +120,7 @@ export default function FileBrowser() {
           disableDefaultFileActions={true}
         />
       </div>
+      {/*})}*/}
     </>
   );
 }
