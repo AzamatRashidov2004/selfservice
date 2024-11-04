@@ -3,12 +3,10 @@ import {
   updateAnalyticalProject,
 } from "../api/analyst/postAnalyst.ts";
 import {
-  getSinglPdfConfig,
   getAllPdfProjects,
   getAllPdfsFromProject,
 } from "../api/kronos/getKronos.ts";
 import {
-  updatePdfConfig,
   createKronosProject,
   uploadMultiplePdfs,
   updatePathSingle,
@@ -23,36 +21,10 @@ import {
 import {
   getAllAnalyticalConfigs,
   getAllAnalyticalIDs,
-  getSingleAnalyticalConfig,
 } from "../api/analyst/getAnalyst.ts";
 import { SettingsType } from "./types.ts";
-import getFileExstension from "../utility/File_Exstension.ts";
 import { deletePdfProject } from "../api/kronos/deleteKronos.ts";
 
-export async function handleGetSingleConfig(
-  project: ProjectType,
-  token: string | undefined,
-  setLoading?: React.Dispatch<React.SetStateAction<boolean>>,
-): Promise<SettingsType | null> {
-  if (setLoading) setLoading(true);
-  const fileExstension = getFileExstension(project.filename);
-  let config: SettingsType | null;
-
-  if (fileExstension === "pdf" && project.projectId) {
-    if (!token) return null;
-    config = await getSinglPdfConfig(project.projectId, project.docId, token);
-  } else {
-    config = await getSingleAnalyticalConfig(project.docId);
-  }
-
-  if (setLoading) setLoading(false);
-  if (!config || !config.attributes) {
-    console.error("Error config not found");
-    return null;
-  }
-
-  return config;
-}
 
 // export async function updateBulkPaths()
 
@@ -182,7 +154,7 @@ export async function createInitialKronosProject(
   description: string,
   files: FileList,
   token: string | undefined,
-  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<boolean> {
   if (!token) return false;
   const kronosProject = await createKronosProject(
@@ -195,7 +167,7 @@ export async function createInitialKronosProject(
   if (!kronosProject) return false;
   if (setLoading) setLoading(true);
 
-  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id, "", token);
+  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id, "", token, setLoading);
 
   if (!filesUpload) {
     // Delete the created project if file upload fails
@@ -208,46 +180,3 @@ export async function createInitialKronosProject(
 
   return true;
 }
-
-export async function handleUpdateConfig(
-  isAnalytical: boolean,
-  newConfig: SettingsType,
-  docID: string,
-  projectID: string | null,
-  token: string | undefined
-): Promise<boolean | null> {
-  let result: boolean | null = false;
-  const attributes = newConfig.attributes;
-  console.log("id", projectID);
-  if (isAnalytical) {
-    // Analytical documents update
-    result = await updateAnalyticalProject(docID, newConfig);
-  } else if (token){
-    // PDF documents update
-    result = await updatePdfConfig(
-      attributes.project_name,
-      attributes.description,
-      docID,
-      newConfig,
-      token
-    );
-  }
-  return result;
-}
-
-// function getLocale(language?: string): string {
-//   switch (language?.toLowerCase()) {
-//     case 'deutsch':
-//     case 'german':
-//       return 'de-DE';
-//     case 'czech':
-//     case 'čeština':
-//     case 'česky':
-//       return 'cs-CZ';
-//     case 'english':
-//     case 'angličtina':
-//       return 'en-US';
-//     default:
-//       return 'en-US';  // Default to 'en-US' if undefined or unknown
-//   }
-// }

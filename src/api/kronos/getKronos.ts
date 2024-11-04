@@ -6,10 +6,7 @@ import {
 import {
   KronosProjectType,
   kronosKnowledgeBaseType,
-  ProjectType,
-  SettingsType,
 } from "../../utility/types";
-import { formatKronosDate } from "../../utility/Date_Util";
 
 export async function getAllPdfsFromProject(
   projectId: string,
@@ -41,48 +38,6 @@ export async function getAllPdfsFromProject(
     return result.data;
   } catch (e: unknown) {
     return handleError({ error: e, origin: "getAllPdfsFromProject" });
-  }
-}
-
-export async function getAllPdfs(token: string): Promise<ProjectType[] | null> {
-  try {
-    let allPdfs: kronosKnowledgeBaseType[] | null = [];
-
-    // Get all projects
-    const allProjects: KronosProjectType[] | null = await getAllPdfProjects(
-      token
-    );
-    if (!allProjects) return null;
-
-    // Get all pdf files from all projects
-    for (const project of allProjects) {
-      const projectPdfs = await getAllPdfsFromProject(project._id, token);
-
-      if (projectPdfs) {
-        allPdfs = [...allPdfs, ...projectPdfs];
-      }
-    }
-
-    if (allPdfs.length === 0) {
-      console.error("No pdf documents found");
-      return null;
-    }
-
-    const result: ProjectType[] = allPdfs.map(
-      (pdf: kronosKnowledgeBaseType) => ({
-        name: pdf.name,
-        lastUpdate:
-          pdf.chatbot_config.attributes?.last_update ||
-          formatKronosDate(new Date(pdf.created_at)),
-        filename: pdf.source_file,
-        docId: pdf._id,
-        projectId: pdf.project_id,
-      })
-    );
-
-    return result;
-  } catch (e: unknown) {
-    return handleError({ error: e, origin: "getAllPdfs" });
   }
 }
 
@@ -139,52 +94,6 @@ export async function getKronosProject(
     return project;
   } catch (e: unknown) {
     return handleError({ error: e, origin: "getKronosProject" });
-  }
-}
-
-export async function getSinglPdfConfig(
-  projectId: string,
-  docId: string,
-  token: string
-): Promise<SettingsType | null> {
-  try {
-    const _url = `${apiUrl}/projects/${projectId}/knowledge_base/${docId}/`;
-    const response: Response = await fetch(_url, {
-      method: "GET",
-      headers: {
-        accept: "application/json",
-        Authorization: `Bearer + ${token}`,
-        "x-api-key": apiKey,
-      },
-    });
-
-    if (!response.ok) {
-      console.error("Failed to fetch pdf config");
-      return null;
-    }
-
-    const result: kronosKnowledgeBaseType = await response.json();
-
-    if (!result) {
-      console.error("Failed to fetch pdf config");
-      return null;
-    }
-
-    const settings: SettingsType = result.chatbot_config;
-
-    const newAttributes = {
-      description: result.description,
-      last_update: formatKronosDate(new Date(result.created_at)),
-      project_name: result.name,
-      docId: result._id,
-      projectId: result.project_id,
-    };
-
-    settings.attributes = { ...newAttributes, ...settings.attributes };
-
-    return settings;
-  } catch (e: unknown) {
-    return handleError({ error: e, origin: "getSinglPdfConfig" });
   }
 }
 
@@ -278,6 +187,7 @@ export async function getPdfFileUrl(
   docName: string,
   token: string
 ): Promise<string> {
+  console.log(docName);
   try {
     const projectResponse: Response = await fetch(
       `${apiUrl}/projects/${projectID}/knowledge_base/${docID}/source`,
