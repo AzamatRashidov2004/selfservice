@@ -58,6 +58,11 @@
   max-width: 80%;
 }
 
+.scrollable-content {
+  height: 100%; /* Limit the height for scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
 .gray-bg {
   background-color: #f2f2f2 !important;
 }
@@ -88,5 +93,5 @@
 }
 
 .hidden {
-  display: hidden;
+  visibility: hidden !important;
 }

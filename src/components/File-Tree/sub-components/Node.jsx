@@ -3,11 +3,20 @@ import Typography from "@mui/material/Typography";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import { TypeIcon } from "./Type-Icon";
 import { useFiles } from "../../../context/fileContext";
+import {
+  getKbId,
+  getPdfFile,
+  getPdfFileUrl,
+} from "../../../api/kronos/getKronos";
+import keycloak from "../../../keycloak";
 
 export const CustomNode = (props) => {
   const { droppable, data } = props.node;
   const indent = props.depth * 24;
-  const { setCurrentFolder } = useFiles();
+  const { setCurrentFolder, getProjectForNode } = useFiles();
+
+  const setPdfVisible = props.setPdfVisible;
+  const setPdfUrl = props.setPdfUrl;
 
   const handleToggle = (e, target) => {
     e.stopPropagation();
@@ -32,6 +41,46 @@ export const CustomNode = (props) => {
     props.updateNode(props.node);
   }, [props.hasChild]);
 
+  async function handleDoubleClick() {
+    setPdfVisible(true);
+    console.log("Double-clicked on PDF node.");
+    if (!keycloak || !keycloak.token) return;
+
+    const file = data;
+    if (file && file.fileType === "pdf") {
+      const number_id = parseInt(props.node.id);
+      const project = getProjectForNode(number_id);
+
+      if (project) {
+        const { kronosProjectId: projectId, text: text } = project;
+
+        console.log("project id: ", projectId);
+
+        try {
+          const kb_id = await getKbId(projectId, keycloak.token);
+          const url = await getPdfFileUrl(
+            projectId,
+            kb_id,
+            text,
+            keycloak.token
+          );
+          console.log("the url is: ", url);
+          console.log("token: ", keycloak.token);
+          if (url != "") {
+            setPdfVisible(true);
+            setPdfUrl(url);
+          } else {
+            console.error("No content in PDF blob.");
+          }
+        } catch (error) {
+          console.error("Error fetching PDF:", error);
+        }
+      } else {
+        console.error("Project not found for node:", number_id);
+      }
+    }
+  }
+
   return (
     <div
       style={{
@@ -44,6 +93,7 @@ export const CustomNode = (props) => {
       onClick={(e) => {
         handleToggle(e, "row");
       }}
+      onDoubleClick={data?.fileType === "pdf" ? handleDoubleClick : () => {}}
     >
       <div
         className={`expandIconWrapper ${props.isOpen ? "isOpen" : ""}`}

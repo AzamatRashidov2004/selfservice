@@ -12,14 +12,21 @@ import {
   uploadMultiplePdfs,
 } from "../../../api/kronos/postKronos";
 import { deleteBulkPdf } from "../../../api/kronos/deleteKronos";
-import { getPdfFile } from "../../../api/kronos/getKronos";
+import {
+  getKbId,
+  getPdfFile,
+  getPdfFileUrl,
+} from "../../../api/kronos/getKronos";
 
 async function handleAction(
   data,
   setCurrentFolder,
   fileContext,
   currentFolder,
-  keycloak
+  keycloak,
+  setPdfUrl,
+  setPdfVisible,
+  setFileUploadLoading
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -119,7 +126,6 @@ async function handleAction(
   // Handle Create File custom action
   if (data.id === "upload") {
     if (!keycloak || !keycloak.token) return;
-
     let path = getPathFromProject(parseInt(currentFolder));
     const project = getProjectForNode(parseInt(currentFolder));
 
@@ -129,7 +135,8 @@ async function handleAction(
         files,
         project.kronosProjectId,
         path,
-        keycloak.token
+        keycloak.token,
+        setFileUploadLoading
       );
       console.log("RESULT", result);
       if (result) {
@@ -157,6 +164,42 @@ async function handleAction(
       currentNode.text,
       keycloak.token
     );
+  }
+
+  if (data.id === "open_files") {
+    if (!keycloak || !keycloak.token) return;
+
+    const selectedFile = data.state.selectedFiles[0];
+    const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
+
+    if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
+      const project = getProjectForNode(parseInt(selectedFile.id));
+      const project_id = project.kronosProjectId;
+      const project_text = project.text;
+
+      if (project_id) {
+        setPdfVisible(true);
+        const kb_id = await getKbId(project_id, keycloak.token);
+
+        if (kb_id) {
+          const pdfUrl = await getPdfFileUrl(
+            project_id,
+            kb_id,
+            project_text,
+            keycloak.token
+          );
+          if (pdfUrl) {
+            setPdfUrl(pdfUrl);
+          } else {
+            console.log("pdfUrl not found!");
+          }
+        } else {
+          console.log("kb_id not found!");
+        }
+      } else {
+        console.log("project_id is not there!");
+      }
+    }
   }
 
   if (data.id === "delete_files") {

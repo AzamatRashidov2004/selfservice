@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { DndProvider } from "react-dnd";
 import {
@@ -17,8 +17,21 @@ import { updatePathBulk } from "../../api/kronos/postKronos";
 import handlePathChangeAtDepth from "../../utility/FileSystem_Utils";
 
 function FileTree() {
-  const { getFileStructure, dragAndDropFile, draggableTypes, droppableTypes, getPathFromProject, getNodeInfo, getAllChildren, getDepth } =
-    useFiles();
+  const {
+    getFileStructure,
+    dragAndDropFile,
+    draggableTypes,
+    droppableTypes,
+    getPathFromProject,
+    getNodeInfo,
+    getAllChildren,
+    getDepth,
+    getProjectForNode,
+    pdfVisible,
+    setPdfUrl,
+    setPdfVisible,
+    pdfUrl,
+  } = useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null); // Moved highlighted state here
@@ -31,16 +44,20 @@ function FileTree() {
     const newPath = getPathFromProject(parseInt(dropTargetId));
     const nodeInfo = getNodeInfo(parseInt(dragSourceId));
 
-    if (nodeInfo.droppable){ // Folder drag
+    if (nodeInfo.droppable) {
+      if (nodeInfo.kronosProjectId != newPath.kronosProjectId) return;
+      // Folder drag
       const children = getAllChildren(parseInt(nodeInfo.id));
-      if (!children || children.length === 0){ // Empty folder, just change UI
-        dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+      if (!children || children.length === 0) {
+        // Empty folder, just change UI
+        dragAndDropFile(dropTargetId, [{ id: dragSourceId }]);
         return;
       }
       const payload = [];
       const targetDepth = getDepth(parseInt(nodeInfo.id));
-      
-      children.forEach((childNode) => { // Update the paths of all children files
+
+      children.forEach((childNode) => {
+        // Update the paths of all children files
         const newChildPath = handlePathChangeAtDepth(
           targetDepth,
           newPath,
@@ -53,23 +70,27 @@ function FileTree() {
           source_file: newChildPath,
         });
       });
-      const result = await updatePathBulk(nodeInfo.kronosProjectId, payload, keycloak.token);
-      if (result){
-        return dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+      const result = await updatePathBulk(
+        nodeInfo.kronosProjectId,
+        payload,
+        keycloak.token
+      );
+      if (result) {
+        return dragAndDropFile(dropTargetId, [{ id: dragSourceId }]);
       }
-
-    }else{ // Single file drag
+    } else {
+      // Single file drag
       const result = await updateSinglePath(
         nodeInfo.kronosProjectId,
         nodeInfo.kronosKB_id,
         `${newPath}${nodeInfo.text}`,
         keycloak.token
       );
-      if (result){
-        return dragAndDropFile(dropTargetId, [{id: dragSourceId}]);
+      if (result) {
+        return dragAndDropFile(dropTargetId, [{ id: dragSourceId }]);
       }
     }
-  };
+  }
 
   function updateNode(node, depth, hasChild) {
     let checkExist = false;
@@ -127,6 +148,10 @@ function FileTree() {
                   }}
                   highlightedNodeId={highlightedNodeId} // Pass down the highlighted node id
                   setHighlightedNodeId={setHighlightedNodeId} // Pass down the setter function
+                  setPdfVisible={setPdfVisible}
+                  pdfVisible={setPdfVisible}
+                  setPdfUrl={setPdfUrl}
+                  pdfUrl={setPdfUrl}
                 />
               )}
               dragPreviewRender={(monitorProps) => (
@@ -137,7 +162,21 @@ function FileTree() {
                 treeData,
                 { dragSource, dropTarget, dropTargetId, dragSourceId }
               ) => {
-                if (dragSource !== dropTarget) {
+                if (dropTarget && dragSource !== dropTarget) {
+                  console.log("dropTarget is: ", dropTarget);
+                  let project_id_source = getProjectForNode(
+                    parseInt(dragSourceId)
+                  );
+                  let project_id_target = "";
+                  if (dropTargetId) {
+                    project_id_target = getProjectForNode(
+                      parseInt(dropTargetId)
+                    );
+                  }
+                  if (project_id_source !== project_id_target) {
+                    console.log("here");
+                    return false;
+                  }
                   let dropT = getDropTarget(dropTargetId);
                   let dragT = getDragTarget(dragSourceId);
                   if (dropT && dragT) {
