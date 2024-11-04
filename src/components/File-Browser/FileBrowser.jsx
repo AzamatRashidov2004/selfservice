@@ -37,12 +37,8 @@ export default function FileBrowser() {
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
 
-  const {
-    pdfVisibleBrowser,
-    setPdfVisibleBrowser,
-    pdfUrlBrowser,
-    setPdfUrlBrowser,
-  } = useContext(PDFContext);
+  const { pdfVisible, setPdfVisible, pdfUrl, setPdfUrl } =
+    useContext(PDFContext);
 
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
@@ -64,8 +60,8 @@ export default function FileBrowser() {
         },
         currentFolder,
         keycloak,
-        setPdfUrlBrowser,
-        setPdfVisibleBrowser,
+        setPdfUrl,
+        setPdfVisible,
         setFileUploadLoading
       );
     },
@@ -110,37 +106,31 @@ export default function FileBrowser() {
   }, [currentFolder, getFileStructure]);
 
   return (
-    <>
-      {/*{pdfVisibleBrowser ? (
-        <PdfViewer pdfUrl={pdfUrlBrowser} setVisible={setPdfVisibleBrowser} />
-      ) : (*/}
-      <div style={{ width: "100%", height: "400px" }}>
-        {fileUploadLoading ? (
-          <div
-            className="loader-container"
-            style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              backgroundColor: "rgba(0, 0, 0, 0.7)",
-              borderRadius: "10px",
-            }}
-          >
-            <Loader loader="white" />
-          </div>
-        ) : (
-          <></>
-        )}
-        <FullFileBrowser
-          files={files}
-          folderChain={folderChain}
-          defaultFileViewActionId={ChonkyActions.EnableListView.id}
-          fileActions={fileActions}
-          onFileAction={handleActionWrapper}
-          disableDefaultFileActions={true}
-        />
-      </div>
-      {/*})}*/}
-    </>
+    <div style={{ width: "100%", height: "400px" }}>
+      {fileUploadLoading ? (
+        <div
+          className="loader-container"
+          style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            borderRadius: "10px",
+          }}
+        >
+          <Loader loader="white" />
+        </div>
+      ) : (
+        <></>
+      )}
+      <FullFileBrowser
+        files={files}
+        folderChain={folderChain}
+        defaultFileViewActionId={ChonkyActions.EnableListView.id}
+        fileActions={fileActions}
+        onFileAction={handleActionWrapper}
+        disableDefaultFileActions={true}
+      />
+    </div>
   );
 }

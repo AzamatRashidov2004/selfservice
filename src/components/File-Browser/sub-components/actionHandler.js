@@ -24,8 +24,8 @@ async function handleAction(
   fileContext,
   currentFolder,
   keycloak,
-  setPdfUrlBrowser,
-  setPdfVisibleBrowser,
+  setPdfUrl,
+  setPdfVisible,
   setFileUploadLoading
 ) {
   const fileData = fileContext.getFileStructure(true);
@@ -178,7 +178,7 @@ async function handleAction(
       const project_text = project.text;
 
       if (project_id) {
-        setPdfVisibleBrowser(true);
+        setPdfVisible(true);
         const kb_id = await getKbId(project_id, keycloak.token);
 
         if (kb_id) {
@@ -189,7 +189,7 @@ async function handleAction(
             keycloak.token
           );
           if (pdfUrl) {
-            setPdfUrlBrowser(pdfUrl);
+            setPdfUrl(pdfUrl);
           } else {
             console.log("pdfUrl not found!");
           }

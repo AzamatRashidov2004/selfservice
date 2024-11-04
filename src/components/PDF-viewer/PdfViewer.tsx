@@ -1,14 +1,21 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 //import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "./PdfViewer.css";
+import Loader from "../Loader/Loader";
 
 interface PdfViewerProps {
   pdfUrl?: string; // URL or base64 string of the PDF
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setPdfUrl: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const PdfViewer: React.FC<PdfViewerProps> = ({ pdfUrl, setVisible }) => {
+const PdfViewer: React.FC<PdfViewerProps> = ({
+  pdfUrl,
+  setVisible,
+  setPdfUrl,
+}) => {
   const mainRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   useEffect(() => {
     const overlayDiv = document.createElement("div");
     overlayDiv.className = "overlay";
@@ -27,6 +34,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ pdfUrl, setVisible }) => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         setVisible(false);
+        setPdfUrl("");
       }
     };
 
@@ -37,9 +45,17 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ pdfUrl, setVisible }) => {
     };
   }, []);
   useEffect(() => {
+    if (pdfUrl === "") {
+      setLoading(true);
+    } else {
+      setLoading(false);
+    }
+  });
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (mainRef.current && !mainRef.current.contains(event.target as Node)) {
         setVisible(false);
+        setPdfUrl("");
       }
     };
 
@@ -51,17 +67,23 @@ const PdfViewer: React.FC<PdfViewerProps> = ({ pdfUrl, setVisible }) => {
   }, []);
   return (
     <main className="container-fluid main-container custom-main" ref={mainRef}>
-      <div className="pdf-container">
-        <iframe
-          src={pdfUrl}
-          title="PDF Viewer"
-          className="pdf-viewer"
-          allowFullScreen
-          loading="lazy"
-        >
-          <p>Your browser does not support iframes.</p>
-        </iframe>
-      </div>
+      {loading ? (
+        <div className="loader-container h-100">
+          <Loader />
+        </div>
+      ) : (
+        <div className="pdf-container">
+          <iframe
+            src={pdfUrl}
+            title="PDF Viewer"
+            className="pdf-viewer"
+            allowFullScreen
+            loading="lazy"
+          >
+            <p>Your browser does not support iframes.</p>
+          </iframe>
+        </div>
+      )}
     </main>
   );
 };

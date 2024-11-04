@@ -303,7 +303,11 @@ const Dashboard: React.FC = () => {
       <section className="dashboard-section">
         <main className="container-fluid main-container">
           {pdfVisible ? (
-            <PdfViewer pdfUrl={pdfUrl} setVisible={setPdfVisible} />
+            <PdfViewer
+              pdfUrl={pdfUrl}
+              setVisible={setPdfVisible}
+              setPdfUrl={setPdfUrl}
+            />
           ) : (
             <>
               <div className="bg-primary p-4 rounded mb-4 text-center">
