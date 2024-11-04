@@ -111,14 +111,9 @@ const FeaturesSection: React.FC = () => {
 };
 
 const LoginSection: React.FC = () => {
-  const { login, authenticated, checkAuthenticated, logout, keycloak } =
+  const { login, authenticated, logout } =
     useAuth();
   const [error, setError] = useState<string | null>(null);
-  console.log(keycloak.token);
-  // Only log auth status after Keycloak is initialized
-  useEffect(() => {
-    console.log("auth", checkAuthenticated());
-  }, [checkAuthenticated]);
 
   const handleSubmit = async () => {
     setError(null); // Reset error state

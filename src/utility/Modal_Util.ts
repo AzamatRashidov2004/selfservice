@@ -13,3 +13,18 @@ export const createNotificationEvent = (title: string, text: string, type: Notif
     });
     window.dispatchEvent(showNotificationEvent);
   };
+
+export const createUploadFileModalEvent = (callback: (uploadedFiles: File[]) => void) => {
+  const showUploadFileModalEvent = new CustomEvent('showUploadFile', { 
+    detail: { callback } 
+  });
+  window.dispatchEvent(showUploadFileModalEvent);
+};
+
+export const createFolderModalEvent = (callback: (folderName: string) => void) => {
+  const showCreateFolderModalEvent = new CustomEvent('showCreateFolder', { 
+    detail: { callback } 
+  });
+  window.dispatchEvent(showCreateFolderModalEvent);
+};
+  

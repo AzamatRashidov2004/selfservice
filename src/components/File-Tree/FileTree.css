@@ -1,0 +1,77 @@
+.expandIconWrapper {
+  align-items: center;
+  font-size: 0;
+  cursor: pointer;
+  display: flex;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
+  transition: transform linear 0.1s;
+  transform: rotate(0deg);
+}
+
+.drag-root {
+  align-items: "center";
+  background-color: #1967d2;
+  border-radius: 4px;
+  box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(0, 0, 0, 0.08);
+  color: #fff;
+  display: inline-grid;
+  font-size: 14px;
+  gap: 8px;
+  grid-template-columns: auto auto;
+  padding: 4px 8px;
+  pointer-events: none;
+}
+
+.node-root {
+  align-items: center;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  height: 32px;
+  padding-inline-end: 1px;
+  padding-inline-start: 12px !important;
+}
+
+.file-tree-border-wrapper {
+  padding-top: 1px;
+  margin-left: 10px;
+  margin-right: 10px;
+  border-top: solid 1px #e0e0e0;
+}
+
+.depth-0 {
+  padding-inline-start: 0px !important;
+}
+
+.expandIconWrapper.isOpen {
+  transform: rotate(90deg);
+}
+
+.labelGridItem {
+  padding-inline-start: 8px;
+}
+
+.icon,
+.label {
+  align-items: center;
+  display: flex;
+}
+
+.FileTree-Container {
+  height: 100%;
+}
+
+.treeRoot {
+  height: 100%;
+  padding: 0;
+}
+
+.draggingSource {
+  opacity: 0.3;
+}
+
+.dropTarget {
+  background-color: #e8f0fe;
+}

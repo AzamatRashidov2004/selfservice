@@ -1,1 +1,23 @@
-/// <reference types="vite/client" />
+interface ImportMetaEnv {
+    VITE_ENVIRONMENT: 'DEVELOPMENT' | 'PRODUCTION'; // Specify possible values for VITE_ENVIRONMENT
+  
+    VITE_ANALYTICAL_URL_PRODUCTION: string;
+    VITE_ANALYTICAL_URL_DEVELOPMENT: string;
+  
+    VITE_DOCRETR_URL_DEVELOPMENT: string;
+    VITE_DOCRETR_API_KEY_DEVELOPMENT: string;
+  
+    VITE_KRONOS_URL_PRODUCTION: string;
+    VITE_KRONOS_URL_DEVELOPMENT: string;
+    VITE_KRONOS_API_KEY_PRODUCTION: string;
+    VITE_KRONOS_API_KEY_DEVELOPMENT: string;
+  
+    VITE_KEYCLOACK_URL: string;
+    VITE_KEYCLOACK_REALM: string;
+    VITE_KEYCLOACK_CLIENT_ID: string;
+    VITE_KEYCLOACK_PRODUCTION_CLIENT_ID: string;
+  }
+  
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }

@@ -27,9 +27,8 @@ import { AuthProvider } from "./context/authContext"; // Adjust the path as nece
 // Import css
 import "./App.css";
 import "./responsive.css";
-import CreateFolderModal from "./components/Modals/sub-components/CreateFolderModal";
-import UploadFileModal from "./components/Modals/sub-components/UploadFileModal";
-import Contact_Page from "./pages/Contact/Contact_page";
+import Contact_Page from "./pages/Contact/Contact_Page";
+import { FilesProvider } from "./context/fileContext";
 
 const App: React.FC = () => {
   // Window size listener for Scrollbar width styling
@@ -50,18 +49,20 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
-      <Router>
-        <Navbar />
-        <Modals />
-        <Routes>
-          <Route path="/" element={<Landing_Page />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/new-project" element={<New_Project />} />
-          <Route path="/try-now" element={<Try_Now />} />
-          <Route path="/contact" element={<Contact_Page />} />
-        </Routes>
-        <Footer />
-      </Router>
+      <FilesProvider>
+        <Router>
+          <Navbar />
+          <Modals />
+          <Routes>
+            <Route path="/" element={<Landing_Page />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/new-project" element={<New_Project />} />
+            <Route path="/try-now" element={<Try_Now />} />
+            <Route path="/contact" element={<Contact_Page />} />
+          </Routes>
+          <Footer />
+        </Router>
+      </FilesProvider>
     </AuthProvider>
   );
 };
