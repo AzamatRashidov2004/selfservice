@@ -32,10 +32,8 @@ export const PDFContext = React.createContext<PDFContextType | undefined>(
 );
 
 const Dashboard: React.FC = () => {
-  const [pdfVisibleTree, setPdfVisibleTree] = useState<boolean>(false);
-  const [pdfUrlTree, setPdfUrlTree] = useState<string>("");
-  const [pdfVisibleBrowser, setPdfVisibleBrowser] = useState<boolean>(false);
-  const [pdfUrlBrowser, setPdfUrlBrowser] = useState<string>("");
+  const [pdfVisible, setPdfVisible] = useState<boolean>(false);
+  const [pdfUrl, setPdfUrl] = useState<string>("");
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
   const [analyticalProjects, setAnalyticalProjects] = useState<ProjectType[]>(
     []
@@ -241,7 +239,7 @@ const Dashboard: React.FC = () => {
   }, [projects]);
 
   useEffect(() => {
-    if (!pdfVisibleBrowser) {
+    if (!pdfVisible) {
       const table = document.getElementsByClassName("file-browser-wrapper");
       const loader = document.getElementsByClassName("loader-container");
       if (loading && table && loader) {
@@ -296,23 +294,16 @@ const Dashboard: React.FC = () => {
   return (
     <PDFContext.Provider
       value={{
-        pdfVisibleTree,
-        setPdfVisibleTree,
-        pdfUrlTree,
-        setPdfUrlTree,
-        pdfVisibleBrowser,
-        setPdfVisibleBrowser,
-        pdfUrlBrowser,
-        setPdfUrlBrowser,
+        pdfVisible,
+        setPdfVisible,
+        pdfUrl,
+        setPdfUrl,
       }}
     >
       <section className="dashboard-section">
         <main className="container-fluid main-container">
-          {pdfVisibleBrowser ? (
-            <PdfViewer
-              pdfUrl={pdfUrlBrowser}
-              setVisible={setPdfVisibleBrowser}
-            />
+          {pdfVisible ? (
+            <PdfViewer pdfUrl={pdfUrl} setVisible={setPdfVisible} />
           ) : (
             <>
               <div className="bg-primary p-4 rounded mb-4 text-center">

@@ -188,12 +188,8 @@ export type fetchProjectsDataReturn = {
 };
 
 export type PDFContextType = {
-  pdfVisibleTree: boolean;
-  setPdfVisibleTree: React.Dispatch<React.SetStateAction<boolean>>;
-  pdfUrlTree: string;
-  setPdfUrlTree: React.Dispatch<React.SetStateAction<string>>;
-  pdfVisibleBrowser: boolean;
-  setPdfVisibleBrowser: React.Dispatch<React.SetStateAction<boolean>>;
-  pdfUrlBrowser: string;
-  setPdfUrlBrowser: React.Dispatch<React.SetStateAction<string>>;
+  pdfVisible: boolean;
+  setPdfVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  pdfUrl: string;
+  setPdfUrl: React.Dispatch<React.SetStateAction<string>>;
 };

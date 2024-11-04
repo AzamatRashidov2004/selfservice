@@ -15,8 +15,8 @@ export const CustomNode = (props) => {
   const indent = props.depth * 24;
   const { setCurrentFolder, getProjectForNode } = useFiles();
 
-  const setPdfVisible = props.setPdfVisibleTree;
-  const setPdfUrl = props.setPdfUrlTree;
+  const setPdfVisible = props.setPdfVisible;
+  const setPdfUrl = props.setPdfUrl;
 
   const handleToggle = (e, target) => {
     e.stopPropagation();

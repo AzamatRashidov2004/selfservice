@@ -15,7 +15,6 @@ import { useAuth } from "../../context/authContext";
 import { updateSinglePath } from "../../utility/Api_Utils";
 import { updatePathBulk } from "../../api/kronos/postKronos";
 import handlePathChangeAtDepth from "../../utility/FileSystem_Utils";
-import PdfViewer from "../PDF-viewer/PdfViewer.tsx";
 import { PDFContext } from "../../pages/Dashboard/Dashboard.tsx";
 
 function FileTree() {
@@ -34,7 +33,7 @@ function FileTree() {
   const [nodeList, setNodeList] = useState([]);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null); // Moved highlighted state here
   const { keycloak } = useAuth();
-  const { pdfVisibleTree, pdfUrlTree, setPdfUrlTree, setPdfVisibleTree } =
+  const { pdfVisible, pdfUrl, setPdfUrl, setPdfVisible } =
     useContext(PDFContext);
 
   async function handleDrop(newTree, { dragSourceId, dropTargetId }) {
@@ -125,89 +124,78 @@ function FileTree() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <DndProvider backend={MultiBackend} options={getBackendOptions()}>
-          {pdfVisibleTree ? (
-            <PdfViewer setVisible={setPdfVisibleTree} pdfUrl={pdfUrlTree} />
-          ) : (
-            <div className="FileTree-Container">
-              <Tree
-                tree={getFileStructure(false)}
-                rootId={0}
-                initialOpen={true}
-                render={(
-                  node,
-                  {
-                    depth,
-                    isOpen,
-                    onToggle,
-                    isDragging,
-                    isDropTarget,
-                    hasChild,
-                  }
-                ) => (
-                  <CustomNode
-                    node={node}
-                    depth={depth}
-                    isOpen={isOpen}
-                    onToggle={onToggle}
-                    isDragging={isDragging}
-                    isDropTarget={isDropTarget}
-                    draggingNode={draggingNode}
-                    hasChild={hasChild}
-                    updateNode={(value) => {
-                      updateNode(value, depth, hasChild);
-                    }}
-                    highlightedNodeId={highlightedNodeId} // Pass down the highlighted node id
-                    setHighlightedNodeId={setHighlightedNodeId} // Pass down the setter function
-                    setPdfVisibleTree={setPdfVisibleTree}
-                    pdfVisibleTree={setPdfVisibleTree}
-                    setPdfUrlTree={setPdfUrlTree}
-                    pdfUrlTree={setPdfUrlTree}
-                  />
-                )}
-                dragPreviewRender={(monitorProps) => (
-                  <CustomDragPreview monitorProps={monitorProps} />
-                )}
-                onDrop={handleDrop}
-                canDrop={(
-                  treeData,
-                  { dragSource, dropTarget, dropTargetId, dragSourceId }
-                ) => {
-                  if (dropTarget && dragSource !== dropTarget) {
-                    console.log("dropTarget is: ", dropTarget);
-                    let project_id_source = getProjectForNode(
-                      parseInt(dragSourceId)
+          <div className="FileTree-Container">
+            <Tree
+              tree={getFileStructure(false)}
+              rootId={0}
+              initialOpen={true}
+              render={(
+                node,
+                { depth, isOpen, onToggle, isDragging, isDropTarget, hasChild }
+              ) => (
+                <CustomNode
+                  node={node}
+                  depth={depth}
+                  isOpen={isOpen}
+                  onToggle={onToggle}
+                  isDragging={isDragging}
+                  isDropTarget={isDropTarget}
+                  draggingNode={draggingNode}
+                  hasChild={hasChild}
+                  updateNode={(value) => {
+                    updateNode(value, depth, hasChild);
+                  }}
+                  highlightedNodeId={highlightedNodeId} // Pass down the highlighted node id
+                  setHighlightedNodeId={setHighlightedNodeId} // Pass down the setter function
+                  setPdfVisible={setPdfVisible}
+                  pdfVisible={setPdfVisible}
+                  setPdfUrl={setPdfUrl}
+                  pdfUrl={setPdfUrl}
+                />
+              )}
+              dragPreviewRender={(monitorProps) => (
+                <CustomDragPreview monitorProps={monitorProps} />
+              )}
+              onDrop={handleDrop}
+              canDrop={(
+                treeData,
+                { dragSource, dropTarget, dropTargetId, dragSourceId }
+              ) => {
+                if (dropTarget && dragSource !== dropTarget) {
+                  console.log("dropTarget is: ", dropTarget);
+                  let project_id_source = getProjectForNode(
+                    parseInt(dragSourceId)
+                  );
+                  let project_id_target = "";
+                  if (dropTargetId) {
+                    project_id_target = getProjectForNode(
+                      parseInt(dropTargetId)
                     );
-                    let project_id_target = "";
-                    if (dropTargetId) {
-                      project_id_target = getProjectForNode(
-                        parseInt(dropTargetId)
-                      );
-                    }
-                    if (project_id_source !== project_id_target) {
-                      console.log("here");
-                      return false;
-                    }
-                    let dropT = getDropTarget(dropTargetId);
-                    let dragT = getDragTarget(dragSourceId);
-                    if (dropT && dragT) {
-                      if (
-                        droppableTypes.includes(dropT.data.fileType) &&
-                        draggableTypes.includes(dragT.data.fileType)
-                      ) {
-                        return true;
-                      }
+                  }
+                  if (project_id_source !== project_id_target) {
+                    console.log("here");
+                    return false;
+                  }
+                  let dropT = getDropTarget(dropTargetId);
+                  let dragT = getDragTarget(dragSourceId);
+                  if (dropT && dragT) {
+                    if (
+                      droppableTypes.includes(dropT.data.fileType) &&
+                      draggableTypes.includes(dragT.data.fileType)
+                    ) {
+                      return true;
                     }
                   }
-                  return false;
-                }}
-                classes={{
-                  root: "treeRoot",
-                  draggingSource: "draggingSource",
-                  dropTarget: "dropTarget",
-                }}
-              />
-            </div>
-          )}
+                }
+                return false;
+              }}
+              classes={{
+                root: "treeRoot",
+                draggingSource: "draggingSource",
+                dropTarget: "dropTarget",
+              }}
+            />
+          </div>
         </DndProvider>
       </ThemeProvider>
     </div>
