@@ -15,7 +15,6 @@ import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
-import PdfViewer from "../PDF-viewer/PdfViewer";
 
 export default function FileBrowser() {
   const {
