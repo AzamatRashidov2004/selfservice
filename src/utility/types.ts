@@ -186,10 +186,3 @@ export type fetchProjectsDataReturn = {
   analytical: ProjectType[];
   project: projectFetchReturn[];
 };
-
-export type PDFContextType = {
-  pdfVisible: boolean;
-  setPdfVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  pdfUrl: string;
-  setPdfUrl: React.Dispatch<React.SetStateAction<string>>;
-};

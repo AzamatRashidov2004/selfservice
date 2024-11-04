@@ -15,7 +15,6 @@ import { useAuth } from "../../context/authContext";
 import { updateSinglePath } from "../../utility/Api_Utils";
 import { updatePathBulk } from "../../api/kronos/postKronos";
 import handlePathChangeAtDepth from "../../utility/FileSystem_Utils";
-import { PDFContext } from "../../pages/Dashboard/Dashboard.tsx";
 
 function FileTree() {
   const {
@@ -28,13 +27,15 @@ function FileTree() {
     getAllChildren,
     getDepth,
     getProjectForNode,
+    pdfVisible,
+    setPdfUrl,
+    setPdfVisible,
+    pdfUrl,
   } = useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
   const [highlightedNodeId, setHighlightedNodeId] = useState(null); // Moved highlighted state here
   const { keycloak } = useAuth();
-  const { pdfVisible, pdfUrl, setPdfUrl, setPdfVisible } =
-    useContext(PDFContext);
 
   async function handleDrop(newTree, { dragSourceId, dropTargetId }) {
     if (dragSourceId === dropTargetId) return;

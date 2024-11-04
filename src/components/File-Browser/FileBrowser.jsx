@@ -15,7 +15,6 @@ import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
-import { PDFContext } from "../../pages/Dashboard/Dashboard";
 import PdfViewer from "../PDF-viewer/PdfViewer";
 
 export default function FileBrowser() {
@@ -34,11 +33,12 @@ export default function FileBrowser() {
     getPathFromProject,
     fileUploadLoading,
     setFileUploadLoading,
+    setPdfVisible,
+    pdfVisible,
+    pdfUrl,
+    setPdfUrl,
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
-
-  const { pdfVisible, setPdfVisible, pdfUrl, setPdfUrl } =
-    useContext(PDFContext);
 
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(

@@ -58,6 +58,10 @@ interface FilesContextType {
   setCurrentFolder: React.Dispatch<React.SetStateAction<string>>;
   fileUploadLoading: boolean;
   setFileUploadLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  pdfUrl: string;
+  pdfVisible: boolean;
+  setPdfVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  setPdfUrl: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Create the context with the initial value
@@ -93,6 +97,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [filesData, setFilesData] = useState<FileData[]>([]);
   const [currentFolder, setCurrentFolder] = useState("0");
+  const [pdfUrl, setPdfUrl] = useState<string>("");
+  const [pdfVisible, setPdfVisible] = useState<boolean>(false);
 
   useEffect(() => {
     setFileStructure([]); // Transform and set the initial state
@@ -440,6 +446,10 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     setCurrentFolder,
     fileUploadLoading,
     setFileUploadLoading,
+    pdfUrl,
+    pdfVisible,
+    setPdfVisible,
+    setPdfUrl,
   };
 
   return (
