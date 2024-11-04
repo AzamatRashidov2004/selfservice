@@ -68,7 +68,7 @@ const PdfViewer: React.FC<PdfViewerProps> = ({
   return (
     <main className="container-fluid main-container custom-main" ref={mainRef}>
       {loading ? (
-        <div className="loader-container h-100">
+        <div className="loader-container-pdf h-100">
           <Loader />
         </div>
       ) : (

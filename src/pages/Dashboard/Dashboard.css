@@ -93,5 +93,5 @@
 }
 
 .hidden {
-  display: hidden;
+  visibility: hidden !important;
 }
