@@ -28,7 +28,6 @@ const Dashboard: React.FC = () => {
     totalFilesCount,
     currentFolder,
     visibleCount,
-    setVisibleCount,
   } = useFiles();
 
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
