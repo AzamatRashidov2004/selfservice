@@ -27,6 +27,13 @@ export default function FileBrowser() {
     setFileUploadLoading,
     setPdfVisible,
     setPdfUrl,
+    files,
+    setFiles,
+    visibleCount,
+    setVisibleCount,
+    incrementVisibleCount,
+    totalFilesCount,
+    setTotalFilesCount,
   } = useFiles();
   const { keycloak } = useAuth();
 
