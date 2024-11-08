@@ -4,9 +4,7 @@ import {
   fetchProjectsDataReturn,
   projectFetchReturn,
 } from "../../utility/types.ts";
-import {
-  fetchProjectsData,
-} from "../../utility/Api_Utils.ts";
+import { fetchProjectsData } from "../../utility/Api_Utils.ts";
 import Loader from "../../components/Loader/Loader.tsx";
 import { useAuth } from "../../context/authContext.tsx";
 import { useNavigate } from "react-router-dom";
@@ -16,12 +14,22 @@ import { ResizableBox, ResizeCallbackData } from "react-resizable";
 import "react-resizable/css/styles.css";
 import { useFiles } from "../../context/fileContext.tsx";
 import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
+import CodeEditor from "../../components/Code-Editor/CodeEditor.tsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
 
-  const { setProjectsContext, pdfVisible, setPdfUrl, setPdfVisible, pdfUrl } =
-    useFiles();
+  const {
+    setProjectsContext,
+    pdfVisible,
+    setPdfUrl,
+    setPdfVisible,
+    pdfUrl,
+    codeLanguage,
+    codeVisible,
+    setCodeVisible,
+    codeValue,
+  } = useFiles();
 
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
   const accordionRef = useRef<HTMLDivElement>(null);
@@ -115,7 +123,7 @@ const Dashboard: React.FC = () => {
     event: React.SyntheticEvent,
     data: ResizeCallbackData
   ) => {
-    console.log(event)
+    console.log(event);
     if (data.size.width <= window.innerWidth * 0.6) {
       console.log(
         "data size widht and window inner width 80",
@@ -150,6 +158,21 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  useEffect(() => {
+    const targetCode = document.getElementById("code-container");
+    const targetRest = document.getElementById("dashboard-part");
+    const targetOverlay = document.getElementsByClassName("overlay")[0];
+    if (codeVisible) {
+      targetRest?.classList.add("hidden");
+      targetCode?.classList.remove("hidden");
+      targetOverlay?.classList.remove("hidden");
+    } else {
+      targetRest?.classList.remove("hidden");
+      targetCode?.classList.add("hidden");
+      targetOverlay?.classList.add("hidden");
+    }
+  });
+
   return (
     <section className="dashboard-section">
       <main className="container-fluid main-container">
@@ -158,6 +181,13 @@ const Dashboard: React.FC = () => {
             pdfUrl={pdfUrl}
             setVisible={setPdfVisible}
             setPdfUrl={setPdfUrl}
+          />
+        </div>
+        <div id="code-container" className="hidden">
+          <CodeEditor
+            initialValue={codeValue}
+            language={codeLanguage}
+            setVisible={setCodeVisible}
           />
         </div>
         <div id="dashboard-part">
@@ -208,8 +238,7 @@ const Dashboard: React.FC = () => {
                   ref={accordionRef}
                   className="accordion"
                   id="projectsAccordion"
-                >
-                </div>
+                ></div>
               </tr>
             </tbody>
           </table>

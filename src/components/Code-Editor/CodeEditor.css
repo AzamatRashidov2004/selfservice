@@ -1,0 +1,59 @@
+.code-editor-section {
+  height: 92% !important;
+  width: 100% !important;
+  padding: 0 !important;
+  text-align: start !important;
+  position: relative;
+}
+
+.custom-main {
+  width: 80vw !important;
+  height: 90vh !important;
+  margin-bottom: 90px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  margin-top: 50px !important;
+}
+.code-editor-section section {
+  padding: 0 !important;
+  text-align: start;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent grey */
+  z-index: 9997;
+  border-radius: 0 !important;
+}
+
+/* Highlighted div */
+.highlighted-div {
+  position: relative;
+  z-index: 9999; /* A very high z-index to make sure it's above everything */
+  background-color: white;
+  padding: 20px;
+  width: 300px;
+  margin: 100px auto; /* Centered horizontally */
+}
+
+.buttons-div {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+  width: 100% !important;
+  height: 8% !important;
+  background-color: #52555b;
+  align-items: center;
+  justify-content: center;
+}
+
+.code-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}

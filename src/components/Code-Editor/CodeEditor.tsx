@@ -82,45 +82,47 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <main className="container-fluid main-container custom-main" ref={mainRef}>
-      <div className="buttons-div">
-        {isReadOnly ? (
-          <button
-            className="btn btn-outline-light btn-md"
-            onClick={handleToggleEditMode}
-          >
-            Edit
-          </button>
-        ) : (
-          <>
+      <div className="code-container">
+        <div className="buttons-div">
+          {isReadOnly ? (
             <button
               className="btn btn-outline-light btn-md"
-              onClick={handleSave}
+              onClick={handleToggleEditMode}
             >
-              Save
+              Edit
             </button>
-            <button
-              className="btn btn-outline-light btn-md"
-              onClick={handleCancel}
-            >
-              Cancel
-            </button>
-          </>
-        )}
+          ) : (
+            <>
+              <button
+                className="btn btn-outline-light btn-md"
+                onClick={handleSave}
+              >
+                Save
+              </button>
+              <button
+                className="btn btn-outline-light btn-md"
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>
+            </>
+          )}
+        </div>
+        <section className="code-editor-section">
+          <Editor
+            defaultLanguage={language}
+            theme={theme}
+            value={value}
+            onChange={(e: string | undefined) => {
+              setValue(e);
+            }}
+            options={{
+              fontSize: 18,
+              readOnly: isReadOnly,
+            }}
+          />
+        </section>
       </div>
-      <section className="code-editor-section">
-        <Editor
-          defaultLanguage={language}
-          theme={theme}
-          value={value}
-          onChange={(e: string | undefined) => {
-            setValue(e);
-          }}
-          options={{
-            fontSize: 18,
-            readOnly: isReadOnly,
-          }}
-        />
-      </section>
     </main>
   );
 };

@@ -32,6 +32,12 @@ interface TreeNode {
 }
 
 interface FilesContextType {
+  codeVisible: boolean;
+  setCodeVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  codeValue: string;
+  setCodeValue: React.Dispatch<React.SetStateAction<string>>;
+  codeLanguage: string;
+  setCodeLanguage: React.Dispatch<React.SetStateAction<string>>;
   setProjectsContext: (projects: projectFetchReturn[]) => void;
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
@@ -427,6 +433,10 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"];
   const [fileUploadLoading, setFileUploadLoading] = useState<boolean>(false);
 
+  const [codeVisible, setCodeVisible] = useState<boolean>(false);
+  const [codeValue, setCodeValue] = useState<string>("");
+  const [codeLanguage, setCodeLanguage] = useState<string>("");
+
   const contextValue: FilesContextType = {
     setProjectsContext,
     getFileStructure,
@@ -450,6 +460,12 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     pdfVisible,
     setPdfVisible,
     setPdfUrl,
+    codeValue,
+    setCodeValue,
+    codeVisible,
+    setCodeVisible,
+    setCodeLanguage,
+    codeLanguage,
   };
 
   return (
