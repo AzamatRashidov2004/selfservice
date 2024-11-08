@@ -2,14 +2,7 @@ import { setChonkyDefaults } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
 import Loader from "../Loader/Loader";
-import {
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  useContext,
-} from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
@@ -33,15 +26,46 @@ export default function FileBrowser() {
     fileUploadLoading,
     setFileUploadLoading,
     setPdfVisible,
-    pdfVisible,
-    pdfUrl,
     setPdfUrl,
-  } = useFiles(); // Get the context function
+  } = useFiles();
   const { keycloak } = useAuth();
+
+  // Set the Chonky icon set
+  setChonkyDefaults({ iconComponent: ChonkyIconFA });
+  const [folderChain, setFolderChain] = useState(null);
+
+  // Create the load more file entry
+  const loadMoreFile = {
+    id: "load-more-button",
+    name: "Load More",
+    isLoadMoreButton: true,
+  };
+
+  const fileActions = useMemo(
+    () => [
+      ChonkyActions.EnableListView,
+      ChonkyActions.EnableGridView,
+      ChonkyActions.CreateFolder,
+      ...customActions,
+      ChonkyActions.DownloadFiles,
+      ChonkyActions.DeleteFiles,
+    ],
+    []
+  );
 
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
+      // Check if the clicked file is the load more button
+      if (data.id === ChonkyActions.OpenFiles.id && data.payload.targetFile) {
+        const targetFile = data.payload.targetFile;
+        if (targetFile.isLoadMoreButton) {
+          // Increment visibleCount to load more files
+          incrementVisibleCount();
+          return;
+        }
+      }
+      // Existing action handler logic
       handleAction(
         data,
         setCurrentFolder,
@@ -64,24 +88,14 @@ export default function FileBrowser() {
         setFileUploadLoading
       );
     },
-    [getFileStructure, dragAndDropFile]
-  );
-
-  // Set the Chonky icon set
-  setChonkyDefaults({ iconComponent: ChonkyIconFA });
-  const [files, setFiles] = useState(null);
-  const [folderChain, setFolderChain] = useState(null);
-
-  const fileActions = useMemo(
-    () => [
-      ChonkyActions.EnableListView,
-      ChonkyActions.EnableGridView,
-      ChonkyActions.CreateFolder, // Make sure this is included
-      ...customActions,
-      ChonkyActions.DownloadFiles,
-      ChonkyActions.DeleteFiles,
-    ],
-    []
+    [
+      getFileStructure,
+      dragAndDropFile,
+      currentFolder,
+      keycloak,
+      setCurrentFolder,
+      incrementVisibleCount, // Include in dependencies
+    ]
   );
 
   // Fetch the folder data and set the file and folder chain states
@@ -101,12 +115,44 @@ export default function FileBrowser() {
       folderChainTemp = folderChainTemp1;
     }
     setFolderChain(folderChainTemp);
-    setFiles(filesTemp);
-  }, [currentFolder, getFileStructure]);
+    setTotalFilesCount(filesTemp.length);
+
+    // Slice the files up to visibleCount
+    let visibleFiles = filesTemp.slice(0, visibleCount);
+
+    // If not all files are visible, add the load more button
+    if (visibleCount < filesTemp.length) {
+      visibleFiles = [...visibleFiles, loadMoreFile];
+    }
+
+    setFiles(visibleFiles);
+  }, [currentFolder, getFileStructure, visibleCount]);
+
+  // Reset visible count when changing folders
+  useEffect(() => {
+    setVisibleCount(1); // Reset to initial number when folder changes
+  }, [currentFolder]);
+
+  // Customize the appearance of the "Load More" button
+  const fileDecorator = (file) => {
+    if (file.isLoadMoreButton) {
+      return {
+        icon: null, // Remove the icon
+        style: {
+          cursor: "pointer",
+          backgroundColor: "#007bff",
+          color: "white",
+          textAlign: "center",
+          lineHeight: "30px",
+        },
+      };
+    }
+    return {};
+  };
 
   return (
-    <div style={{ width: "100%", height: "400px" }}>
-      {fileUploadLoading ? (
+    <div style={{ width: "100%", height: "400px", position: "relative" }}>
+      {fileUploadLoading && (
         <div
           className="loader-container"
           style={{
@@ -119,8 +165,6 @@ export default function FileBrowser() {
         >
           <Loader loader="white" />
         </div>
-      ) : (
-        <></>
       )}
       <FullFileBrowser
         files={files}
@@ -129,6 +173,7 @@ export default function FileBrowser() {
         fileActions={fileActions}
         onFileAction={handleActionWrapper}
         disableDefaultFileActions={true}
+        fileDecorator={fileDecorator}
       />
     </div>
   );
