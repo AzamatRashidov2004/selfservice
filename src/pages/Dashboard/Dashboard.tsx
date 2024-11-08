@@ -4,9 +4,7 @@ import {
   fetchProjectsDataReturn,
   projectFetchReturn,
 } from "../../utility/types.ts";
-import {
-  fetchProjectsData,
-} from "../../utility/Api_Utils.ts";
+import { fetchProjectsData } from "../../utility/Api_Utils.ts";
 import Loader from "../../components/Loader/Loader.tsx";
 import { useAuth } from "../../context/authContext.tsx";
 import { useNavigate } from "react-router-dom";
@@ -20,8 +18,18 @@ import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
 
-  const { setProjectsContext, pdfVisible, setPdfUrl, setPdfVisible, pdfUrl } =
-    useFiles();
+  const {
+    setProjectsContext,
+    pdfVisible,
+    setPdfUrl,
+    setPdfVisible,
+    pdfUrl,
+    incrementVisibleCount,
+    totalFilesCount,
+    currentFolder,
+    visibleCount,
+    setVisibleCount,
+  } = useFiles();
 
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
   const accordionRef = useRef<HTMLDivElement>(null);
@@ -115,7 +123,7 @@ const Dashboard: React.FC = () => {
     event: React.SyntheticEvent,
     data: ResizeCallbackData
   ) => {
-    console.log(event)
+    console.log(event);
     if (data.size.width <= window.innerWidth * 0.6) {
       console.log(
         "data size widht and window inner width 80",
@@ -134,6 +142,26 @@ const Dashboard: React.FC = () => {
     setWidth(data.size.width);
     setPosition(position + deltaWidth);
   };*/
+
+  const handleLoadClick = () => {
+    incrementVisibleCount();
+  };
+  const loadButtonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    setTimeout(() => {
+      if (
+        currentFolder === "0" ||
+        totalFilesCount == 0 ||
+        visibleCount >= totalFilesCount
+      ) {
+        // Access the classList of the actual DOM element
+        loadButtonRef?.current?.classList.add("hidden");
+      } else {
+        console.log(loadButtonRef.current);
+        loadButtonRef?.current?.classList.remove("hidden");
+      }
+    }, 0);
+  }, [currentFolder, visibleCount, totalFilesCount]);
 
   useEffect(() => {
     const targetPdf = document.getElementById("pdf-container");
@@ -187,6 +215,13 @@ const Dashboard: React.FC = () => {
                 style={{ minWidth: "500px" }}
               >
                 <FileBrowser />
+                <button
+                  className="load-button"
+                  onClick={handleLoadClick}
+                  ref={loadButtonRef}
+                >
+                  Load more...
+                </button>
               </ResizableBox>
             </div>
           </div>
@@ -208,8 +243,7 @@ const Dashboard: React.FC = () => {
                   ref={accordionRef}
                   className="accordion"
                   id="projectsAccordion"
-                >
-                </div>
+                ></div>
               </tr>
             </tbody>
           </table>

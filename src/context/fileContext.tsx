@@ -32,6 +32,11 @@ interface TreeNode {
 }
 
 interface FilesContextType {
+  visibleCount: number;
+  setVisibleCount: React.Dispatch<React.SetStateAction<number>>;
+  totalFilesCount: number;
+  setTotalFilesCount: React.Dispatch<React.SetStateAction<number>>;
+  incrementVisibleCount: () => void;
   setProjectsContext: (projects: projectFetchReturn[]) => void;
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
@@ -426,12 +431,11 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   const droppableTypes = ["folder", "project", "program"];
   const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"];
   const [fileUploadLoading, setFileUploadLoading] = useState<boolean>(false);
-  /*const [files, setFiles] = useState(null);
-  const [visibleCount, setVisibleCount] = useState(1);
+  const [visibleCount, setVisibleCount] = useState(10);
   const incrementVisibleCount = () => {
-    setVisibleCount((prev) => prev + 1);
+    setVisibleCount((prev) => prev + 10);
   };
-  const [totalFilesCount, setTotalFilesCount] = useState(0);*/
+  const [totalFilesCount, setTotalFilesCount] = useState(0);
 
   const contextValue: FilesContextType = {
     setProjectsContext,
@@ -456,6 +460,11 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     pdfVisible,
     setPdfVisible,
     setPdfUrl,
+    visibleCount,
+    setVisibleCount,
+    incrementVisibleCount,
+    totalFilesCount,
+    setTotalFilesCount,
   };
 
   return (

@@ -26,8 +26,7 @@ async function handleAction(
   keycloak,
   setPdfUrl,
   setPdfVisible,
-  setFileUploadLoading,
-  incrementVisibleCount
+  setFileUploadLoading
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -44,16 +43,7 @@ async function handleAction(
     getPathFromProject,
     getDepth,
   } = fileContext;
-  // Check if the clicked file is the load more button
-  if (
-    data.id === ChonkyActions.OpenFiles.id &&
-    data.payload.targetFile &&
-    data.payload.targetFile.isLoadMoreButton
-  ) {
-    // Increment visibleCount to load more files
-    incrementVisibleCount();
-    return;
-  }
+
   if (data.id === ChonkyActions.OpenFiles.id) {
     const file = findFile(fileData, data.payload.files[0].id);
     if (file?.isDir) {
