@@ -1,13 +1,14 @@
 .load-more-button {
-  cursor: pointer;
-  background-color: #007bff;
-  color: white;
-  text-align: center;
-  padding: 10px;
-  border-radius: 5px;
-  margin-top: 10px;
-  margin-bottom: 10px;
   display: flex;
+  list-style-type: none;
+  cursor: pointer;
+  background-color: #90ee90;
+  color: white;
+  /* text-align: center; */
+  /* padding: 10px; */
+  border-radius: 5px;
+  /*margin-top: 5px;
+  margin-bottom: 10px;*/
   justify-content: center;
   align-items: center;
   font-weight: bold;

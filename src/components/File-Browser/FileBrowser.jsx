@@ -6,9 +6,9 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
-import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
+import { useFiles } from "../../context/fileContext";
 import { useAuth } from "../../context/authContext";
-import "./FileBrowser.css";
+import "./FileBrowser.css"; // Ensure the CSS file is correctly imported
 
 export default function FileBrowser() {
   const {
@@ -28,15 +28,9 @@ export default function FileBrowser() {
     setFileUploadLoading,
     setPdfVisible,
     setPdfUrl,
-    /*files,
-    setFiles,
-    visibleCount,
-    setVisibleCount,
-    incrementVisibleCount,
-    totalFilesCount,
-    setTotalFilesCount,*/
   } = useFiles();
-  const [files, setFiles] = useState(null);
+
+  const [files, setFiles] = useState([]); // Initialize as empty array
   const [visibleCount, setVisibleCount] = useState(1);
   const incrementVisibleCount = () => {
     setVisibleCount((prev) => prev + 1);
@@ -51,35 +45,9 @@ export default function FileBrowser() {
   // Create the load more file entry
   const loadMoreFile = {
     id: "load-more-button",
-    name: "Load 1 More File",
+    name: "Double Click to load 1 more file",
     isLoadMoreButton: true,
     icon: ChonkyIconName.placeholder,
-    /*style: {
-      cursor: "pointer",
-      backgroundColor: "#007bff",
-      color: "white",
-      textAlign: "center",
-      padding: "10px",
-      borderRadius: "5px",
-      marginTop: "10px",
-      marginBottom: "10px",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      fontWeight: "bold",
-    },*/
-    className: "load-more-button",
-    title: "Click to load more files",
-  };
-  const fileDecorator = (file) => {
-    if (file.isLoadMoreButton) {
-      return {
-        icon: ChonkyIconName.plus, // Use a plus icon
-        className: "load-more-button", // Apply your custom class
-        title: "Click to load more files",
-      };
-    }
-    return {};
   };
 
   const fileActions = useMemo(
@@ -93,6 +61,17 @@ export default function FileBrowser() {
     ],
     []
   );
+
+  // Define the fileDecorator function
+  const fileDecorator = (file) => {
+    if (file.isLoadMoreButton) {
+      return {
+        className: "load-more-button",
+        title: "Click to load more files",
+      };
+    }
+    return {};
+  };
 
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
@@ -126,18 +105,18 @@ export default function FileBrowser() {
       currentFolder,
       keycloak,
       setCurrentFolder,
-      incrementVisibleCount, // Include in dependencies
+      incrementVisibleCount,
     ]
   );
 
   // Fetch the folder data and set the file and folder chain states
   useEffect(() => {
-    const transformedData = getFileStructure(true); // Get the file structure from context
+    const transformedData = getFileStructure(true);
     let folderChainTemp = [];
     let filesTemp = [];
 
     const [found, filesTemp1, folderChainTemp1] = folderSearch(
-      transformedData, // Use the transformed data from context
+      transformedData,
       folderChainTemp,
       currentFolder
     );
@@ -156,16 +135,39 @@ export default function FileBrowser() {
     if (visibleCount < filesTemp.length) {
       visibleFiles = [...visibleFiles, loadMoreFile];
     }
-
     setFiles(visibleFiles);
   }, [currentFolder, getFileStructure, visibleCount]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const loadMoreDiv = document.querySelector(
+        '[data-chonky-file-id="load-more-button"]'
+      );
+      if (loadMoreDiv) {
+        loadMoreDiv.classList.add("load-more-button");
+      }
+      // Select all spans with the specified class
+      const extensionSpans = document.querySelectorAll(
+        ".chonky-file-entry-description-title-extension"
+      );
+
+      extensionSpans.forEach((span) => {
+        // Get the text content
+        let text = span.textContent;
+        // Remove the leading dot if present
+        if (text.startsWith(".")) {
+          span.textContent = text.substring(1);
+        }
+      });
+    }, 150);
+    return () => clearInterval(interval);
+  }, []);
+
   // Reset visible count when changing folders
   useEffect(() => {
-    setVisibleCount(1); // Reset to initial number when folder changes
+    setVisibleCount(1);
   }, [currentFolder]);
 
-  // Customize the appearance of the "Load More" button
   return (
     <div style={{ width: "100%", height: "400px", position: "relative" }}>
       {fileUploadLoading && (
@@ -189,7 +191,7 @@ export default function FileBrowser() {
         fileActions={fileActions}
         onFileAction={handleActionWrapper}
         disableDefaultFileActions={true}
-        fileDecorator={fileDecorator}
+        fileDecorator={fileDecorator} // Pass the fileDecorator function
       />
     </div>
   );

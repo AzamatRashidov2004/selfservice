@@ -45,13 +45,14 @@ async function handleAction(
     getDepth,
   } = fileContext;
   // Check if the clicked file is the load more button
-  if (data.id === ChonkyActions.OpenFiles.id && data.payload.targetFile) {
-    const targetFile = data.payload.targetFile;
-    if (targetFile.isLoadMoreButton) {
-      // Increment visibleCount to load more files
-      incrementVisibleCount();
-      return;
-    }
+  if (
+    data.id === ChonkyActions.OpenFiles.id &&
+    data.payload.targetFile &&
+    data.payload.targetFile.isLoadMoreButton
+  ) {
+    // Increment visibleCount to load more files
+    incrementVisibleCount();
+    return;
   }
   if (data.id === ChonkyActions.OpenFiles.id) {
     const file = findFile(fileData, data.payload.files[0].id);
