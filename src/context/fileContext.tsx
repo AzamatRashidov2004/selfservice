@@ -426,12 +426,12 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   const droppableTypes = ["folder", "project", "program"];
   const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"];
   const [fileUploadLoading, setFileUploadLoading] = useState<boolean>(false);
-  const [files, setFiles] = useState(null);
+  /*const [files, setFiles] = useState(null);
   const [visibleCount, setVisibleCount] = useState(1);
   const incrementVisibleCount = () => {
     setVisibleCount((prev) => prev + 1);
   };
-  const [totalFilesCount, setTotalFilesCount] = useState(0);
+  const [totalFilesCount, setTotalFilesCount] = useState(0);*/
 
   const contextValue: FilesContextType = {
     setProjectsContext,

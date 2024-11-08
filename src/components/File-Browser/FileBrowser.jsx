@@ -1,4 +1,4 @@
-import { setChonkyDefaults } from "chonky";
+import { ChonkyIconName, setChonkyDefaults } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
 import Loader from "../Loader/Loader";
@@ -8,6 +8,7 @@ import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
+import "./FileBrowser.css";
 
 export default function FileBrowser() {
   const {
@@ -27,14 +28,20 @@ export default function FileBrowser() {
     setFileUploadLoading,
     setPdfVisible,
     setPdfUrl,
-    files,
+    /*files,
     setFiles,
     visibleCount,
     setVisibleCount,
     incrementVisibleCount,
     totalFilesCount,
-    setTotalFilesCount,
+    setTotalFilesCount,*/
   } = useFiles();
+  const [files, setFiles] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(1);
+  const incrementVisibleCount = () => {
+    setVisibleCount((prev) => prev + 1);
+  };
+  const [totalFilesCount, setTotalFilesCount] = useState(0);
   const { keycloak } = useAuth();
 
   // Set the Chonky icon set
@@ -44,8 +51,35 @@ export default function FileBrowser() {
   // Create the load more file entry
   const loadMoreFile = {
     id: "load-more-button",
-    name: "Load More",
+    name: "Load 1 More File",
     isLoadMoreButton: true,
+    icon: ChonkyIconName.placeholder,
+    /*style: {
+      cursor: "pointer",
+      backgroundColor: "#007bff",
+      color: "white",
+      textAlign: "center",
+      padding: "10px",
+      borderRadius: "5px",
+      marginTop: "10px",
+      marginBottom: "10px",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      fontWeight: "bold",
+    },*/
+    className: "load-more-button",
+    title: "Click to load more files",
+  };
+  const fileDecorator = (file) => {
+    if (file.isLoadMoreButton) {
+      return {
+        icon: ChonkyIconName.plus, // Use a plus icon
+        className: "load-more-button", // Apply your custom class
+        title: "Click to load more files",
+      };
+    }
+    return {};
   };
 
   const fileActions = useMemo(
@@ -63,16 +97,6 @@ export default function FileBrowser() {
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
-      // Check if the clicked file is the load more button
-      if (data.id === ChonkyActions.OpenFiles.id && data.payload.targetFile) {
-        const targetFile = data.payload.targetFile;
-        if (targetFile.isLoadMoreButton) {
-          // Increment visibleCount to load more files
-          incrementVisibleCount();
-          return;
-        }
-      }
-      // Existing action handler logic
       handleAction(
         data,
         setCurrentFolder,
@@ -92,7 +116,8 @@ export default function FileBrowser() {
         keycloak,
         setPdfUrl,
         setPdfVisible,
-        setFileUploadLoading
+        setFileUploadLoading,
+        incrementVisibleCount
       );
     },
     [
@@ -141,22 +166,6 @@ export default function FileBrowser() {
   }, [currentFolder]);
 
   // Customize the appearance of the "Load More" button
-  const fileDecorator = (file) => {
-    if (file.isLoadMoreButton) {
-      return {
-        icon: null, // Remove the icon
-        style: {
-          cursor: "pointer",
-          backgroundColor: "#007bff",
-          color: "white",
-          textAlign: "center",
-          lineHeight: "30px",
-        },
-      };
-    }
-    return {};
-  };
-
   return (
     <div style={{ width: "100%", height: "400px", position: "relative" }}>
       {fileUploadLoading && (

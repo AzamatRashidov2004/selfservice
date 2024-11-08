@@ -26,7 +26,8 @@ async function handleAction(
   keycloak,
   setPdfUrl,
   setPdfVisible,
-  setFileUploadLoading
+  setFileUploadLoading,
+  incrementVisibleCount
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
