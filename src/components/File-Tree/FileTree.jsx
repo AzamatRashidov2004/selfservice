@@ -31,6 +31,9 @@ function FileTree() {
     setPdfUrl,
     setPdfVisible,
     pdfUrl,
+    setCodeVisible,
+    setCodeLanguage,
+    setCodeValue,
   } = useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);

@@ -36,6 +36,10 @@ export default function FileBrowser() {
     pdfVisible,
     pdfUrl,
     setPdfUrl,
+    setCodeVisible,
+    setCodeValue,
+    setCodeLanguage,
+    codeValue,
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
 
@@ -61,7 +65,11 @@ export default function FileBrowser() {
         keycloak,
         setPdfUrl,
         setPdfVisible,
-        setFileUploadLoading
+        setFileUploadLoading,
+        setCodeVisible,
+        setCodeValue,
+        setCodeLanguage,
+        codeValue
       );
     },
     [getFileStructure, dragAndDropFile]

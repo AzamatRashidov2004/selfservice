@@ -29,6 +29,8 @@ const Dashboard: React.FC = () => {
     codeVisible,
     setCodeVisible,
     codeValue,
+    setCodeValue,
+    setCodeLanguage,
   } = useFiles();
 
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
@@ -143,6 +145,7 @@ const Dashboard: React.FC = () => {
     setPosition(position + deltaWidth);
   };*/
 
+  // PDF viewer handler
   useEffect(() => {
     const targetPdf = document.getElementById("pdf-container");
     const targetRest = document.getElementById("dashboard-part");
@@ -158,10 +161,11 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  // Code editor viewer handler
   useEffect(() => {
     const targetCode = document.getElementById("code-container");
     const targetRest = document.getElementById("dashboard-part");
-    const targetOverlay = document.getElementsByClassName("overlay")[0];
+    const targetOverlay = document.getElementsByClassName("overlay-code")[0];
     if (codeVisible) {
       targetRest?.classList.add("hidden");
       targetCode?.classList.remove("hidden");
@@ -186,8 +190,10 @@ const Dashboard: React.FC = () => {
         <div id="code-container" className="hidden">
           <CodeEditor
             initialValue={codeValue}
+            setCodeValue={setCodeValue}
             language={codeLanguage}
             setVisible={setCodeVisible}
+            readOnly={true}
           />
         </div>
         <div id="dashboard-part">

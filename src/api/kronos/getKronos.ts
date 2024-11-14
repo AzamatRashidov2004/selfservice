@@ -252,3 +252,67 @@ export async function getKbId(
     return handleError({ error: e, origin: "getAllPdfsFromProject" });
   }
 }
+
+export async function getHtmlFile(
+  projectID: string,
+  docID: string,
+  token: string
+): Promise<string> {
+  try {
+    const projectResponse: Response = await fetch(
+      `${apiUrl}/resources/chatbot_html?project_id=${projectID}&kb_id=${docID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer + ${token}`,
+          "x-api-key": apiKey,
+        },
+      }
+    );
+
+    if (!projectResponse.ok) {
+      console.error("Failed to get PDF file");
+      return "";
+    }
+
+    // Convert response to Blob
+    const blob = await projectResponse.blob();
+    return await blob.text();
+  } catch (e: unknown) {
+    handleError({ error: e, origin: "getHTMLFile" });
+    return "";
+  }
+}
+
+export async function getJsonFile(
+  projectID: string,
+  docID: string,
+  token: string
+): Promise<string> {
+  try {
+    const projectResponse: Response = await fetch(
+      `${apiUrl}/resources/dialogue_fsm?project_id=${projectID}&kb_id=${docID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer + ${token}`,
+          "x-api-key": apiKey,
+        },
+      }
+    );
+
+    if (!projectResponse.ok) {
+      console.error("Failed to get Json file");
+      return "";
+    }
+
+    // Convert response to Blob
+    const blob = await projectResponse.blob();
+    return await blob.text();
+  } catch (e: unknown) {
+    handleError({ error: e, origin: "getJsonFile" });
+    return "";
+  }
+}

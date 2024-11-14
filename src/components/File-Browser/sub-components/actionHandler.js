@@ -16,6 +16,7 @@ import {
   getKbId,
   getPdfFile,
   getPdfFileUrl,
+  getHtmlFile,
 } from "../../../api/kronos/getKronos";
 
 async function handleAction(
@@ -26,7 +27,11 @@ async function handleAction(
   keycloak,
   setPdfUrl,
   setPdfVisible,
-  setFileUploadLoading
+  setFileUploadLoading,
+  setCodeVisible,
+  setCodeValue,
+  setCodeLanguage,
+  codeValue
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -171,6 +176,65 @@ async function handleAction(
 
     const selectedFile = data.state.selectedFiles[0];
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
+
+    if (nodeInfo.text.toLowerCase().endsWith(".html")) {
+      console.log("clicked");
+      const project = getProjectForNode(parseInt(selectedFile.id));
+      const project_id = project.kronosProjectId;
+      const project_text = project.text;
+
+      if (project_id) {
+        const kb_id = await getKbId(project_id, keycloak.token);
+
+        if (kb_id) {
+          const htmlData = await getHtmlFile(project_id, kb_id, keycloak.token);
+
+          if (htmlData !== "") {
+            setCodeVisible(true);
+            console.log("the html data is: ", htmlData);
+            setCodeValue(htmlData);
+            console.log("code value is: ", codeValue);
+            setCodeLanguage("html");
+          } else {
+            setCodeVisible(false);
+            console.log("html get request not found!");
+          }
+        } else {
+          console.log("kb_id not found!");
+        }
+      } else {
+        console.log("project_id is not there!");
+      }
+    }
+
+    if (nodeInfo.text.toLowerCase().endsWith(".json")) {
+      const project = getProjectForNode(parseInt(selectedFile.id));
+      const project_id = project.kronosProjectId;
+      const project_text = project.text;
+
+      if (project_id) {
+        setCodeVisible(true);
+        const kb_id = await getKbId(project_id, keycloak.token);
+
+        if (kb_id) {
+          const jsonData = await getJsonFile(project_id, kb_id, keycloak.token);
+          if (jsonData !== "") {
+            setCodeVisible(true);
+            console.log("the json data is: ", jsonData);
+            setCodeValue(jsonData);
+            console.log("code value is: ", codeValue);
+            setCodeLanguage("json");
+          } else {
+            setCodeVisible(false);
+            console.log("json get request not found!");
+          }
+        } else {
+          console.log("kb_id not found!");
+        }
+      } else {
+        console.log("project_id is not there!");
+      }
+    }
 
     if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
       const project = getProjectForNode(parseInt(selectedFile.id));

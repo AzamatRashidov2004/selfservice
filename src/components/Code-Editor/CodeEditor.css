@@ -6,7 +6,7 @@
   position: relative;
 }
 
-.custom-main {
+.custom-main-code {
   width: 80vw !important;
   height: 90vh !important;
   margin-bottom: 90px !important;
@@ -19,7 +19,7 @@
   text-align: start;
 }
 
-.overlay {
+.overlay-code {
   position: fixed;
   top: 0;
   left: 0;
@@ -31,7 +31,7 @@
 }
 
 /* Highlighted div */
-.highlighted-div {
+.highlighted-div-code {
   position: relative;
   z-index: 9999; /* A very high z-index to make sure it's above everything */
   background-color: white;
@@ -56,4 +56,16 @@
   position: absolute;
   width: 100%;
   height: 100%;
+}
+
+.hidden {
+  visibility: hidden !important;
+}
+
+.loader-container-code {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh; /* Adjust based on the size you want */
+  position: relative !important;
 }
