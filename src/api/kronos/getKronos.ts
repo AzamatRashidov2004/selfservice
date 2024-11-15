@@ -8,6 +8,60 @@ import {
   kronosKnowledgeBaseType,
 } from "../../utility/types";
 
+export async function getHTMLFromProject(
+  projectId: string,
+  token: string
+): Promise<string> {
+  try {
+    const _url = `${apiUrl}/resources/chatbot_html?project_id=${projectId}`;
+    const response: Response = await fetch(_url, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer + ${token}`,
+        "x-api-key": apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch html resource files");
+      return "";
+    }
+
+    const blob = await response.blob();
+    return await blob.text();
+  } catch (e: unknown) {
+    return "handleError({ error: e, origin: getHTMLFromProject })";
+  }
+}
+
+export async function getFSMFromProject(
+  projectId: string,
+  token: string
+): Promise<string> {
+  try {
+    const _url = `${apiUrl}/resources/dialogue_fsm?project_id=${projectId}`;
+    const response: Response = await fetch(_url, {
+      method: "GET",
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer + ${token}`,
+        "x-api-key": apiKey,
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch fsm resource files");
+      return "";
+    }
+
+    const blob = await response.blob();
+    return await blob.text();
+  } catch (e: unknown) {
+    return "handleError({ error: e, origin: getFSMFromProject })";
+  }
+}
+
 export async function getAllPdfsFromProject(
   projectId: string,
   token: string
@@ -281,38 +335,6 @@ export async function getHtmlFile(
     return await blob.text();
   } catch (e: unknown) {
     handleError({ error: e, origin: "getHTMLFile" });
-    return "";
-  }
-}
-
-export async function getJsonFile(
-  projectID: string,
-  docID: string,
-  token: string
-): Promise<string> {
-  try {
-    const projectResponse: Response = await fetch(
-      `${apiUrl}/resources/dialogue_fsm?project_id=${projectID}&kb_id=${docID}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer + ${token}`,
-          "x-api-key": apiKey,
-        },
-      }
-    );
-
-    if (!projectResponse.ok) {
-      console.error("Failed to get Json file");
-      return "";
-    }
-
-    // Convert response to Blob
-    const blob = await projectResponse.blob();
-    return await blob.text();
-  } catch (e: unknown) {
-    handleError({ error: e, origin: "getJsonFile" });
     return "";
   }
 }

@@ -17,7 +17,10 @@ import {
   getPdfFile,
   getPdfFileUrl,
   getHtmlFile,
+  getHTMLFromProject,
+  getFSMFromProject,
 } from "../../../api/kronos/getKronos";
+import { KeyboardReturnRounded } from "@mui/icons-material";
 
 async function handleAction(
   data,
@@ -174,62 +177,45 @@ async function handleAction(
   if (data.id === "open_files") {
     if (!keycloak || !keycloak.token) return;
 
-    const selectedFile = data.state.selectedFiles[0];
+    const selectedFile = data.payload.files[0];
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
 
     if (nodeInfo.text.toLowerCase().endsWith(".html")) {
-      console.log("clicked");
+      const selectedFileCurrent = data.state.selectedFiles[0];
+      console.log("selectedFileCurrent: ", selectedFileCurrent);
       const project = getProjectForNode(parseInt(selectedFile.id));
       const project_id = project.kronosProjectId;
-      const project_text = project.text;
 
       if (project_id) {
-        const kb_id = await getKbId(project_id, keycloak.token);
+        const htmlData = await getHTMLFromProject(project_id, keycloak.token);
 
-        if (kb_id) {
-          const htmlData = await getHtmlFile(project_id, kb_id, keycloak.token);
-
-          if (htmlData !== "") {
-            setCodeVisible(true);
-            console.log("the html data is: ", htmlData);
-            setCodeValue(htmlData);
-            console.log("code value is: ", codeValue);
-            setCodeLanguage("html");
-          } else {
-            setCodeVisible(false);
-            console.log("html get request not found!");
-          }
+        if (htmlData !== "") {
+          setCodeVisible(true);
+          setCodeValue(htmlData);
+          setCodeLanguage("html");
         } else {
-          console.log("kb_id not found!");
+          setCodeVisible(false);
         }
-      } else {
-        console.log("project_id is not there!");
       }
+    } else {
+      console.log("project_id is not there!");
     }
 
-    if (nodeInfo.text.toLowerCase().endsWith(".json")) {
+    if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
       const project = getProjectForNode(parseInt(selectedFile.id));
       const project_id = project.kronosProjectId;
       const project_text = project.text;
 
       if (project_id) {
         setCodeVisible(true);
-        const kb_id = await getKbId(project_id, keycloak.token);
-
-        if (kb_id) {
-          const jsonData = await getJsonFile(project_id, kb_id, keycloak.token);
-          if (jsonData !== "") {
-            setCodeVisible(true);
-            console.log("the json data is: ", jsonData);
-            setCodeValue(jsonData);
-            console.log("code value is: ", codeValue);
-            setCodeLanguage("json");
-          } else {
-            setCodeVisible(false);
-            console.log("json get request not found!");
-          }
+        const fsmData = await getFSMFromProject(project_id, keycloak.token);
+        if (fsmData !== "") {
+          setCodeVisible(true);
+          setCodeValue(fsmData);
+          setCodeLanguage("json");
         } else {
-          console.log("kb_id not found!");
+          setCodeVisible(false);
+          console.log("json get request not found!");
         }
       } else {
         console.log("project_id is not there!");
