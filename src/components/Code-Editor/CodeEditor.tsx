@@ -90,8 +90,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   }, [initialValue]);
 
   useEffect(() => {
-    if (language !== "") setCodeLanguage("html");
-    console.log("hahahahah: ", language);
+    if (language !== "") setCodeLanguage(language);
   }, [language]);
 
   useEffect(() => {
