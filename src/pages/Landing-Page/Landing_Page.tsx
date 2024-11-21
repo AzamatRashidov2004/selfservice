@@ -5,15 +5,20 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import { useNavigate } from "react-router-dom";
 
 const Landing_Page: React.FC = () => {
+  const { authenticated, isFirstLogin, setIsFirst } = useAuth();
+  const navigate = useNavigate();
   useEffect(() => {
     // Add a specific class to the body when this component is rendered
     document.body.classList.add("landing-page-body");
-
+    if (authenticated && isFirstLogin) {
+      navigate("/dashboard");
+      setIsFirst(false);
+    }
     // Cleanup by removing the class when the component unmounts
     return () => {
       document.body.classList.remove("landing-page-body");
     };
-  }, []);
+  }, [authenticated, navigate, isFirstLogin, setIsFirst]);
   return (
     <div>
       <HeroSection />
@@ -111,15 +116,19 @@ const FeaturesSection: React.FC = () => {
 };
 
 const LoginSection: React.FC = () => {
-  const { login, authenticated, logout } =
-    useAuth();
+  const { login, authenticated, logout, isFirstLogin, setIsFirst } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     setError(null); // Reset error state
     try {
       // Attempt to login using Keycloak
       await login();
+      if (authenticated && isFirstLogin) {
+        setIsFirst(false);
+        navigate("/dashboard");
+      }
     } catch (err) {
       // Handle any errors that occur during login
       setError("Login failed.");
@@ -198,7 +207,11 @@ const LoginSection: React.FC = () => {
                     <button
                       id="logout-button"
                       onClick={async () => {
+                        navigate("/landing-page");
                         await logout();
+                        if (!authenticated && !isFirstLogin) {
+                          setIsFirst(true);
+                        }
                       }}
                       className="btn btn-primary btn-block"
                     >

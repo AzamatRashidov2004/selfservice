@@ -1,6 +1,13 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import keycloak from '../keycloak'; // Adjust the path as necessary
-import Keycloak from 'keycloak-js';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  SetStateAction,
+} from "react";
+import keycloak from "../keycloak"; // Adjust the path as necessary
+import Keycloak from "keycloak-js";
 
 // Define the shape of your context data
 interface AuthContextType {
@@ -10,14 +17,19 @@ interface AuthContextType {
   refresh: () => Promise<void>;
   checkAuthenticated: () => boolean;
   keycloak: Keycloak;
+  isFirstLogin: boolean;
+  setIsFirst: React.Dispatch<SetStateAction<boolean>>;
 }
 
 // Create the context with the initial value
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Create a provider component
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [isFirstLogin, setIsFirst] = useState<boolean>(true);
 
   const checkAuthenticated = (): boolean => {
     return keycloak.authenticated || false;
@@ -28,14 +40,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const initKeycloak = async () => {
       try {
         const authenticated = await keycloak.init({
-          onLoad: 'check-sso', // Optional: Adjust this value based on your use case
+          onLoad: "check-sso", // Optional: Adjust this value based on your use case
         });
-        console.log('Initialization Result:', authenticated);  // Check what this returns
-        console.log('Keycloak Authenticated:', keycloak.authenticated); // Check the status after init
-        
-        setAuthenticated(authenticated);  // Update state based on the result
+        console.log("Initialization Result:", authenticated); // Check what this returns
+        console.log("Keycloak Authenticated:", keycloak.authenticated); // Check the status after init
+
+        setAuthenticated(authenticated); // Update state based on the result
       } catch (err) {
-        console.error('Failed to initialize Keycloak', err);
+        console.error("Failed to initialize Keycloak", err);
       }
     };
 
@@ -43,14 +55,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Set up token refresh
     const refreshToken = setInterval(() => {
-      keycloak.updateToken(70).then(refreshed => {
-        if (refreshed) {
-          setAuthenticated(checkAuthenticated()); // Update state on token refresh
-        }
-      }).catch(err => {
-        console.error('Failed to refresh token', err);
-        setAuthenticated(false); // If token refresh fails, set authenticated to false
-      });
+      keycloak
+        .updateToken(70)
+        .then((refreshed) => {
+          if (refreshed) {
+            setAuthenticated(checkAuthenticated()); // Update state on token refresh
+          }
+        })
+        .catch((err) => {
+          console.error("Failed to refresh token", err);
+          setAuthenticated(false); // If token refresh fails, set authenticated to false
+        });
     }, 60000); // Refresh token every minute
 
     return () => clearInterval(refreshToken);
@@ -58,11 +73,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async () => {
     try {
-      await keycloak.login({ redirectUri: window.location.origin + '/dashboard' });
+      await keycloak.login({
+        redirectUri: window.location.origin + "/dashboard",
+      });
       console.log("token", keycloak.token);
       setAuthenticated(checkAuthenticated()); // Update state after login
     } catch (error) {
-      console.error('Login failed', error);
+      console.error("Login failed", error);
     }
   };
 
@@ -71,7 +88,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await keycloak.logout();
       setAuthenticated(false);
     } catch (error) {
-      console.error('Logout failed', error);
+      console.error("Logout failed", error);
     }
   };
 
@@ -80,7 +97,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       await keycloak.updateToken(70);
       setAuthenticated(checkAuthenticated()); // Update authenticated state after refreshing token
     } catch (error) {
-      console.error('Token refresh failed', error);
+      console.error("Token refresh failed", error);
     }
   };
 
@@ -91,12 +108,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     refresh,
     checkAuthenticated,
     keycloak,
+    isFirstLogin,
+    setIsFirst,
   };
 
   return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
   );
 };
 
@@ -104,7 +121,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
