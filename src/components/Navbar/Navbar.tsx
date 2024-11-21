@@ -2,9 +2,11 @@ import React from "react";
 import { Link } from "react-router-dom"; // Import Link component
 import "./Navbar.css";
 import { useAuth } from "../../context/authContext";
+import { useNavigate } from "react-router-dom";
 
 const Navbar: React.FC = () => {
-  const { logout, login, authenticated } = useAuth();
+  const { logout, login, authenticated, isFirstLogin, setIsFirst } = useAuth();
+  const navigate = useNavigate();
   const handleSubmit = async () => {
     try {
       await login();

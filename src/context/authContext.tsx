@@ -85,7 +85,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   const logout = async () => {
     try {
-      await keycloak.logout();
+      console.log("wlo: ", window.location.origin.toString());
+      await keycloak.logout({
+        redirectUri: window.location.origin + "/",
+      });
       setAuthenticated(false);
     } catch (error) {
       console.error("Logout failed", error);

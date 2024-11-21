@@ -207,7 +207,6 @@ const LoginSection: React.FC = () => {
                     <button
                       id="logout-button"
                       onClick={async () => {
-                        navigate("/landing-page");
                         await logout();
                         if (!authenticated && !isFirstLogin) {
                           setIsFirst(true);
