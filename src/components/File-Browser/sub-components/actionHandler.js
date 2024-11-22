@@ -208,8 +208,9 @@ async function handleAction(
 
     const selectedFile = data.payload.files[0];
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
-    try {
-      if (nodeInfo.text.toLowerCase().endsWith(".html")) {
+
+    if (nodeInfo.text.toLowerCase().endsWith(".html")) {
+      try {
         const selectedFileCurrent = data.state.selectedFiles[0];
         console.log("selectedFileCurrent: ", selectedFileCurrent);
         const project = getProjectForNode(parseInt(selectedFile.id));
@@ -228,8 +229,16 @@ async function handleAction(
         } else {
           throw new Error("Project id not found.");
         }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Failed to open HTML file. Please try again.",
+          "danger",
+          4000
+        );
       }
-      if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
+    } else if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
+      try {
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         const project_text = project.text;
@@ -243,14 +252,21 @@ async function handleAction(
             setCodeLanguage("json");
           } else {
             setCodeVisible(false);
-            throw new Error("fsm file not found.");
+            throw new Error("FSM file not found.");
           }
         } else {
           throw new Error("Project id not found.");
         }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Failed to open FSM file. Please try again.",
+          "danger",
+          4000
+        );
       }
-
-      if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
+    } else if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
+      try {
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         const project_text = project.text;
@@ -269,7 +285,7 @@ async function handleAction(
             if (pdfUrl) {
               setPdfUrl(pdfUrl);
             } else {
-              throw new Error("pdf url not found.");
+              throw new Error("PDF URL not found.");
             }
           } else {
             throw new Error("KB id not found.");
@@ -277,54 +293,56 @@ async function handleAction(
         } else {
           throw new Error("Project id not found.");
         }
-      }
-    } catch (error) {
-      createNotificationEvent(
-        "Something Went Wrong",
-        "Open file action failed. Please try again.",
-        "danger",
-        4000
-      );
-    }
-
-    if (data.id === "delete_files") {
-      if (!keycloak || !keycloak.token) return;
-
-      const selectedFiles = data.state.selectedFiles;
-      let project_id;
-      const payload = [];
-      selectedFiles.forEach((file) => {
-        const nodeInfo = getNodeInfo(parseInt(file.id));
-        if (nodeInfo.droppable) {
-          // Droppable, extract children
-          const children = getAllChildren(nodeInfo.id);
-          children.forEach((childNode) => {
-            payload.push(childNode.kronosKB_id);
-          });
-        } else {
-          // File, add to list
-          payload.push(nodeInfo.kronosKB_id);
-        }
-        if (!project_id)
-          project_id = getProjectForNode(parseInt(file.id)).kronosProjectId;
-      });
-      try {
-        const result = await deleteBulkPdf(project_id, payload, keycloak.token);
-        if (result) {
-          await fileContext.deleteFiles(
-            selectedFiles.map((file) => parseInt(file.id))
-          );
-        } else {
-          throw new Error("Delete action failed.");
-        }
       } catch (error) {
         createNotificationEvent(
           "Something Went Wrong",
-          "Delete action failed. Please try again.",
+          "Failed to open PDF file. Please try again.",
           "danger",
           4000
         );
       }
+    } else {
+      // Handle other file types or do nothing
+    }
+  }
+
+  if (data.id === "delete_files") {
+    if (!keycloak || !keycloak.token) return;
+
+    const selectedFiles = data.state.selectedFiles;
+    let project_id;
+    const payload = [];
+    selectedFiles.forEach((file) => {
+      const nodeInfo = getNodeInfo(parseInt(file.id));
+      if (nodeInfo.droppable) {
+        // Droppable, extract children
+        const children = getAllChildren(nodeInfo.id);
+        children.forEach((childNode) => {
+          payload.push(childNode.kronosKB_id);
+        });
+      } else {
+        // File, add to list
+        payload.push(nodeInfo.kronosKB_id);
+      }
+      if (!project_id)
+        project_id = getProjectForNode(parseInt(file.id)).kronosProjectId;
+    });
+    try {
+      const result = await deleteBulkPdf(project_id, payload, keycloak.token);
+      if (result) {
+        await fileContext.deleteFiles(
+          selectedFiles.map((file) => parseInt(file.id))
+        );
+      } else {
+        throw new Error("Delete action failed.");
+      }
+    } catch (error) {
+      createNotificationEvent(
+        "Something Went Wrong",
+        "Delete action failed. Please try again.",
+        "danger",
+        4000
+      );
     }
   }
 }
