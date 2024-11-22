@@ -3,6 +3,7 @@ import { findFile } from "./folderSearch";
 import {
   createFolderModalEvent,
   createUploadFileModalEvent,
+  createNotificationEvent,
 } from "../../../utility/Modal_Util";
 
 import { updateSinglePath } from "../../../utility/Api_Utils";
@@ -70,57 +71,68 @@ async function handleAction(
     const selectedFiles = data.state.selectedFiles;
 
     let result = false;
-    if (selectedFiles.length > 1 || nodeInfo.droppable) {
-      // Multiple file dragging
-      const payload = [];
-      selectedFiles.forEach((file) => {
-        const currentNode = getNodeInfo(parseInt(file.id));
-        if (!currentNode) return;
+    try {
+      if (selectedFiles.length > 1 || nodeInfo.droppable) {
+        // Multiple file dragging
+        const payload = [];
+        selectedFiles.forEach((file) => {
+          const currentNode = getNodeInfo(parseInt(file.id));
+          if (!currentNode) return;
 
-        if (currentNode.droppable) {
-          const targetDepth = getDepth(parseInt(currentNode.id));
-          // If folder
-          const children = getAllChildren(parseInt(currentNode.id));
-          children.forEach((childNode) => {
-            const newChildPath = handlePathChangeAtDepth(
-              targetDepth,
-              newPath,
-              childNode,
-              getPathFromProject
-            );
-            payload.push({
-              id: childNode.kronosKB_id,
-              project_id: childNode.kronosProjectId,
-              source_file: newChildPath,
+          if (currentNode.droppable) {
+            const targetDepth = getDepth(parseInt(currentNode.id));
+            // If folder
+            const children = getAllChildren(parseInt(currentNode.id));
+            children.forEach((childNode) => {
+              const newChildPath = handlePathChangeAtDepth(
+                targetDepth,
+                newPath,
+                childNode,
+                getPathFromProject
+              );
+              payload.push({
+                id: childNode.kronosKB_id,
+                project_id: childNode.kronosProjectId,
+                source_file: newChildPath,
+              });
             });
-          });
-        } else {
-          // If file
-          console.log(currentNode);
-          payload.push({
-            _id: currentNode.kronosKB_id,
-            project_id: currentNode.kronosProjectId,
-            source_file: `${newPath}${currentNode.text}`,
-          });
-        }
-      });
-      result = await updatePathBulk(
-        nodeInfo.kronosProjectId,
-        payload,
-        keycloak.token
+          } else {
+            // If file
+            console.log(currentNode);
+            payload.push({
+              _id: currentNode.kronosKB_id,
+              project_id: currentNode.kronosProjectId,
+              source_file: `${newPath}${currentNode.text}`,
+            });
+          }
+        });
+        result = await updatePathBulk(
+          nodeInfo.kronosProjectId,
+          payload,
+          keycloak.token
+        );
+      } else {
+        // Single file dragging
+        result = await updateSinglePath(
+          nodeInfo.kronosProjectId,
+          nodeInfo.kronosKB_id,
+          `${newPath}${nodeInfo.text}`,
+          keycloak.token
+        );
+      }
+      if (result) {
+        console.log(selectedFiles);
+        fileContext.dragAndDropFile(destination.id, selectedFiles);
+      } else {
+        throw new Error("Drag and drop failed");
+      }
+    } catch (error) {
+      createNotificationEvent(
+        "Something Went Wrong",
+        "Drag and drop failed. Please try again.",
+        "danger",
+        4000
       );
-    } else {
-      // Single file dragging
-      result = await updateSinglePath(
-        nodeInfo.kronosProjectId,
-        nodeInfo.kronosKB_id,
-        `${newPath}${nodeInfo.text}`,
-        keycloak.token
-      );
-    }
-    if (result) {
-      console.log(selectedFiles);
-      fileContext.dragAndDropFile(destination.id, selectedFiles);
     }
   }
 
@@ -136,23 +148,33 @@ async function handleAction(
     if (!keycloak || !keycloak.token) return;
     let path = getPathFromProject(parseInt(currentFolder));
     const project = getProjectForNode(parseInt(currentFolder));
-
     if (path.lengt > 0) path = path.slice(0, -1);
     createUploadFileModalEvent(async (files) => {
-      const result = await uploadMultiplePdfs(
-        files,
-        project.kronosProjectId,
-        path,
-        keycloak.token,
-        setFileUploadLoading
-      );
-      console.log("RESULT", result);
-      if (result) {
-        fileContext.addFiles(
-          parseInt(currentFolder),
+      try {
+        const result = await uploadMultiplePdfs(
           files,
           project.kronosProjectId,
-          result
+          path,
+          keycloak.token,
+          setFileUploadLoading
+        );
+        console.log("RESULT", result);
+        if (result) {
+          fileContext.addFiles(
+            parseInt(currentFolder),
+            files,
+            project.kronosProjectId,
+            result
+          );
+        } else {
+          throw new Error("File upload failed");
+        }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "File upload failed. Please try again.",
+          "danger",
+          4000
         );
       }
     });
@@ -273,11 +295,21 @@ async function handleAction(
       if (!project_id)
         project_id = getProjectForNode(parseInt(file.id)).kronosProjectId;
     });
-
-    const result = await deleteBulkPdf(project_id, payload, keycloak.token);
-    if (result) {
-      await fileContext.deleteFiles(
-        selectedFiles.map((file) => parseInt(file.id))
+    try {
+      const result = await deleteBulkPdf(project_id, payload, keycloak.token);
+      if (result) {
+        await fileContext.deleteFiles(
+          selectedFiles.map((file) => parseInt(file.id))
+        );
+      } else {
+        throw new Error("Delete action failed.");
+      }
+    } catch (error) {
+      createNotificationEvent(
+        "Something Went Wrong",
+        "Delete action failed. Please try again.",
+        "danger",
+        4000
       );
     }
   }
