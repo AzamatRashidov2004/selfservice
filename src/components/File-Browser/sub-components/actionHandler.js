@@ -187,13 +187,20 @@ async function handleAction(
     const currentNode = getNodeInfo(parseInt(selectedFile.id));
 
     if (currentNode.droppable) return;
-
-    await getPdfFile(
+    const res = await getPdfFile(
       currentNode.kronosProjectId,
       currentNode.kronosKB_id,
       currentNode.text,
       keycloak.token
     );
+    if (!res) {
+      createNotificationEvent(
+        "Something Went Wrong",
+        "Download has failed. Try again later.",
+        "danger",
+        4000
+      );
+    }
   }
 
   if (data.id === "open_files") {
@@ -201,116 +208,123 @@ async function handleAction(
 
     const selectedFile = data.payload.files[0];
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
+    try {
+      if (nodeInfo.text.toLowerCase().endsWith(".html")) {
+        const selectedFileCurrent = data.state.selectedFiles[0];
+        console.log("selectedFileCurrent: ", selectedFileCurrent);
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        if (project_id) {
+          const htmlData = await getHTMLFromProject(project_id, keycloak.token);
 
-    if (nodeInfo.text.toLowerCase().endsWith(".html")) {
-      const selectedFileCurrent = data.state.selectedFiles[0];
-      console.log("selectedFileCurrent: ", selectedFileCurrent);
-      const project = getProjectForNode(parseInt(selectedFile.id));
-      const project_id = project.kronosProjectId;
-
-      if (project_id) {
-        const htmlData = await getHTMLFromProject(project_id, keycloak.token);
-
-        if (htmlData !== "") {
-          setCodeVisible(true);
-          setCodeValue(htmlData);
-          setCodeLanguage("html");
-        } else {
-          setCodeVisible(false);
-        }
-      }
-    } else {
-      console.log("project_id is not there!");
-    }
-
-    if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
-      const project = getProjectForNode(parseInt(selectedFile.id));
-      const project_id = project.kronosProjectId;
-      const project_text = project.text;
-
-      if (project_id) {
-        setCodeVisible(true);
-        const fsmData = await getFSMFromProject(project_id, keycloak.token);
-        if (fsmData !== "") {
-          setCodeVisible(true);
-          setCodeValue(fsmData);
-          setCodeLanguage("json");
-        } else {
-          setCodeVisible(false);
-          console.log("json get request not found!");
-        }
-      } else {
-        console.log("project_id is not there!");
-      }
-    }
-
-    if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
-      const project = getProjectForNode(parseInt(selectedFile.id));
-      const project_id = project.kronosProjectId;
-      const project_text = project.text;
-
-      if (project_id) {
-        setPdfVisible(true);
-        const kb_id = await getKbId(project_id, keycloak.token);
-
-        if (kb_id) {
-          const pdfUrl = await getPdfFileUrl(
-            project_id,
-            kb_id,
-            project_text,
-            keycloak.token
-          );
-          if (pdfUrl) {
-            setPdfUrl(pdfUrl);
+          if (htmlData !== "") {
+            setCodeVisible(true);
+            setCodeValue(htmlData);
+            setCodeLanguage("html");
           } else {
-            console.log("pdfUrl not found!");
+            setCodeVisible(false);
+            throw new Error("HTML content not found.");
           }
         } else {
-          console.log("kb_id not found!");
+          throw new Error("Project id not found.");
         }
-      } else {
-        console.log("project_id is not there!");
       }
-    }
-  }
+      if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        const project_text = project.text;
 
-  if (data.id === "delete_files") {
-    if (!keycloak || !keycloak.token) return;
-
-    const selectedFiles = data.state.selectedFiles;
-    let project_id;
-    const payload = [];
-    selectedFiles.forEach((file) => {
-      const nodeInfo = getNodeInfo(parseInt(file.id));
-      if (nodeInfo.droppable) {
-        // Droppable, extract children
-        const children = getAllChildren(nodeInfo.id);
-        children.forEach((childNode) => {
-          payload.push(childNode.kronosKB_id);
-        });
-      } else {
-        // File, add to list
-        payload.push(nodeInfo.kronosKB_id);
+        if (project_id) {
+          setCodeVisible(true);
+          const fsmData = await getFSMFromProject(project_id, keycloak.token);
+          if (fsmData !== "") {
+            setCodeVisible(true);
+            setCodeValue(fsmData);
+            setCodeLanguage("json");
+          } else {
+            setCodeVisible(false);
+            throw new Error("fsm file not found.");
+          }
+        } else {
+          throw new Error("Project id not found.");
+        }
       }
-      if (!project_id)
-        project_id = getProjectForNode(parseInt(file.id)).kronosProjectId;
-    });
-    try {
-      const result = await deleteBulkPdf(project_id, payload, keycloak.token);
-      if (result) {
-        await fileContext.deleteFiles(
-          selectedFiles.map((file) => parseInt(file.id))
-        );
-      } else {
-        throw new Error("Delete action failed.");
+
+      if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        const project_text = project.text;
+
+        if (project_id) {
+          setPdfVisible(true);
+          const kb_id = await getKbId(project_id, keycloak.token);
+
+          if (kb_id) {
+            const pdfUrl = await getPdfFileUrl(
+              project_id,
+              kb_id,
+              project_text,
+              keycloak.token
+            );
+            if (pdfUrl) {
+              setPdfUrl(pdfUrl);
+            } else {
+              throw new Error("pdf url not found.");
+            }
+          } else {
+            throw new Error("KB id not found.");
+          }
+        } else {
+          throw new Error("Project id not found.");
+        }
       }
     } catch (error) {
       createNotificationEvent(
         "Something Went Wrong",
-        "Delete action failed. Please try again.",
+        "Open file action failed. Please try again.",
         "danger",
         4000
       );
+    }
+
+    if (data.id === "delete_files") {
+      if (!keycloak || !keycloak.token) return;
+
+      const selectedFiles = data.state.selectedFiles;
+      let project_id;
+      const payload = [];
+      selectedFiles.forEach((file) => {
+        const nodeInfo = getNodeInfo(parseInt(file.id));
+        if (nodeInfo.droppable) {
+          // Droppable, extract children
+          const children = getAllChildren(nodeInfo.id);
+          children.forEach((childNode) => {
+            payload.push(childNode.kronosKB_id);
+          });
+        } else {
+          // File, add to list
+          payload.push(nodeInfo.kronosKB_id);
+        }
+        if (!project_id)
+          project_id = getProjectForNode(parseInt(file.id)).kronosProjectId;
+      });
+      try {
+        const result = await deleteBulkPdf(project_id, payload, keycloak.token);
+        if (result) {
+          await fileContext.deleteFiles(
+            selectedFiles.map((file) => parseInt(file.id))
+          );
+        } else {
+          throw new Error("Delete action failed.");
+        }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Delete action failed. Please try again.",
+          "danger",
+          4000
+        );
+      }
     }
   }
 }
