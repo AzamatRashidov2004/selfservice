@@ -110,12 +110,13 @@ export async function fetchProjectsData(
   token: string | undefined
 ): Promise<fetchProjectsDataReturn | null> {
   let allProjects: projectFetchReturn[] = [];
-  let allAnalytical: ProjectType[] = [];
+  const allAnalytical: ProjectType[] = [];
   let pdfProjects: projectFetchReturn[] = [];
 
   // Fetch all pdfs (Faster api call first)
   if (token) {
     pdfProjects = await getAllProjectsAndProjectData(token);
+    console.log("PROJECTS", pdfProjects)
   }
   if (pdfProjects) {
     allProjects = pdfProjects;
@@ -123,13 +124,14 @@ export async function fetchProjectsData(
     setInitial({ analytical: allAnalytical, project: allProjects });
   }
 
+  // Removed analytical projects fetch
   // Fetch all analytical files (Slower api call last)
-  const analyticalProjects: ProjectType[] | null =
-    await fetchAnalyticalConfigs();
-  if (analyticalProjects) {
-    allAnalytical = analyticalProjects;
-    setInitial({ analytical: allAnalytical, project: allProjects });
-  }
+  // const analyticalProjects: ProjectType[] | null =
+  //   await fetchAnalyticalConfigs();
+  // if (analyticalProjects) {
+  //   allAnalytical = analyticalProjects;
+  //   setInitial({ analytical: allAnalytical, project: allProjects });
+  // }
 
   if (allProjects.length === 0) {
     console.error("No pdf/analytical documents found!");

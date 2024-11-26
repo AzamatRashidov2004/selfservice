@@ -143,6 +143,28 @@ async function handleAction(
     });
   }
 
+  if (data.id === "details") {
+    const project = getProjectForNode(parseInt(currentFolder));
+    console.log(project);
+    if (project) {
+      createNotificationEvent(
+        "Project Info",
+        `**Project Name:** ${project.text}
+        \n**Project ID:** ${project.kronosProjectId}
+        \n**Project Description**: ${project.description}`,
+        "",
+        8000
+      );
+    } else {
+      createNotificationEvent(
+        "Select Project",
+        `Please first select a project and then press the details button`,
+        "",
+        3000
+      );
+    }
+  }
+
   // Handle Create File custom action
   if (data.id === "upload") {
     if (!keycloak || !keycloak.token) return;

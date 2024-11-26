@@ -30,7 +30,6 @@ const Dashboard: React.FC = () => {
     setCodeVisible,
     codeValue,
     setCodeValue,
-    setCodeLanguage,
   } = useFiles();
 
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);

@@ -21,6 +21,7 @@ interface FileData {
     fileType: string;
     fileSize?: string; // Optional for folders
   };
+  description?: string;
 }
 
 // Define the structure for tree nodes
@@ -218,6 +219,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
         data: { fileType: "project" },
         kronosKB_id: project._id,
         kronosProjectId: project._id,
+        description: project.description
       });
       ids += 1;
 
