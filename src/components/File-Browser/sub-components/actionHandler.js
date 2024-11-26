@@ -3,6 +3,7 @@ import { findFile } from "./folderSearch";
 import {
   createFolderModalEvent,
   createUploadFileModalEvent,
+  createNotificationEvent,
 } from "../../../utility/Modal_Util";
 
 import { updateSinglePath } from "../../../utility/Api_Utils";
@@ -70,57 +71,68 @@ async function handleAction(
     const selectedFiles = data.state.selectedFiles;
 
     let result = false;
-    if (selectedFiles.length > 1 || nodeInfo.droppable) {
-      // Multiple file dragging
-      const payload = [];
-      selectedFiles.forEach((file) => {
-        const currentNode = getNodeInfo(parseInt(file.id));
-        if (!currentNode) return;
+    try {
+      if (selectedFiles.length > 1 || nodeInfo.droppable) {
+        // Multiple file dragging
+        const payload = [];
+        selectedFiles.forEach((file) => {
+          const currentNode = getNodeInfo(parseInt(file.id));
+          if (!currentNode) return;
 
-        if (currentNode.droppable) {
-          const targetDepth = getDepth(parseInt(currentNode.id));
-          // If folder
-          const children = getAllChildren(parseInt(currentNode.id));
-          children.forEach((childNode) => {
-            const newChildPath = handlePathChangeAtDepth(
-              targetDepth,
-              newPath,
-              childNode,
-              getPathFromProject
-            );
-            payload.push({
-              id: childNode.kronosKB_id,
-              project_id: childNode.kronosProjectId,
-              source_file: newChildPath,
+          if (currentNode.droppable) {
+            const targetDepth = getDepth(parseInt(currentNode.id));
+            // If folder
+            const children = getAllChildren(parseInt(currentNode.id));
+            children.forEach((childNode) => {
+              const newChildPath = handlePathChangeAtDepth(
+                targetDepth,
+                newPath,
+                childNode,
+                getPathFromProject
+              );
+              payload.push({
+                id: childNode.kronosKB_id,
+                project_id: childNode.kronosProjectId,
+                source_file: newChildPath,
+              });
             });
-          });
-        } else {
-          // If file
-          console.log(currentNode);
-          payload.push({
-            _id: currentNode.kronosKB_id,
-            project_id: currentNode.kronosProjectId,
-            source_file: `${newPath}${currentNode.text}`,
-          });
-        }
-      });
-      result = await updatePathBulk(
-        nodeInfo.kronosProjectId,
-        payload,
-        keycloak.token
+          } else {
+            // If file
+            console.log(currentNode);
+            payload.push({
+              _id: currentNode.kronosKB_id,
+              project_id: currentNode.kronosProjectId,
+              source_file: `${newPath}${currentNode.text}`,
+            });
+          }
+        });
+        result = await updatePathBulk(
+          nodeInfo.kronosProjectId,
+          payload,
+          keycloak.token
+        );
+      } else {
+        // Single file dragging
+        result = await updateSinglePath(
+          nodeInfo.kronosProjectId,
+          nodeInfo.kronosKB_id,
+          `${newPath}${nodeInfo.text}`,
+          keycloak.token
+        );
+      }
+      if (result) {
+        console.log(selectedFiles);
+        fileContext.dragAndDropFile(destination.id, selectedFiles);
+      } else {
+        throw new Error("Drag and drop failed");
+      }
+    } catch (error) {
+      createNotificationEvent(
+        "Something Went Wrong",
+        "Drag and drop failed. Please try again.",
+        "danger",
+        4000
       );
-    } else {
-      // Single file dragging
-      result = await updateSinglePath(
-        nodeInfo.kronosProjectId,
-        nodeInfo.kronosKB_id,
-        `${newPath}${nodeInfo.text}`,
-        keycloak.token
-      );
-    }
-    if (result) {
-      console.log(selectedFiles);
-      fileContext.dragAndDropFile(destination.id, selectedFiles);
     }
   }
 
@@ -136,23 +148,33 @@ async function handleAction(
     if (!keycloak || !keycloak.token) return;
     let path = getPathFromProject(parseInt(currentFolder));
     const project = getProjectForNode(parseInt(currentFolder));
-
     if (path.lengt > 0) path = path.slice(0, -1);
     createUploadFileModalEvent(async (files) => {
-      const result = await uploadMultiplePdfs(
-        files,
-        project.kronosProjectId,
-        path,
-        keycloak.token,
-        setFileUploadLoading
-      );
-      console.log("RESULT", result);
-      if (result) {
-        fileContext.addFiles(
-          parseInt(currentFolder),
+      try {
+        const result = await uploadMultiplePdfs(
           files,
           project.kronosProjectId,
-          result
+          path,
+          keycloak.token,
+          setFileUploadLoading
+        );
+        console.log("RESULT", result);
+        if (result) {
+          fileContext.addFiles(
+            parseInt(currentFolder),
+            files,
+            project.kronosProjectId,
+            result
+          );
+        } else {
+          throw new Error("File upload failed");
+        }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "File upload failed. Please try again.",
+          "danger",
+          4000
         );
       }
     });
@@ -165,13 +187,20 @@ async function handleAction(
     const currentNode = getNodeInfo(parseInt(selectedFile.id));
 
     if (currentNode.droppable) return;
-
-    await getPdfFile(
+    const res = await getPdfFile(
       currentNode.kronosProjectId,
       currentNode.kronosKB_id,
       currentNode.text,
       keycloak.token
     );
+    if (!res) {
+      createNotificationEvent(
+        "Something Went Wrong",
+        "Download has failed. Try again later.",
+        "danger",
+        4000
+      );
+    }
   }
 
   if (data.id === "open_files") {
@@ -181,74 +210,99 @@ async function handleAction(
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
 
     if (nodeInfo.text.toLowerCase().endsWith(".html")) {
-      const selectedFileCurrent = data.state.selectedFiles[0];
-      console.log("selectedFileCurrent: ", selectedFileCurrent);
-      const project = getProjectForNode(parseInt(selectedFile.id));
-      const project_id = project.kronosProjectId;
+      try {
+        const selectedFileCurrent = data.state.selectedFiles[0];
+        console.log("selectedFileCurrent: ", selectedFileCurrent);
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        if (project_id) {
+          const htmlData = await getHTMLFromProject(project_id, keycloak.token);
 
-      if (project_id) {
-        const htmlData = await getHTMLFromProject(project_id, keycloak.token);
-
-        if (htmlData !== "") {
-          setCodeVisible(true);
-          setCodeValue(htmlData);
-          setCodeLanguage("html");
-        } else {
-          setCodeVisible(false);
-        }
-      }
-    } else {
-      console.log("project_id is not there!");
-    }
-
-    if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
-      const project = getProjectForNode(parseInt(selectedFile.id));
-      const project_id = project.kronosProjectId;
-      const project_text = project.text;
-
-      if (project_id) {
-        setCodeVisible(true);
-        const fsmData = await getFSMFromProject(project_id, keycloak.token);
-        if (fsmData !== "") {
-          setCodeVisible(true);
-          setCodeValue(fsmData);
-          setCodeLanguage("json");
-        } else {
-          setCodeVisible(false);
-          console.log("json get request not found!");
-        }
-      } else {
-        console.log("project_id is not there!");
-      }
-    }
-
-    if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
-      const project = getProjectForNode(parseInt(selectedFile.id));
-      const project_id = project.kronosProjectId;
-      const project_text = project.text;
-
-      if (project_id) {
-        setPdfVisible(true);
-        const kb_id = await getKbId(project_id, keycloak.token);
-
-        if (kb_id) {
-          const pdfUrl = await getPdfFileUrl(
-            project_id,
-            kb_id,
-            project_text,
-            keycloak.token
-          );
-          if (pdfUrl) {
-            setPdfUrl(pdfUrl);
+          if (htmlData !== "") {
+            setCodeVisible(true);
+            setCodeValue(htmlData);
+            setCodeLanguage("html");
           } else {
-            console.log("pdfUrl not found!");
+            setCodeVisible(false);
+            throw new Error("HTML content not found.");
           }
         } else {
-          console.log("kb_id not found!");
+          throw new Error("Project id not found.");
         }
-      } else {
-        console.log("project_id is not there!");
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Failed to open HTML file. Please try again.",
+          "danger",
+          4000
+        );
       }
+    } else if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
+      try {
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        const project_text = project.text;
+
+        if (project_id) {
+          setCodeVisible(true);
+          const fsmData = await getFSMFromProject(project_id, keycloak.token);
+          if (fsmData !== "") {
+            setCodeVisible(true);
+            setCodeValue(fsmData);
+            setCodeLanguage("json");
+          } else {
+            setCodeVisible(false);
+            throw new Error("FSM file not found.");
+          }
+        } else {
+          throw new Error("Project id not found.");
+        }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Failed to open FSM file. Please try again.",
+          "danger",
+          4000
+        );
+      }
+    } else if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
+      try {
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        const project_text = project.text;
+
+        if (project_id) {
+          setPdfVisible(true);
+          const kb_id = await getKbId(project_id, keycloak.token);
+
+          if (kb_id) {
+            const pdfUrl = await getPdfFileUrl(
+              project_id,
+              kb_id,
+              project_text,
+              keycloak.token
+            );
+            if (pdfUrl) {
+              setPdfUrl(pdfUrl);
+            } else {
+              throw new Error("PDF URL not found.");
+            }
+          } else {
+            throw new Error("KB id not found.");
+          }
+        } else {
+          throw new Error("Project id not found.");
+        }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Failed to open PDF file. Please try again.",
+          "danger",
+          4000
+        );
+      }
+    } else {
+      // Handle other file types or do nothing
     }
   }
 
@@ -273,11 +327,21 @@ async function handleAction(
       if (!project_id)
         project_id = getProjectForNode(parseInt(file.id)).kronosProjectId;
     });
-
-    const result = await deleteBulkPdf(project_id, payload, keycloak.token);
-    if (result) {
-      await fileContext.deleteFiles(
-        selectedFiles.map((file) => parseInt(file.id))
+    try {
+      const result = await deleteBulkPdf(project_id, payload, keycloak.token);
+      if (result) {
+        await fileContext.deleteFiles(
+          selectedFiles.map((file) => parseInt(file.id))
+        );
+      } else {
+        throw new Error("Delete action failed.");
+      }
+    } catch (error) {
+      createNotificationEvent(
+        "Something Went Wrong",
+        "Delete action failed. Please try again.",
+        "danger",
+        4000
       );
     }
   }
