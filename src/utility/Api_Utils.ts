@@ -25,20 +25,31 @@ import {
 import { SettingsType } from "./types.ts";
 import { deletePdfProject } from "../api/kronos/deleteKronos.ts";
 
-
 // export async function updateBulkPaths()
 
-export async function updateSinglePath(projectId: string, kb_id: string, newPath: string, token: string): Promise<boolean> {
+export async function updateSinglePath(
+  projectId: string,
+  kb_id: string,
+  newPath: string,
+  token: string
+): Promise<boolean> {
   const result = await updatePathSingle(projectId, kb_id, newPath, token);
-  if (!result){
+  if (!result) {
     return false;
   }
   return true;
 }
 
-async function getAllProjectsAndProjectData(token: string): Promise<projectFetchReturn[]> {
+async function getAllProjectsAndProjectData(
+  token: string
+): Promise<projectFetchReturn[]> {
   let allResults: projectFetchReturn[] = [];
-  const allProjects: KronosProjectType[] | null = await getAllPdfProjects(token);
+  const allProjects: KronosProjectType[] | null = await getAllPdfProjects(
+    token
+  );
+
+  // todo: here i can go thru each project and somehow create dev folders with
+  // source files here
 
   if (!allProjects) return []; // Return an empty array if allProjects is null
 
@@ -47,6 +58,38 @@ async function getAllProjectsAndProjectData(token: string): Promise<projectFetch
     const projectDataPromises = allProjects.map(async (project) => {
       const projectData: kronosKnowledgeBaseType[] | null =
         await getAllPdfsFromProject(project._id, token);
+
+      // Create dummy fsm and html files
+      const newKnowledgeBaseData1: kronosKnowledgeBaseType = {
+        _id: "",
+        project_id: project._id,
+        name: "",
+        description: "",
+        embedding_model: "", // Example embedding model
+        language: "", // Example language
+        total_pages: 0, // Example page count
+        source_file: `dev/index.html`, // Example source file name
+        source_type: "html", // Example source type
+        created_at: new Date().toISOString(), // Current timestamp
+        model_version: 3, // Example model version
+      };
+
+      const newKnowledgeBaseData2: kronosKnowledgeBaseType = {
+        _id: "",
+        project_id: project._id,
+        name: "",
+        description: "",
+        embedding_model: "", // Example embedding model
+        language: "", // Example language
+        total_pages: 0, // Example page count
+        source_file: `dev/data.fsm`, // Example source file name
+        source_type: "fsm", // Example source type
+        created_at: new Date().toISOString(), // Current timestamp
+        model_version: 3, // Example model version
+      };
+
+      projectData?.push(newKnowledgeBaseData1);
+      projectData?.push(newKnowledgeBaseData2);
 
       // If projectData is null, return an empty array for projectData
       return {
@@ -68,14 +111,15 @@ export async function fetchProjectsData(
 ): Promise<fetchProjectsDataReturn | null> {
   let allProjects: projectFetchReturn[] = [];
   let allAnalytical: ProjectType[] = [];
-  let pdfProjects: projectFetchReturn[] = []
+  let pdfProjects: projectFetchReturn[] = [];
 
   // Fetch all pdfs (Faster api call first)
-  if (token){
+  if (token) {
     pdfProjects = await getAllProjectsAndProjectData(token);
   }
   if (pdfProjects) {
     allProjects = pdfProjects;
+    console.log("allProjects is: ", allProjects);
     setInitial({ analytical: allAnalytical, project: allProjects });
   }
 
@@ -167,7 +211,13 @@ export async function createInitialKronosProject(
   if (!kronosProject) return false;
   if (setLoading) setLoading(true);
 
-  const filesUpload = await uploadMultiplePdfs(files, kronosProject._id, "", token, setLoading);
+  const filesUpload = await uploadMultiplePdfs(
+    files,
+    kronosProject._id,
+    "",
+    token,
+    setLoading
+  );
 
   if (!filesUpload) {
     // Delete the created project if file upload fails

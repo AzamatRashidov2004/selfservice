@@ -16,7 +16,11 @@ import {
   getKbId,
   getPdfFile,
   getPdfFileUrl,
+  getHtmlFile,
+  getHTMLFromProject,
+  getFSMFromProject,
 } from "../../../api/kronos/getKronos";
+import { KeyboardReturnRounded } from "@mui/icons-material";
 
 async function handleAction(
   data,
@@ -26,7 +30,11 @@ async function handleAction(
   keycloak,
   setPdfUrl,
   setPdfVisible,
-  setFileUploadLoading
+  setFileUploadLoading,
+  setCodeVisible,
+  setCodeValue,
+  setCodeLanguage,
+  codeValue
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -169,8 +177,50 @@ async function handleAction(
   if (data.id === "open_files") {
     if (!keycloak || !keycloak.token) return;
 
-    const selectedFile = data.state.selectedFiles[0];
+    const selectedFile = data.payload.files[0];
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
+
+    if (nodeInfo.text.toLowerCase().endsWith(".html")) {
+      const selectedFileCurrent = data.state.selectedFiles[0];
+      console.log("selectedFileCurrent: ", selectedFileCurrent);
+      const project = getProjectForNode(parseInt(selectedFile.id));
+      const project_id = project.kronosProjectId;
+
+      if (project_id) {
+        const htmlData = await getHTMLFromProject(project_id, keycloak.token);
+
+        if (htmlData !== "") {
+          setCodeVisible(true);
+          setCodeValue(htmlData);
+          setCodeLanguage("html");
+        } else {
+          setCodeVisible(false);
+        }
+      }
+    } else {
+      console.log("project_id is not there!");
+    }
+
+    if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
+      const project = getProjectForNode(parseInt(selectedFile.id));
+      const project_id = project.kronosProjectId;
+      const project_text = project.text;
+
+      if (project_id) {
+        setCodeVisible(true);
+        const fsmData = await getFSMFromProject(project_id, keycloak.token);
+        if (fsmData !== "") {
+          setCodeVisible(true);
+          setCodeValue(fsmData);
+          setCodeLanguage("json");
+        } else {
+          setCodeVisible(false);
+          console.log("json get request not found!");
+        }
+      } else {
+        console.log("project_id is not there!");
+      }
+    }
 
     if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
       const project = getProjectForNode(parseInt(selectedFile.id));
