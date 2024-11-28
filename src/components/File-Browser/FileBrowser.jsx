@@ -129,10 +129,6 @@ export default function FileBrowser() {
   useEffect(() => {
     setVisibleCount(20);
   }, [currentFolder]);
-  const loadButtonRef = useRef(null);
-  const handleLoadClick = () => {
-    incrementVisibleCount();
-  };
 
   return (
     <div style={{ width: "100%", height: "400px" }}>
@@ -161,13 +157,6 @@ export default function FileBrowser() {
         onFileAction={handleActionWrapper}
         disableDefaultFileActions={true}
       />
-      {/*<button
-        className="load-button"
-        onClick={handleLoadClick}
-        ref={loadButtonRef}
-      >
-        Load more...
-      </button>*/}
     </div>
   );
 }
