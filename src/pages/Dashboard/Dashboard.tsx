@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     setTimeout(() => {
       if (
-        currentFolder === "0" ||
+        //currentFolder === "0" ||
         totalFilesCount == 0 ||
         visibleCount >= totalFilesCount
       ) {

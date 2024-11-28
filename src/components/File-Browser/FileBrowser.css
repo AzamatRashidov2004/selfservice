@@ -1,20 +1,13 @@
-.load-more-button {
+.load-button {
+  position: absolute;
+  width: 100%;
+  bottom: 10px;
   display: flex;
-  list-style-type: none;
-  cursor: pointer;
-  background-color: #90ee90;
-  color: white;
-  /* text-align: center; */
-  /* padding: 10px; */
-  border-radius: 5px;
-  /*margin-top: 5px;
-  margin-bottom: 10px;*/
-  justify-content: center;
   align-items: center;
-  font-weight: bold;
-}
-
-.load-more-button:hover {
-  background-color: #0056b3;
-  transition: background-color 0.2s ease;
+  justify-content: center;
+  height: 20px !important;
+  border: 0px;
+  background-color: inherit;
+  color: #999797;
+  font-size: large;
 }

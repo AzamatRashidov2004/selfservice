@@ -119,8 +119,12 @@ export default function FileBrowser() {
 
   // Reset visible count when changing folders
   useEffect(() => {
-    setVisibleCount(10);
+    setVisibleCount(20);
   }, [currentFolder]);
+  const loadButtonRef = useRef(null);
+  const handleLoadClick = () => {
+    incrementVisibleCount();
+  };
 
   return (
     <div style={{ width: "100%", height: "400px" }}>
@@ -133,6 +137,7 @@ export default function FileBrowser() {
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.7)",
             borderRadius: "10px",
+            zIndex: "1000",
           }}
         >
           <Loader loader="white" />
@@ -148,6 +153,13 @@ export default function FileBrowser() {
         onFileAction={handleActionWrapper}
         disableDefaultFileActions={true}
       />
+      {/*<button
+        className="load-button"
+        onClick={handleLoadClick}
+        ref={loadButtonRef}
+      >
+        Load more...
+      </button>*/}
     </div>
   );
 }
