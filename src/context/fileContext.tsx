@@ -21,6 +21,7 @@ interface FileData {
     fileType: string;
     fileSize?: string; // Optional for folders
   };
+  description?: string;
 }
 
 // Define the structure for tree nodes
@@ -37,6 +38,12 @@ interface FilesContextType {
   totalFilesCount: number;
   setTotalFilesCount: React.Dispatch<React.SetStateAction<number>>;
   incrementVisibleCount: () => void;
+  codeVisible: boolean;
+  setCodeVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  codeValue: string;
+  setCodeValue: React.Dispatch<React.SetStateAction<string>>;
+  codeLanguage: string;
+  setCodeLanguage: React.Dispatch<React.SetStateAction<string>>;
   setProjectsContext: (projects: projectFetchReturn[]) => void;
   getFileStructure: (isFileBrowserObject?: boolean) => FileData[] | TreeNode[];
   setFileStructure: (newFilesData: FileData[]) => void;
@@ -217,6 +224,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
         data: { fileType: "project" },
         kronosKB_id: project._id,
         kronosProjectId: project._id,
+        description: project.description
       });
       ids += 1;
 
@@ -437,6 +445,10 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   };
   const [totalFilesCount, setTotalFilesCount] = useState(0);
 
+  const [codeVisible, setCodeVisible] = useState<boolean>(false);
+  const [codeValue, setCodeValue] = useState<string>("");
+  const [codeLanguage, setCodeLanguage] = useState<string>("");
+
   const contextValue: FilesContextType = {
     setProjectsContext,
     getFileStructure,
@@ -465,6 +477,12 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     incrementVisibleCount,
     totalFilesCount,
     setTotalFilesCount,
+    codeValue,
+    setCodeValue,
+    codeVisible,
+    setCodeVisible,
+    setCodeLanguage,
+    codeLanguage,
   };
 
   return (

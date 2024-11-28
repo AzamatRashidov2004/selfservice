@@ -31,6 +31,9 @@ function FileTree() {
     setPdfUrl,
     setPdfVisible,
     pdfUrl,
+    setCodeVisible,
+    setCodeLanguage,
+    setCodeValue,
   } = useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
@@ -45,7 +48,11 @@ function FileTree() {
     const nodeInfo = getNodeInfo(parseInt(dragSourceId));
 
     if (nodeInfo.droppable) {
-      if (nodeInfo.kronosProjectId != newPath.kronosProjectId) return;
+      if (nodeInfo.kronosProjectId != newPath.kronosProjectId) {
+        // todo show failed popup
+        console.log("show failed modal");
+        return;
+      }
       // Folder drag
       const children = getAllChildren(parseInt(nodeInfo.id));
       if (!children || children.length === 0) {

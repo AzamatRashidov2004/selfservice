@@ -14,6 +14,7 @@ import { ResizableBox, ResizeCallbackData } from "react-resizable";
 import "react-resizable/css/styles.css";
 import { useFiles } from "../../context/fileContext.tsx";
 import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
+import CodeEditor from "../../components/Code-Editor/CodeEditor.tsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -28,6 +29,11 @@ const Dashboard: React.FC = () => {
     totalFilesCount,
     currentFolder,
     visibleCount,
+    codeLanguage,
+    codeVisible,
+    setCodeVisible,
+    codeValue,
+    setCodeValue,
   } = useFiles();
 
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
@@ -162,6 +168,7 @@ const Dashboard: React.FC = () => {
     }, 0);
   }, [currentFolder, visibleCount, totalFilesCount]);
 
+
   useEffect(() => {
     const targetPdf = document.getElementById("pdf-container");
     const targetRest = document.getElementById("dashboard-part");
@@ -177,6 +184,22 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  // Code editor viewer handler
+  useEffect(() => {
+    const targetCode = document.getElementById("code-container");
+    const targetRest = document.getElementById("dashboard-part");
+    const targetOverlay = document.getElementsByClassName("overlay-code")[0];
+    if (codeVisible) {
+      targetRest?.classList.add("hidden");
+      targetCode?.classList.remove("hidden");
+      targetOverlay?.classList.remove("hidden");
+    } else {
+      targetRest?.classList.remove("hidden");
+      targetCode?.classList.add("hidden");
+      targetOverlay?.classList.add("hidden");
+    }
+  });
+
   return (
     <section className="dashboard-section">
       <main className="container-fluid main-container">
@@ -185,6 +208,15 @@ const Dashboard: React.FC = () => {
             pdfUrl={pdfUrl}
             setVisible={setPdfVisible}
             setPdfUrl={setPdfUrl}
+          />
+        </div>
+        <div id="code-container" className="hidden">
+          <CodeEditor
+            initialValue={codeValue}
+            setCodeValue={setCodeValue}
+            language={codeLanguage}
+            setVisible={setCodeVisible}
+            readOnly={true}
           />
         </div>
         <div id="dashboard-part">

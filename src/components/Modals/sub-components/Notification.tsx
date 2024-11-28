@@ -10,18 +10,41 @@ interface NotificationProps {
   notification_time?: number;
 }
 
-const Notification: React.FC<NotificationProps> = ({ title, text, type, isVisible, onClose, notification_time=2000 }) => {
+const Notification: React.FC<NotificationProps> = ({
+  title,
+  text,
+  type,
+  isVisible,
+  onClose,
+  notification_time = 2000,
+}) => {
   useEffect(() => {
     if (isVisible) {
-      const timer = setTimeout(onClose, notification_time); // Dismiss after 2 seconds
+      const timer = setTimeout(onClose, notification_time); // Dismiss after notification_time
       return () => clearTimeout(timer); // Cleanup the timer on unmount
     }
   }, [isVisible, onClose, notification_time]);
 
+  const parseText = (text: string) => {
+    const lines = text.split('\n'); // Split text into lines by \n
+    return lines.map((line, lineIndex) => (
+      <p key={lineIndex}>
+        {line.split(/(\*\*.*?\*\*)/).map((part, partIndex) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <strong key={partIndex}>{part.slice(2, -2)}</strong> // Remove ** and render as bold
+            );
+          }
+          return <span key={partIndex}>{part}</span>;
+        })}
+      </p>
+    ));
+  };
+
   return (
     <div className={`notification-container bg-${type} ${isVisible ? 'show' : ''}`}>
       <h2 className="notification-title">{title}</h2>
-      <p className="notification-text">{text}</p>
+      <div className="notification-text">{parseText(text)}</div>
     </div>
   );
 };
