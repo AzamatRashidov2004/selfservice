@@ -5,6 +5,7 @@ export const kronosApiUrl: string = `${import.meta.env[`VITE_KRONOS_URL_${enviro
 export const kronosApiKey: string = `${import.meta.env[`VITE_KRONOS_API_KEY_${environment}`]}`;
 
 export const analystApiUrl: string = `${import.meta.env[`VITE_ANALYTICAL_URL_${environment}`]}`;
+console.log("env vars are here?", kronosApiKey, kronosApiUrl)
 
 export const handleError = (vars: {error: unknown, origin: string}): null => {
   const error = vars.error
