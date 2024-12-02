@@ -19,7 +19,7 @@ build_and_deploy:
   stage: build_and_deploy
   script:
     # Check if environment variables are set correctly
-    - echo "VITE_KRONOS_API_KEY_DEVELOPMENT: $VITE_KRONOS_API_KEY_DEVELOPMENT"
+    - echo $VITE_KRONOS_API_KEY_DEVELOPMENT
 
     # Install dependencies and build the project
     - npm install
