@@ -19,7 +19,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   initialValue = "hello",
   readOnly = false,
   setVisible,
-  setCodeValue,
 }) => {
   const mainRef = useRef<HTMLDivElement>(null);
   const [isReadOnly, setIsReadOnly] = useState(readOnly);
