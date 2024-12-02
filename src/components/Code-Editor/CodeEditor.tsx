@@ -3,6 +3,10 @@ import React, { useEffect, useState, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import "./CodeEditor.css";
 import Loader from "../Loader/Loader";
+import { updateFSMFile, updateHTMLFile } from "../../api/kronos/postKronos";
+import keycloak from "../../keycloak";
+import { useFiles } from "../../context/fileContext";
+import { removeItemFromCache } from "../../utility/Session_Storage";
 
 interface CodeEditorProps {
   language: string;
@@ -19,8 +23,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   initialValue = "hello",
   readOnly = false,
   setVisible,
-  setCodeValue,
 }) => {
+  const { current_project_id } = useFiles();
   const mainRef = useRef<HTMLDivElement>(null);
   const [isReadOnly, setIsReadOnly] = useState(readOnly);
   const [value, setValue] = useState<string | undefined>(initialValue);
@@ -33,10 +37,27 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     setIsReadOnly(false);
   };
 
-  const handleSave = () => {
-    setTempValue(value);
+  async function handleSave() {
     setIsReadOnly(true); // Set back to read-only
-  };
+    if (tempValue != value) {
+      setTempValue(value);
+      if (p_language == "html") {
+        removeItemFromCache(current_project_id + ".html");
+        await updateHTMLFile(
+          current_project_id,
+          value ? value : "",
+          keycloak.token ? keycloak.token : ""
+        );
+      } else {
+        removeItemFromCache(current_project_id + ".fsm");
+        await updateFSMFile(
+          current_project_id,
+          value ? value : "",
+          keycloak.token ? keycloak.token : ""
+        );
+      }
+    }
+  }
 
   const handleCancel = () => {
     setValue(tempValue);
@@ -75,6 +96,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (mainRef.current && !mainRef.current.contains(event.target as Node)) {
         setVisible(false);
+        setIsReadOnly(true);
       }
     };
 

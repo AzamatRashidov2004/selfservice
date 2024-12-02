@@ -22,6 +22,11 @@ import {
   getFSMFromProject,
 } from "../../../api/kronos/getKronos";
 import { KeyboardReturnRounded } from "@mui/icons-material";
+import {
+  addItemToCache,
+  isItemInCache,
+  getItemFromCache,
+} from "../../../utility/Session_Storage";
 
 async function handleAction(
   data,
@@ -35,7 +40,8 @@ async function handleAction(
   setCodeVisible,
   setCodeValue,
   setCodeLanguage,
-  codeValue
+  codeValue,
+  setCurrentProjectId
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -238,7 +244,14 @@ async function handleAction(
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         if (project_id) {
-          const htmlData = await getHTMLFromProject(project_id, keycloak.token);
+          setCurrentProjectId(project_id);
+          var htmlData;
+          if (isItemInCache(project_id + ".html")) {
+            htmlData = getItemFromCache(project_id + ".html");
+          } else {
+            htmlData = await getHTMLFromProject(project_id, keycloak.token);
+            addItemToCache(project_id + ".html", htmlData);
+          }
 
           if (htmlData !== "") {
             setCodeVisible(true);
@@ -266,8 +279,15 @@ async function handleAction(
         const project_text = project.text;
 
         if (project_id) {
+          setCurrentProjectId(project_id);
           setCodeVisible(true);
-          const fsmData = await getFSMFromProject(project_id, keycloak.token);
+          var fsmData;
+          if (isItemInCache(project_id + ".fsm")) {
+            fsmData = getItemFromCache(project_id + ".fsm");
+          } else {
+            fsmData = await getFSMFromProject(project_id, keycloak.token);
+            addItemToCache(project_id + ".fsm", fsmData);
+          }
           if (fsmData !== "") {
             setCodeVisible(true);
             setCodeValue(fsmData);
@@ -292,18 +312,22 @@ async function handleAction(
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         const project_text = project.text;
-
+        const kb_id = getNodeInfo(parseInt(selectedFile.id)).kronosKB_id;
         if (project_id) {
           setPdfVisible(true);
-          const kb_id = await getKbId(project_id, keycloak.token);
-
           if (kb_id) {
-            const pdfUrl = await getPdfFileUrl(
-              project_id,
-              kb_id,
-              project_text,
-              keycloak.token
-            );
+            var pdfUrl;
+            if (isItemInCache(kb_id)) {
+              pdfUrl = getItemFromCache(project_id);
+            } else {
+              pdfUrl = await getPdfFileUrl(
+                project_id,
+                kb_id,
+                project_text,
+                keycloak.token
+              );
+              addItemToCache(project_id, fsmData);
+            }
             if (pdfUrl) {
               setPdfUrl(pdfUrl);
             } else {

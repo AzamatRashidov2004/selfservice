@@ -255,7 +255,6 @@ export async function updatePathSingle(
       {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer + ${token}`,
           "x-api-key": apiKey,
         },
@@ -280,4 +279,64 @@ export async function updatePathSingle(
     handleError({ error: e, origin: "updatePdfConfig" });
     return false;
   }
+}
+
+export async function updateFile(
+  projectID: string,
+  content: string,
+  fileName: string,
+  fileType: string,
+  token: string
+): Promise<boolean> {
+  try {
+    // Create Blob and File
+    const blob = new Blob([content], { type: fileType });
+    const file = new File([blob], fileName, { type: fileType });
+
+    // Append to FormData
+    const formData = new FormData();
+    formData.append("file", file);
+
+    // Send POST request
+    const _url =
+      fileType == "text/html"
+        ? `${apiUrl}/resources/chatbot_html?project_id=${projectID}`
+        : `${apiUrl}/resources/dialogue_fsm?project_id=${projectID}`;
+    console.log("the project id is: ", projectID);
+    const projectResponse: Response = await fetch(_url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer + ${token}`,
+        "x-api-key": apiKey,
+      },
+      body: formData,
+    });
+    return projectResponse.ok;
+  } catch (e: unknown) {
+    handleError({ error: e, origin: `updateFile - ${fileName}` });
+    return false;
+  }
+}
+
+// Specific File Updates
+export async function updateHTMLFile(
+  projectID: string,
+  htmlContent: string,
+  token: string
+): Promise<boolean> {
+  return updateFile(projectID, htmlContent, "index.html", "text/html", token);
+}
+
+export async function updateFSMFile(
+  projectID: string,
+  fsmContent: string,
+  token: string
+): Promise<boolean> {
+  return updateFile(
+    projectID,
+    fsmContent,
+    "data.fsm",
+    "application/json",
+    token
+  );
 }
