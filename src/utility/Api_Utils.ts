@@ -1,8 +1,4 @@
 import {
-  uploadAnalyticalProject,
-  updateAnalyticalProject,
-} from "../api/analyst/postAnalyst.ts";
-import {
   getAllPdfProjects,
   getAllPdfsFromProject,
 } from "../api/kronos/getKronos.ts";
@@ -18,10 +14,6 @@ import {
   projectFetchReturn,
   ProjectType,
 } from "./types";
-import {
-  getAllAnalyticalConfigs,
-  getAllAnalyticalIDs,
-} from "../api/analyst/getAnalyst.ts";
 import { SettingsType } from "./types.ts";
 import { deletePdfProject } from "../api/kronos/deleteKronos.ts";
 
@@ -139,59 +131,6 @@ export async function fetchProjectsData(
   }
 
   return { analytical: allAnalytical, project: allProjects };
-}
-
-export async function fetchAnalyticalConfigs(
-  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
-): Promise<ProjectType[] | null> {
-  // Get all ids
-  if (setLoading) setLoading(true);
-  const analyst_all_ids = await getAllAnalyticalIDs();
-  if (!analyst_all_ids) {
-    console.error("Failed to retrieve config ID's");
-    if (setLoading) setLoading(false);
-    return null;
-  }
-
-  // Get all configs
-  const analyst_configs: SettingsType[] | null = await getAllAnalyticalConfigs(
-    analyst_all_ids
-  );
-  if (!analyst_configs) {
-    console.error("Failed to retrieve config data");
-    if (setLoading) setLoading(false);
-    return null;
-  }
-
-  const result: ProjectType[] = analyst_configs.map((config: SettingsType) => ({
-    name: config.attributes?.project_name || "Unknown Project",
-    lastUpdate: config.attributes?.last_update || "Unknown Date",
-    filename: config.attributes?.doc_name || "Unknown File",
-    docId: config.attributes?.doc_id || "Unknown ID",
-  }));
-  if (setLoading) setLoading(true);
-  return result;
-}
-
-export async function createInitialAnalyticalProject(
-  settings: SettingsType,
-  files: FileList,
-  notationFile: File,
-  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
-): Promise<boolean> {
-  // Upload files to create the analytical project
-  if (setLoading) setLoading(true);
-  const uploadResult = await uploadAnalyticalProject(files[0], notationFile);
-
-  if (!uploadResult) return false;
-
-  const docID = uploadResult.docID;
-
-  const response = await updateAnalyticalProject(docID, settings);
-  if (setLoading) setLoading(false);
-  if (!response) return false;
-
-  return true;
 }
 
 export async function createInitialKronosProject(
