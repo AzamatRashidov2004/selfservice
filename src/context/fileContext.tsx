@@ -69,6 +69,8 @@ interface FilesContextType {
   pdfVisible: boolean;
   setPdfVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setPdfUrl: React.Dispatch<React.SetStateAction<string>>;
+  current_project_id: string;
+  setCurrentProjectId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Create the context with the initial value
@@ -106,6 +108,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   const [currentFolder, setCurrentFolder] = useState("0");
   const [pdfUrl, setPdfUrl] = useState<string>("");
   const [pdfVisible, setPdfVisible] = useState<boolean>(false);
+  const [current_project_id, setCurrentProjectId] = useState<string>("");
 
   useEffect(() => {
     setFileStructure([]); // Transform and set the initial state
@@ -219,7 +222,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
         data: { fileType: "project" },
         kronosKB_id: project._id,
         kronosProjectId: project._id,
-        description: project.description
+        description: project.description,
       });
       ids += 1;
 
@@ -468,6 +471,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     setCodeVisible,
     setCodeLanguage,
     codeLanguage,
+    current_project_id,
+    setCurrentProjectId,
   };
 
   return (
