@@ -44,12 +44,15 @@ build:
     # Step 2: Verify that the .env file was created correctly
     - cat .env
 
-    # Step 3: Install dependencies and build the project
+    # Step 3: Install dependencies
     - npm install
+
+    # Step 4: Build the project and generate the 'dist' directory
     - npm run build
 
   artifacts:
     paths:
+      - dist
       - .env
     expire_in: 1 hour
 
@@ -60,11 +63,16 @@ build:
 
 deploy:
   stage: deploy
+  dependencies:
+    - build
   script:
     # Step 1: Install Firebase CLI
     - npm install -g firebase-tools
 
-    # Step 2: Deploy to Firebase using the Firebase token
+    # Step 2: Verify that the 'dist' directory exists
+    - ls -al dist
+
+    # Step 3: Deploy to Firebase using the Firebase token
     - echo "Deploying to Firebase with token $FIREBASE_TOKEN"
     - firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator
 
