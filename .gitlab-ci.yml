@@ -31,6 +31,9 @@ build_and_deploy:
       echo "VITE_KRONOS_API_KEY_PRODUCTION=$VITE_KRONOS_API_KEY_PRODUCTION" >> .env
       echo "VITE_KRONOS_API_KEY_DEVELOPMENT=$VITE_KRONOS_API_KEY_DEVELOPMENT" >> .env
 
+    # Step 2: Verify that the .env file was created correctly
+    - cat .env
+
     # Step 2: Install dependencies and build the project
     - npm install
     - npm run build
