@@ -1,7 +1,8 @@
 image: node:18
 
 stages:
-  - build_and_deploy
+  - build
+  - deploy
 
 variables:
   VITE_ENVIRONMENT: $VITE_ENVIRONMENT
@@ -19,8 +20,8 @@ variables:
   VITE_KEYCLOACK_URL: $VITE_KEYCLOACK_URL
   FIREBASE_TOKEN: $FIREBASE_TOKEN
 
-build_and_deploy:
-  stage: build_and_deploy
+build:
+  stage: build
   script:
     # Step 1: Create the .env file dynamically with expanded environment variables
     - echo "Creating .env file for Vite..."
@@ -47,10 +48,23 @@ build_and_deploy:
     - npm install
     - npm run build
 
-    # Step 4: Install Firebase CLI
+  artifacts:
+    paths:
+      - .env
+    expire_in: 1 hour
+
+# test:
+#   stage: test
+#   script:
+#     - echo "Test stage - Empty for now"
+
+deploy:
+  stage: deploy
+  script:
+    # Step 1: Install Firebase CLI
     - npm install -g firebase-tools
 
-    # Step 5: Deploy to Firebase using the Firebase token
+    # Step 2: Deploy to Firebase using the Firebase token
     - echo "Deploying to Firebase with token $FIREBASE_TOKEN"
     - firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator
 
