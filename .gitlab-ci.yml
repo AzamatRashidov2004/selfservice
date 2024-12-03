@@ -47,7 +47,10 @@ build:
     # Step 3: Install dependencies
     - npm install
 
-    # Step 4: Build the project and generate the 'dist' directory
+    # Step 4: Fix any vulnerabilities
+    - npm audit fix
+
+    # Step 5: Build the project and generate the 'dist' directory
     - npm run build
 
   artifacts:
