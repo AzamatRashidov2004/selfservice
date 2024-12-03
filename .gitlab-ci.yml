@@ -18,26 +18,27 @@ variables:
 build_and_deploy:
   stage: build_and_deploy
   script:
-    # Explicitly export environment variables to ensure they are available
-    - export VITE_ENVIRONMENT="${VITE_ENVIRONMENT}"
-    - export VITE_ANALYTICAL_URL_PRODUCTION="${VITE_ANALYTICAL_URL_PRODUCTION}"
-    - export VITE_ANALYTICAL_URL_DEVELOPMENT="${VITE_ANALYTICAL_URL_DEVELOPMENT}"
-    - export VITE_DOCRETR_URL_DEVELOPMENT="${VITE_DOCRETR_URL_DEVELOPMENT}"
-    - export VITE_DOCRETR_API_KEY_DEVELOPMENT="${VITE_DOCRETR_API_KEY_DEVELOPMENT}"
-    - export VITE_KRONOS_URL_PRODUCTION="${VITE_KRONOS_URL_PRODUCTION}"
-    - export VITE_KRONOS_URL_DEVELOPMENT="${VITE_KRONOS_URL_DEVELOPMENT}"
-    - export VITE_KRONOS_API_KEY_PRODUCTION="${VITE_KRONOS_API_KEY_PRODUCTION}"
-    - export VITE_KRONOS_API_KEY_DEVELOPMENT="${VITE_KRONOS_API_KEY_DEVELOPMENT}"
-    - export FIREBASE_TOKEN="${FIREBASE_TOKEN}"
+    # Step 1: Create the .env file dynamically
+    - echo "Creating .env file for Vite..."
+    - |
+      echo "VITE_ENVIRONMENT=$VITE_ENVIRONMENT" > .env
+      echo "VITE_ANALYTICAL_URL_PRODUCTION=$VITE_ANALYTICAL_URL_PRODUCTION" >> .env
+      echo "VITE_ANALYTICAL_URL_DEVELOPMENT=$VITE_ANALYTICAL_URL_DEVELOPMENT" >> .env
+      echo "VITE_DOCRETR_URL_DEVELOPMENT=$VITE_DOCRETR_URL_DEVELOPMENT" >> .env
+      echo "VITE_DOCRETR_API_KEY_DEVELOPMENT=$VITE_DOCRETR_API_KEY_DEVELOPMENT" >> .env
+      echo "VITE_KRONOS_URL_PRODUCTION=$VITE_KRONOS_URL_PRODUCTION" >> .env
+      echo "VITE_KRONOS_URL_DEVELOPMENT=$VITE_KRONOS_URL_DEVELOPMENT" >> .env
+      echo "VITE_KRONOS_API_KEY_PRODUCTION=$VITE_KRONOS_API_KEY_PRODUCTION" >> .env
+      echo "VITE_KRONOS_API_KEY_DEVELOPMENT=$VITE_KRONOS_API_KEY_DEVELOPMENT" >> .env
 
-    # Install dependencies and build the project
+    # Step 2: Install dependencies and build the project
     - npm install
     - npm run build
 
-    # Install Firebase CLI
+    # Step 3: Install Firebase CLI
     - npm install -g firebase-tools
 
-    # Deploy to Firebase using the Firebase token
+    # Step 4: Deploy to Firebase using the Firebase token
     - echo "Deploying to Firebase with token $FIREBASE_TOKEN"
     - firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator
 
