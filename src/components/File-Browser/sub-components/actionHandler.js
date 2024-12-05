@@ -318,7 +318,7 @@ async function handleAction(
           if (kb_id) {
             var pdfUrl;
             if (isItemInCache(kb_id)) {
-              pdfUrl = getItemFromCache(project_id);
+              pdfUrl = getItemFromCache(kb_id);
             } else {
               pdfUrl = await getPdfFileUrl(
                 project_id,
@@ -326,7 +326,7 @@ async function handleAction(
                 project_text,
                 keycloak.token
               );
-              addItemToCache(project_id, fsmData);
+              addItemToCache(kb_id, pdfUrl);
             }
             if (pdfUrl) {
               setPdfUrl(pdfUrl);
