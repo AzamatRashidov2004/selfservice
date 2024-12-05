@@ -5,7 +5,7 @@ const uploadFileAction = defineFileAction({
   fileFilter: (file) => file.isDir,
   button: {
     name: "Upload Files",
-    toolbar: true,
+    toolbar: false,
     contextMenu: true,
     icon: ChonkyIconName.upload,
   },
