@@ -7,6 +7,7 @@ import { updateFSMFile, updateHTMLFile } from "../../api/kronos/postKronos";
 import keycloak from "../../keycloak";
 import { useFiles } from "../../context/fileContext";
 import { removeItemFromCache } from "../../utility/Session_Storage";
+import { createNotificationEvent } from "../../utility/Modal_Util";
 
 interface CodeEditorProps {
   language: string;
@@ -43,18 +44,42 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
       setTempValue(value);
       if (p_language == "html") {
         removeItemFromCache(current_project_id + ".html");
-        await updateHTMLFile(
-          current_project_id,
-          value ? value : "",
-          keycloak.token ? keycloak.token : ""
-        );
+        try {
+          await updateHTMLFile(
+            current_project_id,
+            value ? value : "",
+            keycloak.token ? keycloak.token : ""
+          );
+          setVisible(false);
+          createNotificationEvent("Success!", "File saved ", "success", 4000);
+        } catch {
+          setVisible(false);
+          createNotificationEvent(
+            "Something Went Wrong",
+            "File save failed. Please try again.",
+            "danger",
+            4000
+          );
+        }
       } else {
         removeItemFromCache(current_project_id + ".fsm");
-        await updateFSMFile(
-          current_project_id,
-          value ? value : "",
-          keycloak.token ? keycloak.token : ""
-        );
+        try {
+          await updateFSMFile(
+            current_project_id,
+            value ? value : "",
+            keycloak.token ? keycloak.token : ""
+          );
+          setVisible(false);
+          createNotificationEvent("Success!", "File saved ", "success", 4000);
+        } catch {
+          setVisible(false);
+          createNotificationEvent(
+            "Something Went Wrong",
+            "File save failed. Please try again.",
+            "danger",
+            4000
+          );
+        }
       }
     }
   }
