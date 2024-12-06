@@ -176,6 +176,16 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  const handleMouseEnter = () => {
+    const body = document.body;
+    body.classList.add("unscrollable");
+  };
+
+  const handleMouseLeave = () => {
+    const body = document.body;
+    body.classList.remove("unscrollable");
+  };
+
   return (
     <section className="dashboard-section">
       <main className="container-fluid main-container">
@@ -204,7 +214,11 @@ const Dashboard: React.FC = () => {
           <div className="loader-container">
             <Loader />
           </div>
-          <div className="file-browser-wrapper">
+          <div
+            className="file-browser-wrapper"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
             <div className="file-tree-container">
               <div className="scrollable-content">
                 <FileTree />

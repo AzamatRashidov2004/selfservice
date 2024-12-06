@@ -95,3 +95,7 @@
 .hidden {
   visibility: hidden !important;
 }
+
+.unscrollable {
+  overflow: hidden !important;
+}
