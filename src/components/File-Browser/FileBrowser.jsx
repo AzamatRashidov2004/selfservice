@@ -15,6 +15,7 @@ import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
+import "./FileBrowser.css";
 
 export default function FileBrowser() {
   const {
@@ -130,6 +131,32 @@ export default function FileBrowser() {
     setVisibleCount(20);
   }, [currentFolder]);
 
+  const loadMoreButton = document.getElementById("load-more-button");
+
+  // After the FullFileBrowser is rendered:
+  useEffect(() => {
+    const scrollableEl = document.querySelector(".listContainer-0-3-15");
+    const fileListWrapper = document.querySelector(".chonky-fileListWrapper");
+
+    if (scrollableEl) {
+      const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = scrollableEl;
+        if (scrollTop + clientHeight >= scrollHeight - 5) {
+          if (loadMoreButton) loadMoreButton.classList.remove("hidden");
+          if (fileListWrapper) fileListWrapper.classList.add("buttom-margin");
+        } else {
+          if (loadMoreButton) loadMoreButton.classList.add("hidden");
+          if (fileListWrapper)
+            fileListWrapper.classList.remove("buttom-margin");
+        }
+      };
+      scrollableEl.addEventListener("scroll", handleScroll);
+
+      return () => {
+        scrollableEl.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, []);
   return (
     <div style={{ width: "100%", height: "400px" }}>
       {fileUploadLoading ? (
@@ -156,6 +183,9 @@ export default function FileBrowser() {
         fileActions={fileActions}
         onFileAction={handleActionWrapper}
         disableDefaultFileActions={true}
+        fileListAdditionalProps={{
+          style: { marginBottom: "20px !important" }, // Add extra space at bottom
+        }}
       />
     </div>
   );

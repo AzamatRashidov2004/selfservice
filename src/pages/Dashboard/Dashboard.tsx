@@ -148,10 +148,11 @@ const Dashboard: React.FC = () => {
     setPosition(position + deltaWidth);
   };*/
 
+  const loadButtonRef = useRef<HTMLButtonElement>(null);
   const handleLoadClick = () => {
+    loadButtonRef?.current?.classList.add("hidden");
     incrementVisibleCount();
   };
-  const loadButtonRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     setTimeout(() => {
       if (
@@ -167,7 +168,6 @@ const Dashboard: React.FC = () => {
       }
     }, 0);
   }, [currentFolder, visibleCount, totalFilesCount]);
-
 
   useEffect(() => {
     const targetPdf = document.getElementById("pdf-container");
@@ -250,6 +250,7 @@ const Dashboard: React.FC = () => {
                   className="load-button"
                   onClick={handleLoadClick}
                   ref={loadButtonRef}
+                  id="load-more-button"
                 >
                   Load more...
                 </button>

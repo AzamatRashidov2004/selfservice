@@ -1,13 +1,3 @@
-.load-button {
-  position: absolute;
-  width: 100%;
-  bottom: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 20px !important;
-  border: 0px;
-  background-color: inherit;
-  color: #999797;
-  font-size: large;
+.buttom-margin {
+  margin-bottom: 20px !important;
 }
