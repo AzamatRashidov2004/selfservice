@@ -5,7 +5,6 @@ stages:
   - deploy
 
 variables:
-  VITE_ENVIRONMENT: $VITE_ENVIRONMENT
   VITE_ANALYTICAL_URL_PRODUCTION: $VITE_ANALYTICAL_URL_PRODUCTION
   VITE_ANALYTICAL_URL_DEVELOPMENT: $VITE_ANALYTICAL_URL_DEVELOPMENT
   VITE_DOCRETR_URL_DEVELOPMENT: $VITE_DOCRETR_URL_DEVELOPMENT
@@ -23,11 +22,26 @@ variables:
 build:
   stage: build
   script:
-    # Step 1: Create the .env file dynamically with expanded environment variables
+    # Step 1: Set environment based on branch
+    - echo "Checking branch: $CI_COMMIT_REF_NAME"
+    - |
+      if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
+        export VITE_ENVIRONMENT=production
+        echo "Setting environment to production"
+      elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
+        export VITE_ENVIRONMENT=development
+        echo "Setting environment to development"
+      else
+        export VITE_ENVIRONMENT=unknown
+        echo "Branch is not 'main' or 'development'. Setting environment to unknown."
+      fi
+
+    - echo "env var is $VITE_ENVIRONMENT"
+    
+    # Step 2: Create the .env file dynamically with the appropriate environment variables
     - echo "Creating .env file for Vite..."
     - |
-      echo "VITE_ENVIRONMENT=$VITE_ENVIRONMENT" > .env
-      echo "VITE_ANALYTICAL_URL_PRODUCTION=$VITE_ANALYTICAL_URL_PRODUCTION" >> .env
+      echo "VITE_ANALYTICAL_URL_PRODUCTION=$VITE_ANALYTICAL_URL_PRODUCTION" > .env
       echo "VITE_ANALYTICAL_URL_DEVELOPMENT=$VITE_ANALYTICAL_URL_DEVELOPMENT" >> .env
       echo "VITE_DOCRETR_URL_DEVELOPMENT=$VITE_DOCRETR_URL_DEVELOPMENT" >> .env
       echo "VITE_DOCRETR_API_KEY_DEVELOPMENT=$VITE_DOCRETR_API_KEY_DEVELOPMENT" >> .env
@@ -41,16 +55,16 @@ build:
       echo "VITE_KEYCLOACK_URL=$VITE_KEYCLOACK_URL" >> .env
       echo "FIREBASE_TOKEN=$FIREBASE_TOKEN" >> .env
 
-    # Step 2: Verify that the .env file was created correctly
+    # Step 3: Verify that the .env file was created correctly
     - cat .env
 
-    # Step 3: Install dependencies
+    # Step 4: Install dependencies
     - npm install
 
-    # Step 4: Fix any vulnerabilities
+    # Step 5: Fix any vulnerabilities
     - npm audit fix
 
-    # Step 5: Build the project and generate the 'dist' directory
+    # Step 6: Build the project and generate the 'dist' directory
     - npm run build
 
   artifacts:
@@ -58,11 +72,6 @@ build:
       - dist
       - .env
     expire_in: 1 hour
-
-# test:
-#   stage: test
-#   script:
-#     - echo "Test stage - Empty for now"
 
 deploy:
   stage: deploy
@@ -75,9 +84,20 @@ deploy:
     # Step 2: Verify that the 'dist' directory exists
     - ls -al dist
 
-    # Step 3: Deploy to Firebase using the Firebase token
+    # Step 3: Check the environment and deploy accordingly
     - echo "Deploying to Firebase with token $FIREBASE_TOKEN"
-    - firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator
+    - echo "Current environment is $VITE_ENVIRONMENT"
+    - |
+      if [[ "$VITE_ENVIRONMENT" == "production" ]]; then
+        echo "Deploying to production..."
+        firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator-production
+      elif [[ "$VITE_ENVIRONMENT" == "development" ]]; then
+        echo "Deploying to development..."
+        firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator-development
+      else
+        echo "Unknown environment. Skipping deployment."
+      fi
 
   only:
-    - main # Run only on the 'main' branch
+    - main
+    - development
