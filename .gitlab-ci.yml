@@ -93,7 +93,7 @@ deploy:
         firebase use --add sop-generator  # Ensure using the correct Firebase project for production
         firebase deploy --only hosting:production --token $FIREBASE_TOKEN
       elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
-        echo "Deploying to development..."
+        echo "Deploying to development...."
         firebase use --add sop-generator  # Ensure using the correct Firebase project for development
         firebase deploy --only hosting:development --token $FIREBASE_TOKEN
       else
