@@ -23,7 +23,7 @@ build:
   stage: build
   script:
     # Step 1: Set environment based on branch
-    - echo "Checking branch: $CI_COMMIT_REF_NAME"
+    - echo "Checking branch $CI_COMMIT_REF_NAME"
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
         export VITE_ENVIRONMENT=production
