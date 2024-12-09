@@ -87,12 +87,11 @@ deploy:
 
     # Step 3: Check the environment and deploy accordingly
     - echo "Deploying to Firebase with token $FIREBASE_TOKEN"
-    - echo "Current environment is $VITE_ENVIRONMENT"
     - |
-      if [[ "$VITE_ENVIRONMENT" == "production" ]]; then
+      if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
         echo "Deploying to production..."
         firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator-production
-      elif [[ "$VITE_ENVIRONMENT" == "development" ]]; then
+      elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
         echo "Deploying to development..."
         firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator-development
       else
