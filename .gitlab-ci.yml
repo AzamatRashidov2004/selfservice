@@ -84,16 +84,16 @@ deploy:
 
     # Step 2: Verify that the 'dist' directory exists
     - ls -al dist
-
+  
     # Step 3: Check the environment and deploy accordingly
     - echo "Deploying to Firebase with token $FIREBASE_TOKEN"
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
         echo "Deploying to production..."
-        firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator-production
+        firebase deploy --only hosting:selfservice-react --token $FIREBASE_TOKEN
       elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
         echo "Deploying to development..."
-        firebase deploy --only hosting --token $FIREBASE_TOKEN --project sop-generator-development
+        firebase deploy --only hosting:self-service-develop --token $FIREBASE_TOKEN
       else
         echo "Unknown environment. Skipping deployment."
       fi
