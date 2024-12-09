@@ -26,10 +26,10 @@ build:
     - echo "Checking branch $CI_COMMIT_REF_NAME"
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
-        export VITE_ENVIRONMENT=production
+        export VITE_ENVIRONMENT=PRODUCTION
         echo "Setting environment to production"
       elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
-        export VITE_ENVIRONMENT=development
+        export VITE_ENVIRONMENT=DEVELOPMENT
         echo "Setting environment to development"
       else
         export VITE_ENVIRONMENT=unknown
