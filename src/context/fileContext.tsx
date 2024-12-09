@@ -79,15 +79,28 @@ const FilesContext = createContext<FilesContextType | undefined>(undefined);
 // Function to transform the files data into a file browser structure
 const transformData = (inputData: FileData[]): TreeNode[] => {
   const buildTree = (items: FileData[], parentId: number = 0): TreeNode[] => {
-    return items
-      .filter((item) => item.parent === parentId)
-      .sort((a, b) => a.text.localeCompare(b.text))
-      .map((item) => ({
-        id: item.id.toString(),
-        name: item.text,
-        isDir: item.droppable,
-        files: buildTree(items, item.id), // Recursively build files
-      }));
+    // Filter items that belong to the current parent
+    const children = items.filter((item) => item.parent === parentId);
+
+    // Separate directories and files
+    const directories = children
+      .filter((child) => child.droppable)
+      .sort((a, b) => a.text.localeCompare(b.text));
+
+    const files = children
+      .filter((child) => !child.droppable)
+      .sort((a, b) => a.text.localeCompare(b.text));
+
+    // Combine directories and files with directories first
+    const sortedChildren = [...directories, ...files];
+
+    // Recursively build the tree for each child
+    return sortedChildren.map((item) => ({
+      id: item.id.toString(),
+      name: item.text,
+      isDir: item.droppable,
+      files: buildTree(items, item.id), // Recursively build the nested structure
+    }));
   };
 
   return [
@@ -101,6 +114,7 @@ const transformData = (inputData: FileData[]): TreeNode[] => {
 };
 
 // Create a provider component
+
 export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {

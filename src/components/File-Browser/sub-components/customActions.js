@@ -5,8 +5,9 @@ const uploadFileAction = defineFileAction({
   fileFilter: (file) => file.isDir,
   button: {
     name: "Upload Files",
-    toolbar: false,
-    contextMenu: true,
+    toolbar: true, // Show it in the toolbar
+    group: "Actions", // Put it inside the Actions dropdown group
+    contextMenu: true, // Also show it in the context menu
     icon: ChonkyIconName.upload,
   },
 });
@@ -26,4 +27,32 @@ const detailsAction = defineFileAction({
   },
 });
 
-export const customActions = [uploadFileAction, detailsAction];
+const editFileAction = defineFileAction({
+  id: "edit_file",
+  requiresSelection: true,
+  button: {
+    name: "Open",
+    toolbar: false, // No need to show in the toolbar
+    contextMenu: true, // Show it in the right-click menu
+    icon: ChonkyIconName.openFiles,
+  },
+});
+
+const MyCreateFolderAction = defineFileAction({
+  id: "create_folder",
+  requiresSelection: false,
+  button: {
+    name: "Create Folder",
+    toolbar: true,
+    group: "Actions", // Put it in the same dropdown as Download/Delete
+    contextMenu: true, // Also show in right-click menu
+    icon: ChonkyIconName.folderCreate,
+  },
+});
+
+export const customActions = [
+  uploadFileAction,
+  detailsAction,
+  editFileAction,
+  MyCreateFolderAction,
+];
