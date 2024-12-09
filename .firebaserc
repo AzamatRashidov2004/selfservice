@@ -3,11 +3,14 @@
   "targets": {
     "sop-generator": {
       "hosting": {
-        "slf-service-preview": [
-          "selfservice-react"
-        ],
         "mf-admin-cz": [
           "mfAdmin"
+        ],
+        "production": [
+          "selfservice-react"
+        ],
+        "development": [
+          "self-service-develop"
         ]
       }
     }
