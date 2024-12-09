@@ -91,11 +91,11 @@ deploy:
       if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
         echo "Deploying to production..."
         firebase use --add sop-generator  # Ensure using the correct Firebase project for production
-        firebase deploy --only hosting:selfservice-react --token $FIREBASE_TOKEN
+        firebase deploy --only hosting:production --token $FIREBASE_TOKEN
       elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
         echo "Deploying to development..."
         firebase use --add sop-generator  # Ensure using the correct Firebase project for development
-        firebase deploy --only hosting:self-service-develop --token $FIREBASE_TOKEN
+        firebase deploy --only hosting:development --token $FIREBASE_TOKEN
       else
         echo "Unknown environment. Skipping deployment."
       fi
