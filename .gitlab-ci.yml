@@ -36,11 +36,12 @@ build:
         echo "Branch is not 'main' or 'development'. Setting environment to unknown."
       fi
 
-    - echo "env var is $VITE_ENVIRONMENT"
+    
     
     # Step 2: Create the .env file dynamically with the appropriate environment variables
     - echo "Creating .env file for Vite..."
     - |
+      echo "VITE_ENVIRONMENT=$VITE_ENVIRONMENT" > .env
       echo "VITE_ANALYTICAL_URL_PRODUCTION=$VITE_ANALYTICAL_URL_PRODUCTION" > .env
       echo "VITE_ANALYTICAL_URL_DEVELOPMENT=$VITE_ANALYTICAL_URL_DEVELOPMENT" >> .env
       echo "VITE_DOCRETR_URL_DEVELOPMENT=$VITE_DOCRETR_URL_DEVELOPMENT" >> .env
