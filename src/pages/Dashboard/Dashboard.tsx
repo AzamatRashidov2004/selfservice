@@ -206,10 +206,6 @@ const Dashboard: React.FC = () => {
           />
         </div>
         <div id="dashboard-part">
-          <div className="bg-primary p-4 rounded mb-4 text-center">
-            <h1 className="text-light">Available Projects</h1>
-            <p className="text-light">Choose a project to edit or delete</p>
-          </div>
           <br />
           <div className="loader-container">
             <Loader />
