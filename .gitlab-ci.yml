@@ -36,8 +36,6 @@ build:
         echo "Branch is not 'main' or 'development'. Setting environment to unknown."
       fi
 
-    
-    
     # Step 2: Create the .env file dynamically with the appropriate environment variables
     - echo "Creating .env file for Vite..."
     - |
@@ -62,10 +60,7 @@ build:
     # Step 4: Install dependencies
     - npm install
 
-    # Step 5: Fix any vulnerabilities
-    - npm audit fix
-
-    # Step 6: Build the project and generate the 'dist' directory
+    # Step 5: Build the project and generate the 'dist' directory
     - npm run build
 
   artifacts:
