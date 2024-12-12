@@ -132,18 +132,28 @@ export default function FileBrowser() {
   }, [currentFolder]);
 
   const loadMoreButton = document.getElementById("load-more-button");
+  loadMoreButton?.classList.add("hidden");
 
   // After the FullFileBrowser is rendered:
   useEffect(() => {
-    const scrollableEl = document.querySelector(".listContainer-0-3-15");
+    var scrollableEl;
+    document.querySelectorAll("div").forEach((div) => {
+      if ([...div.classList].some((cls) => cls.includes("listContainer"))) {
+        scrollableEl = div;
+      }
+    });
+
+    console.log("the scrollableEl is: ", scrollableEl);
     const fileListWrapper = document.querySelector(".chonky-fileListWrapper");
 
     if (scrollableEl) {
       const handleScroll = () => {
         const { scrollTop, scrollHeight, clientHeight } = scrollableEl;
-        if (scrollTop + clientHeight >= scrollHeight - 5) {
-          if (loadMoreButton) loadMoreButton.classList.remove("hidden");
-          if (fileListWrapper) fileListWrapper.classList.add("buttom-margin");
+        if (scrollTop + clientHeight >= scrollHeight - 10) {
+          if (visibleCount < totalFilesCount) {
+            if (loadMoreButton) loadMoreButton.classList.remove("hidden");
+            if (fileListWrapper) fileListWrapper.classList.add("buttom-margin");
+          }
         } else {
           if (loadMoreButton) loadMoreButton.classList.add("hidden");
           if (fileListWrapper)
@@ -156,7 +166,7 @@ export default function FileBrowser() {
         scrollableEl.removeEventListener("scroll", handleScroll);
       };
     }
-  }, []);
+  }, [visibleCount, files]);
   return (
     <div style={{ width: "100%", height: "400px" }}>
       {fileUploadLoading ? (
