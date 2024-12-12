@@ -1,0 +1,105 @@
+image: node:18
+
+stages:
+  - build
+  - deploy
+
+variables:
+  VITE_ANALYTICAL_URL_PRODUCTION: $VITE_ANALYTICAL_URL_PRODUCTION
+  VITE_ANALYTICAL_URL_DEVELOPMENT: $VITE_ANALYTICAL_URL_DEVELOPMENT
+  VITE_DOCRETR_URL_DEVELOPMENT: $VITE_DOCRETR_URL_DEVELOPMENT
+  VITE_DOCRETR_API_KEY_DEVELOPMENT: $VITE_DOCRETR_API_KEY_DEVELOPMENT
+  VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
+  VITE_KRONOS_URL_DEVELOPMENT: $VITE_KRONOS_URL_DEVELOPMENT
+  VITE_KRONOS_API_KEY_PRODUCTION: $VITE_KRONOS_API_KEY_PRODUCTION
+  VITE_KRONOS_API_KEY_DEVELOPMENT: $VITE_KRONOS_API_KEY_DEVELOPMENT
+  VITE_KEYCLOACK_CLIENT_ID: $VITE_KEYCLOACK_CLIENT_ID
+  VITE_KEYCLOACK_PRODUCTION_CLIENT_ID: $VITE_KEYCLOACK_PRODUCTION_CLIENT_ID
+  VITE_KEYCLOACK_REALM: $VITE_KEYCLOACK_REALM
+  VITE_KEYCLOACK_URL: $VITE_KEYCLOACK_URL
+  FIREBASE_TOKEN: $FIREBASE_TOKEN
+
+build:
+  stage: build
+  script:
+    # Step 1: Set environment based on branch
+    - echo "Checking branch $CI_COMMIT_REF_NAME"
+    - |
+      if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
+        export VITE_ENVIRONMENT=PRODUCTION
+        echo "Setting environment to production"
+      elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
+        export VITE_ENVIRONMENT=DEVELOPMENT
+        echo "Setting environment to development"
+      else
+        export VITE_ENVIRONMENT=unknown
+        echo "Branch is not 'main' or 'development'. Setting environment to unknown."
+      fi
+
+    
+    
+    # Step 2: Create the .env file dynamically with the appropriate environment variables
+    - echo "Creating .env file for Vite..."
+    - |
+      echo "VITE_ENVIRONMENT=$VITE_ENVIRONMENT" > .env
+      echo "VITE_ANALYTICAL_URL_PRODUCTION=$VITE_ANALYTICAL_URL_PRODUCTION" >> .env
+      echo "VITE_ANALYTICAL_URL_DEVELOPMENT=$VITE_ANALYTICAL_URL_DEVELOPMENT" >> .env
+      echo "VITE_DOCRETR_URL_DEVELOPMENT=$VITE_DOCRETR_URL_DEVELOPMENT" >> .env
+      echo "VITE_DOCRETR_API_KEY_DEVELOPMENT=$VITE_DOCRETR_API_KEY_DEVELOPMENT" >> .env
+      echo "VITE_KRONOS_URL_PRODUCTION=$VITE_KRONOS_URL_PRODUCTION" >> .env
+      echo "VITE_KRONOS_URL_DEVELOPMENT=$VITE_KRONOS_URL_DEVELOPMENT" >> .env
+      echo "VITE_KRONOS_API_KEY_PRODUCTION=$VITE_KRONOS_API_KEY_PRODUCTION" >> .env
+      echo "VITE_KRONOS_API_KEY_DEVELOPMENT=$VITE_KRONOS_API_KEY_DEVELOPMENT" >> .env
+      echo "VITE_KEYCLOACK_CLIENT_ID=$VITE_KEYCLOACK_CLIENT_ID" >> .env
+      echo "VITE_KEYCLOACK_PRODUCTION_CLIENT_ID=$VITE_KEYCLOACK_PRODUCTION_CLIENT_ID" >> .env
+      echo "VITE_KEYCLOACK_REALM=$VITE_KEYCLOACK_REALM" >> .env
+      echo "VITE_KEYCLOACK_URL=$VITE_KEYCLOACK_URL" >> .env
+      echo "FIREBASE_TOKEN=$FIREBASE_TOKEN" >> .env
+
+    # Step 3: Verify that the .env file was created correctly
+    - cat .env
+
+    # Step 4: Install dependencies
+    - npm install
+
+    # Step 5: Fix any vulnerabilities
+    - npm audit fix
+
+    # Step 6: Build the project and generate the 'dist' directory
+    - npm run build
+
+  artifacts:
+    paths:
+      - dist
+      - .env
+    expire_in: 1 hour
+
+deploy:
+  stage: deploy
+  dependencies:
+    - build
+  script:
+    # Step 1: Install Firebase CLI
+    - npm install -g firebase-tools
+
+    # Step 2: Verify that the 'dist' directory exists
+    - ls -al dist
+
+    # Step 3: Check the environment and deploy accordingly
+    - echo "Deploying to Firebase with token $FIREBASE_TOKEN"
+    - |
+      if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
+        echo "Deploying to production..."
+        firebase use --add sop-generator  # Ensure using the correct Firebase project for production
+        firebase deploy --only hosting:production --token $FIREBASE_TOKEN
+      elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
+        echo "Deploying to development..."
+        firebase use --add sop-generator  # Ensure using the correct Firebase project for development
+        firebase deploy --only hosting:development --token $FIREBASE_TOKEN
+      else
+        echo "Unknown environment. Skipping deployment."
+      fi
+
+  only:
+    - main
+    - development

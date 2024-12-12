@@ -114,3 +114,7 @@
 .load-button:hover {
   text-decoration: underline;
 }
+
+.unscrollable {
+  overflow: hidden !important;
+}

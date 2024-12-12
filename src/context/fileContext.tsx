@@ -74,6 +74,8 @@ interface FilesContextType {
   pdfVisible: boolean;
   setPdfVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setPdfUrl: React.Dispatch<React.SetStateAction<string>>;
+  current_project_id: string;
+  setCurrentProjectId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Create the context with the initial value
@@ -82,15 +84,28 @@ const FilesContext = createContext<FilesContextType | undefined>(undefined);
 // Function to transform the files data into a file browser structure
 const transformData = (inputData: FileData[]): TreeNode[] => {
   const buildTree = (items: FileData[], parentId: number = 0): TreeNode[] => {
-    return items
-      .filter((item) => item.parent === parentId)
-      .sort((a, b) => a.text.localeCompare(b.text))
-      .map((item) => ({
-        id: item.id.toString(),
-        name: item.text,
-        isDir: item.droppable,
-        files: buildTree(items, item.id), // Recursively build files
-      }));
+    // Filter items that belong to the current parent
+    const children = items.filter((item) => item.parent === parentId);
+
+    // Separate directories and files
+    const directories = children
+      .filter((child) => child.droppable)
+      .sort((a, b) => a.text.localeCompare(b.text));
+
+    const files = children
+      .filter((child) => !child.droppable)
+      .sort((a, b) => a.text.localeCompare(b.text));
+
+    // Combine directories and files with directories first
+    const sortedChildren = [...directories, ...files];
+
+    // Recursively build the tree for each child
+    return sortedChildren.map((item) => ({
+      id: item.id.toString(),
+      name: item.text,
+      isDir: item.droppable,
+      files: buildTree(items, item.id), // Recursively build the nested structure
+    }));
   };
 
   return [
@@ -104,6 +119,7 @@ const transformData = (inputData: FileData[]): TreeNode[] => {
 };
 
 // Create a provider component
+
 export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -111,6 +127,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   const [currentFolder, setCurrentFolder] = useState("0");
   const [pdfUrl, setPdfUrl] = useState<string>("");
   const [pdfVisible, setPdfVisible] = useState<boolean>(false);
+  const [current_project_id, setCurrentProjectId] = useState<string>("");
 
   useEffect(() => {
     setFileStructure([]); // Transform and set the initial state
@@ -224,7 +241,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
         data: { fileType: "project" },
         kronosKB_id: project._id,
         kronosProjectId: project._id,
-        description: project.description
+        description: project.description,
       });
       ids += 1;
 
@@ -483,6 +500,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     setCodeVisible,
     setCodeLanguage,
     codeLanguage,
+    current_project_id,
+    setCurrentProjectId,
   };
 
   return (

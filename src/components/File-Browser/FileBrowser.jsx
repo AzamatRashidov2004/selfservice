@@ -48,6 +48,7 @@ export default function FileBrowser() {
     setCodeValue,
     setCodeLanguage,
     codeValue,
+    setCurrentProjectId,
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
   const [files, setFiles] = useState([]);
@@ -77,7 +78,8 @@ export default function FileBrowser() {
         setCodeVisible,
         setCodeValue,
         setCodeLanguage,
-        codeValue
+        codeValue,
+        setCurrentProjectId
       );
     },
     [getFileStructure, dragAndDropFile]
@@ -91,7 +93,7 @@ export default function FileBrowser() {
     () => [
       ChonkyActions.EnableListView,
       ChonkyActions.EnableGridView,
-      ChonkyActions.CreateFolder, // Make sure this is included
+      //ChonkyActions.CreateFolder, // Make sure this is included
       ...customActions,
       ChonkyActions.DownloadFiles,
       ChonkyActions.DeleteFiles,

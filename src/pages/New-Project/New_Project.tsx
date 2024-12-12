@@ -8,7 +8,6 @@ import { SettingsType } from "../../utility/types.ts";
 import getDate from "../../utility/Date_Util";
 import "./New_Project.css";
 import {
-  createInitialAnalyticalProject,
   createInitialKronosProject,
 } from "../../utility/Api_Utils";
 import { useNavigate } from "react-router-dom";
@@ -63,28 +62,15 @@ const New_Project: React.FC = () => {
       project_name: projectName,
     };
 
-    let response;
     if (!files) return;
-    if (isAnalytical && !notationFile) return;
-    // API save the config here
-    if (isAnalytical && notationFile) {
-      // Handle analytical files
-      response = await createInitialAnalyticalProject(
-        settings,
-        files,
-        notationFile,
-        setLoading
-      );
-    } else {
-      response = await createInitialKronosProject(
-        settings,
-        projectName,
-        description,
-        files,
-        keycloak.token,
-        setLoading
-      );
-    }
+    const response = await createInitialKronosProject(
+      settings,
+      projectName,
+      description,
+      files,
+      keycloak.token,
+      setLoading
+    );
 
     if (!response) {
       createNotificationEvent(

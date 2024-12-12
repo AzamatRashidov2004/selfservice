@@ -22,6 +22,11 @@ import {
   getFSMFromProject,
 } from "../../../api/kronos/getKronos";
 import { KeyboardReturnRounded } from "@mui/icons-material";
+import {
+  addItemToCache,
+  isItemInCache,
+  getItemFromCache,
+} from "../../../utility/Session_Storage";
 
 async function handleAction(
   data,
@@ -35,7 +40,8 @@ async function handleAction(
   setCodeVisible,
   setCodeValue,
   setCodeLanguage,
-  codeValue
+  codeValue,
+  setCurrentProjectId
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -238,7 +244,14 @@ async function handleAction(
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         if (project_id) {
-          const htmlData = await getHTMLFromProject(project_id, keycloak.token);
+          setCurrentProjectId(project_id);
+          var htmlData;
+          if (isItemInCache(project_id + ".html")) {
+            htmlData = getItemFromCache(project_id + ".html");
+          } else {
+            htmlData = await getHTMLFromProject(project_id, keycloak.token);
+            addItemToCache(project_id + ".html", htmlData);
+          }
 
           if (htmlData !== "") {
             setCodeVisible(true);
@@ -266,8 +279,15 @@ async function handleAction(
         const project_text = project.text;
 
         if (project_id) {
+          setCurrentProjectId(project_id);
           setCodeVisible(true);
-          const fsmData = await getFSMFromProject(project_id, keycloak.token);
+          var fsmData;
+          if (isItemInCache(project_id + ".fsm")) {
+            fsmData = getItemFromCache(project_id + ".fsm");
+          } else {
+            fsmData = await getFSMFromProject(project_id, keycloak.token);
+            addItemToCache(project_id + ".fsm", fsmData);
+          }
           if (fsmData !== "") {
             setCodeVisible(true);
             setCodeValue(fsmData);
@@ -292,18 +312,22 @@ async function handleAction(
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         const project_text = project.text;
-
+        const kb_id = getNodeInfo(parseInt(selectedFile.id)).kronosKB_id;
         if (project_id) {
           setPdfVisible(true);
-          const kb_id = await getKbId(project_id, keycloak.token);
-
           if (kb_id) {
-            const pdfUrl = await getPdfFileUrl(
-              project_id,
-              kb_id,
-              project_text,
-              keycloak.token
-            );
+            var pdfUrl;
+            if (isItemInCache(kb_id)) {
+              pdfUrl = getItemFromCache(kb_id);
+            } else {
+              pdfUrl = await getPdfFileUrl(
+                project_id,
+                kb_id,
+                project_text,
+                keycloak.token
+              );
+              addItemToCache(kb_id, pdfUrl);
+            }
             if (pdfUrl) {
               setPdfUrl(pdfUrl);
             } else {
@@ -325,6 +349,159 @@ async function handleAction(
       }
     } else {
       // Handle other file types or do nothing
+    }
+  }
+
+  if (data.id === "edit_file") {
+    if (!keycloak || !keycloak.token) return;
+
+    const selectedFiles = data.state.selectedFiles;
+    if (!selectedFiles || selectedFiles.length === 0) {
+      // No selected files, so we cannot edit anything
+      createNotificationEvent(
+        "No File Selected",
+        "Please select a file before trying to edit.",
+        "warning",
+        4000
+      );
+      return;
+    }
+
+    // Since we know there's at least one selected file, grab the first one:
+    const selectedFile = selectedFiles[0];
+    console.log("selected file is: ", selectedFile);
+
+    const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
+
+    if (nodeInfo.text.toLowerCase().endsWith(".html")) {
+      try {
+        const selectedFileCurrent = data.state.selectedFiles[0];
+        console.log("selectedFileCurrent: ", selectedFileCurrent);
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        if (project_id) {
+          setCurrentProjectId(project_id);
+          var htmlData;
+          if (isItemInCache(project_id + ".html")) {
+            htmlData = getItemFromCache(project_id + ".html");
+          } else {
+            htmlData = await getHTMLFromProject(project_id, keycloak.token);
+            addItemToCache(project_id + ".html", htmlData);
+          }
+
+          if (htmlData !== "") {
+            setCodeVisible(true);
+            setCodeValue(htmlData);
+            setCodeLanguage("html");
+          } else {
+            setCodeVisible(false);
+            throw new Error("HTML content not found.");
+          }
+        } else {
+          throw new Error("Project id not found.");
+        }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Failed to open HTML file. Please try again.",
+          "danger",
+          4000
+        );
+      }
+    } else if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
+      try {
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        const project_text = project.text;
+
+        if (project_id) {
+          setCurrentProjectId(project_id);
+          setCodeVisible(true);
+          var fsmData;
+          if (isItemInCache(project_id + ".fsm")) {
+            fsmData = getItemFromCache(project_id + ".fsm");
+          } else {
+            fsmData = await getFSMFromProject(project_id, keycloak.token);
+            addItemToCache(project_id + ".fsm", fsmData);
+          }
+          if (fsmData !== "") {
+            setCodeVisible(true);
+            setCodeValue(fsmData);
+            setCodeLanguage("json");
+          } else {
+            setCodeVisible(false);
+            throw new Error("FSM file not found.");
+          }
+        } else {
+          throw new Error("Project id not found.");
+        }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Failed to open FSM file. Please try again.",
+          "danger",
+          4000
+        );
+      }
+    } else if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
+      try {
+        const project = getProjectForNode(parseInt(selectedFile.id));
+        const project_id = project.kronosProjectId;
+        const project_text = project.text;
+        const kb_id = getNodeInfo(parseInt(selectedFile.id)).kronosKB_id;
+        if (project_id) {
+          setPdfVisible(true);
+          if (kb_id) {
+            var pdfUrl;
+            if (isItemInCache(kb_id)) {
+              pdfUrl = getItemFromCache(kb_id);
+            } else {
+              pdfUrl = await getPdfFileUrl(
+                project_id,
+                kb_id,
+                project_text,
+                keycloak.token
+              );
+              addItemToCache(kb_id, pdfUrl);
+            }
+            if (pdfUrl) {
+              setPdfUrl(pdfUrl);
+            } else {
+              throw new Error("PDF URL not found.");
+            }
+          } else {
+            throw new Error("KB id not found.");
+          }
+        } else {
+          throw new Error("Project id not found.");
+        }
+      } catch (error) {
+        createNotificationEvent(
+          "Something Went Wrong",
+          "Failed to open PDF file. Please try again.",
+          "danger",
+          4000
+        );
+      }
+    } else {
+      const selectedFiles = data.state.selectedFiles;
+      if (!selectedFiles || selectedFiles.length === 0) {
+        // No selected files, so we cannot edit anything
+        createNotificationEvent(
+          "No File Selected",
+          "Please select a file before trying to edit.",
+          "warning",
+          4000
+        );
+        return;
+      }
+
+      // Since we know there's at least one selected file, grab the first one:
+      const selectedFile = selectedFiles[0];
+      const file = findFile(fileData, selectedFile.id);
+      if (file?.isDir) {
+        setCurrentFolder(file.id);
+      }
     }
   }
 
