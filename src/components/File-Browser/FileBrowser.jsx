@@ -6,13 +6,10 @@ import {
   useEffect,
   useState,
   useCallback,
-  useMemo,
-  useRef,
-  useContext,
 } from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
-import { customActions } from "./sub-components/customActions";
+import { customActions, getCustomActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
 
@@ -47,6 +44,14 @@ export default function FileBrowser() {
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
+      console.log(data.state.selectedFiles);
+      if (data.id === "change_selection") {
+        setFileActions([
+          ChonkyActions.EnableListView,
+          ChonkyActions.EnableGridView,
+          ...getCustomActions(data.state.selectedFiles),
+        ])
+      }
       handleAction(
         data,
         setCurrentFolder,
@@ -81,17 +86,21 @@ export default function FileBrowser() {
   setChonkyDefaults({ iconComponent: ChonkyIconFA });
   const [files, setFiles] = useState(null);
   const [folderChain, setFolderChain] = useState(null);
-
-  const fileActions = useMemo(
-    () => [
+  const [fileActions, setFileActions] = useState(
+    [
       ChonkyActions.EnableListView,
       ChonkyActions.EnableGridView,
-      ...customActions,
-      ChonkyActions.DownloadFiles,
-      ChonkyActions.DeleteFiles,
-    ],
-    []
-  );
+      ...customActions
+    ]);
+
+  // const fileActions = useMemo(
+  //   () => [
+  //     ChonkyActions.EnableListView,
+  //     ChonkyActions.EnableGridView,
+  //     ...customActions
+  //   ],
+  //   []
+  // );
 
   // Fetch the folder data and set the file and folder chain states
   useEffect(() => {

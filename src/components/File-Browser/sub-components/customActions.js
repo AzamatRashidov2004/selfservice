@@ -1,16 +1,17 @@
 import { defineFileAction, ChonkyIconName } from "chonky";
+import { ChonkyActions } from "chonky";
 
-const uploadFileAction = defineFileAction({
-  id: "upload",
-  fileFilter: (file) => file.isDir,
-  button: {
-    name: "Upload",
-    toolbar: true, // Show it in the toolbar
-    group: "Actions", // Put it inside the Actions dropdown group
-    contextMenu: true, // Also show it in the context menu
-    icon: ChonkyIconName.upload,
-  },
-});
+const uploadFileAction = (showContext) => {return defineFileAction({
+    id: "upload",
+    fileFilter: (file) => file.isDir,
+    button: {
+      name: "Upload",
+      toolbar: true, // Show it in the toolbar
+      contextMenu: showContext, // Also show it in the context menu
+      icon: ChonkyIconName.upload,
+    },
+  });
+}
 
 const detailsAction = defineFileAction({
   id: "details",
@@ -22,7 +23,7 @@ const detailsAction = defineFileAction({
   button: {
     name: "Details",
     toolbar: true,
-    contextMenu: true,
+    contextMenu: false,
     icon: ChonkyIconName.info, // Fitting icon for a "details" action
   },
 });
@@ -38,24 +39,24 @@ const editFileAction = defineFileAction({
   },
 });
 
-const createFolderAction = defineFileAction({
-  id: "create_folder",
-  requiresSelection: false,
-  button: {
-    name: "New Folder",
-    toolbar: true,
-    group: "Actions", // Put it in the same dropdown as Download/Delete
-    contextMenu: true, // Also show in right-click menu
-    icon: ChonkyIconName.folderCreate,
-  },
-});
+const createFolderAction = (showContext) => {return defineFileAction({
+    id: "create_folder",
+    requiresSelection: false,
+    button: {
+      name: "New Folder",
+      toolbar: true,
+      contextMenu: showContext, // Also show in right-click menu
+      icon: ChonkyIconName.folderCreate,
+    },
+  });
+}
 
 const deleteFileOrFolder = defineFileAction({
   id: "delete_files",
   requiresSelection: false,
   button: {
     name: "Delete",
-    toolbar: true,
+    toolbar: false,
     group: "Actions", // Put it in the same dropdown as Download/Delete
     contextMenu: true, // Also show in right-click menu
     icon: ChonkyIconName.trash,
@@ -67,18 +68,56 @@ const downloadFile = defineFileAction({
   requiresSelection: false,
   button: {
     name: "Download",
-    toolbar: true,
-    group: "Actions", // Put it in the same dropdown as Download/Delete
+    toolbar: false,
+    group: "Actions",
     contextMenu: true, // Also show in right-click menu
     icon: ChonkyIconName.download,
   },
 })
 
-export const customActions = [
-  uploadFileAction,
-  detailsAction,
-  downloadFile,
-  editFileAction,
-  deleteFileOrFolder,
-  createFolderAction,
-];
+const ClearSelection = defineFileAction({
+  id: "clear_selection",
+  requiresSelection: true,
+  button: {
+    name: "Clear",
+    toolbar: false,
+    group: "Actions",
+    contextMenu: true, // Also show in right-click menu
+    icon: ChonkyIconName.download,
+  },
+})
+
+export const getCustomActions = (selectedFiles) => {
+  const customActions = [detailsAction];
+
+  const isEmpty = selectedFiles.length === 0;
+  const isSingle = selectedFiles.length === 1;
+  const hasDir = selectedFiles.some(item => item.isDir === true);
+
+  if (!isEmpty){
+    customActions.push(editFileAction);
+    customActions.push(deleteFileOrFolder);
+    customActions.push(createFolderAction(false));
+    customActions.push(uploadFileAction(false));
+  }
+
+  if (isEmpty){
+    customActions.push(createFolderAction(true));
+    customActions.push(uploadFileAction(true));
+  }
+
+  if (isSingle && !hasDir){
+    customActions.push(downloadFile)
+  }
+
+  if (!isEmpty){ // Duplicate if, clear selection should always be at the last spot
+    customActions.push({
+      ...ChonkyActions.ClearSelection, 
+      ...{button: {...ChonkyActions.ClearSelection.button, group: null, toolbar: false, name: "Deselect"}}
+    });
+  }
+
+  return customActions;
+}
+
+export const customActions = getCustomActions([]);
