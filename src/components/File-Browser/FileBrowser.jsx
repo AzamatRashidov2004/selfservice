@@ -86,7 +86,6 @@ export default function FileBrowser() {
     () => [
       ChonkyActions.EnableListView,
       ChonkyActions.EnableGridView,
-      //ChonkyActions.CreateFolder, // Make sure this is included
       ...customActions,
       ChonkyActions.DownloadFiles,
       ChonkyActions.DeleteFiles,
