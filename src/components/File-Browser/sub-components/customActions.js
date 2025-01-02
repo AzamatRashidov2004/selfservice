@@ -113,7 +113,7 @@ export const getCustomActions = (selectedFiles) => {
   if (!isEmpty){ // Duplicate if, clear selection should always be at the last spot
     customActions.push({
       ...ChonkyActions.ClearSelection, 
-      ...{button: {...ChonkyActions.ClearSelection.button, group: null, toolbar: false, name: "Deselect"}}
+      ...{button: {...ChonkyActions.ClearSelection.button, group: null, toolbar: false}}
     });
   }
 

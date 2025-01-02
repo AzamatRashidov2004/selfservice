@@ -8,6 +8,7 @@ interface NotificationProps {
   isVisible: boolean;
   onClose: () => void;
   notification_time?: number;
+  closeOnClick?: boolean;
 }
 
 const Notification: React.FC<NotificationProps> = ({
@@ -17,6 +18,7 @@ const Notification: React.FC<NotificationProps> = ({
   isVisible,
   onClose,
   notification_time = 2000,
+  closeOnClick = true,
 }) => {
   useEffect(() => {
     if (isVisible) {
@@ -24,6 +26,12 @@ const Notification: React.FC<NotificationProps> = ({
       return () => clearTimeout(timer); // Cleanup the timer on unmount
     }
   }, [isVisible, onClose, notification_time]);
+
+  const handleCloseOnClick = () => {
+    if (closeOnClick) {
+      onClose();
+    }
+  }
 
   const parseText = (text: string) => {
     const lines = text.split('\n'); // Split text into lines by \n
@@ -41,8 +49,14 @@ const Notification: React.FC<NotificationProps> = ({
     ));
   };
 
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      handleCloseOnClick();
+    }
+  });
+
   return (
-    <div className={`notification-container bg-${type} ${isVisible ? 'show' : ''}`}>
+    <div onClick={handleCloseOnClick} className={`notification-container bg-${type} ${isVisible ? 'show' : ''}`}>
       <h2 className="notification-title">{title}</h2>
       <div className="notification-text">{parseText(text)}</div>
     </div>
