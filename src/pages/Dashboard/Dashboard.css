@@ -12,7 +12,7 @@
 .dashboard-section {
   /* width: 100vw; */
   padding: 0 !important;
-  margin-top: 90px;
+  margin-top: 50px;
 }
 
 /* body{
@@ -72,6 +72,12 @@
       width: 100%;
     }
   }
+}
+
+#root,
+body {
+  height: unset !important;
+  min-height: unset !important;
 }
 
 .new-button-options {
