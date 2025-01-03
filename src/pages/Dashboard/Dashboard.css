@@ -49,10 +49,59 @@
   min-width: 20%;
   /* Minimum width */
   border: 1px #e0e0e0 solid;
-  padding-top: 84px;
-  overflow-y: auto;
+  overflow-y: hidden;
   /* Enable vertical scrolling */
   overflow-x: hidden !important;
+}
+
+.file-tree-new-button {
+  height: 84px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &>button {
+    position: relative;
+    width: 80%;
+    height: 80%;
+    z-index: 2;
+    border-radius: 0;
+
+    &:hover>.new-button-options {
+      display: block;
+      width: 100%;
+    }
+  }
+}
+
+.new-button-options {
+  position: absolute;
+  padding-top: 100px;
+  bottom: -120px;
+  left: 0;
+  z-index: 0;
+  border-radius: 5px;
+  display: none;
+  width: 100%;
+
+  &>button {
+    width: 100%;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 800px) {
+
+  .new-button-options {
+    bottom: -170px;
+  }
+}
+
+@media (max-width: 700px) {
+
+  .new-button-options {
+    bottom: -190px;
+  }
 }
 
 .file-browser-container {
@@ -62,7 +111,7 @@
 }
 
 .scrollable-content {
-  height: 100%;
+  max-height: calc(100% - 84px);
   /* Limit the height for scrolling */
   overflow-y: auto;
   /* Enable vertical scrolling */

@@ -45,6 +45,28 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  const handleNewProjectClick = () => {
+    navigate("/new-project");
+  };
+
+  const handleCreateFolderClick = () => {
+    const newFolderButton = document.querySelector(
+      'button.chonky-baseButton[title="New Folder"]'
+    ) as HTMLButtonElement;
+    if (newFolderButton) {
+      newFolderButton.click();
+    }
+  }
+
+  const handleUploadClick = () => {
+    const newFolderButton = document.querySelector(
+      'button.chonky-baseButton[title="Upload"]'
+    ) as HTMLButtonElement;
+    if (newFolderButton) {
+      newFolderButton.click();
+    }
+  }
+
   const fetchData = async (token: string | undefined) => {
     setLoading(true);
     await fetchProjectsData((allProjects: fetchProjectsDataReturn | null) => {
@@ -216,6 +238,16 @@ const Dashboard: React.FC = () => {
             onMouseLeave={handleMouseLeave}
           >
             <div className="file-tree-container">
+              <div className="file-tree-new-button">
+                <button className="btn btn-outline-success">
+                  New
+                  <div className="new-button-options">
+                    <button className="btn btn-secondary" onClick={handleNewProjectClick}>New Project</button>
+                    <button className="btn btn-secondary" onClick={handleCreateFolderClick}>Create Folder</button>
+                    <button className="btn btn-secondary" onClick={handleUploadClick}>Upload File</button>
+                  </div>
+                </button>
+              </div>
               <div className="scrollable-content">
                 <FileTree />
               </div>
