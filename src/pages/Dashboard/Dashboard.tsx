@@ -108,7 +108,6 @@ const Dashboard: React.FC = () => {
       root.style.setProperty("--even-analytical-project-bg", "#FFFFFF");
       root.style.setProperty("--odd-analytical-project-bg", "#F2F2F2");
     }
-    console.log("PROJECTS UPDATED", projects);
     setProjectsContext(projects);
   }, [projects]);
 

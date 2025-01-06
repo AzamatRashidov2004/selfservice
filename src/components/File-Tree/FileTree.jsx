@@ -27,13 +27,8 @@ function FileTree() {
     getAllChildren,
     getDepth,
     getProjectForNode,
-    pdfVisible,
     setPdfUrl,
     setPdfVisible,
-    pdfUrl,
-    setCodeVisible,
-    setCodeLanguage,
-    setCodeValue,
   } = useFiles();
   const [draggingNode, setDraggingNode] = useState();
   const [nodeList, setNodeList] = useState([]);
@@ -136,7 +131,7 @@ function FileTree() {
             <Tree
               tree={getFileStructure(false)}
               rootId={0}
-              initialOpen={true}
+              initialOpen={false}
               render={(
                 node,
                 { depth, isOpen, onToggle, isDragging, isDropTarget, hasChild }
