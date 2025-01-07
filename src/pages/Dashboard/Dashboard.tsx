@@ -135,9 +135,9 @@ const Dashboard: React.FC = () => {
   //const [position, setPosition] = useState(0);
 
   const [fileBrowserWidth, setFileBrowserWidth] = useState<number>(
-    window.innerWidth * 0.6 // Start with 60% of the window width
+    window.innerWidth * 0.7 // Start with 70% of the window width
   );
-  const minFileTreeWidth = window.innerWidth * 0.2; // Minimum width of the file-tree-container
+  const minFileTreeWidth = window.innerWidth * 0.1; // Minimum width of the file-tree-container
   const parentWidth = window.innerWidth;
   console.log("parent width: ", parentWidth);
 
