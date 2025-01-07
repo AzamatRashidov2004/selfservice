@@ -15,7 +15,6 @@ import "react-resizable/css/styles.css";
 import { useFiles } from "../../context/fileContext.tsx";
 import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
 import CodeEditor from "../../components/Code-Editor/CodeEditor.tsx";
-import CUSTOM_ACTION_NAMES from "../../utility/customActionNames.ts";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -49,24 +48,6 @@ const Dashboard: React.FC = () => {
   const handleNewProjectClick = () => {
     navigate("/new-project");
   };
-
-  const handleCreateFolderClick = () => {
-    const newFolderButton = document.querySelector(
-      `button.chonky-baseButton[title="${CUSTOM_ACTION_NAMES.newFolder}"]`
-    ) as HTMLButtonElement;
-    if (newFolderButton) {
-      newFolderButton.click();
-    }
-  }
-
-  const handleUploadClick = () => {
-    const newFolderButton = document.querySelector(
-      `button.chonky-baseButton[title="${CUSTOM_ACTION_NAMES.upload}"]`
-    ) as HTMLButtonElement;
-    if (newFolderButton) {
-      newFolderButton.click();
-    }
-  }
 
   const fetchData = async (token: string | undefined) => {
     setLoading(true);
@@ -228,15 +209,10 @@ const Dashboard: React.FC = () => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="file-tree-container">
+            <div className="file-tree-container" id="file-tree-root">
               <div className="file-tree-new-button">
-                <button className="btn btn-outline-success">
-                  New
-                  <div className="new-button-options">
-                    <button className="btn btn-secondary" onClick={handleNewProjectClick}>New Project</button>
-                    <button className="btn btn-secondary" onClick={handleCreateFolderClick}>Create Folder</button>
-                    <button className="btn btn-secondary" onClick={handleUploadClick}>Upload File</button>
-                  </div>
+                <button onClick={handleNewProjectClick} className="btn btn-outline-success">
+                  New Project
                 </button>
               </div>
               <div className="scrollable-content">

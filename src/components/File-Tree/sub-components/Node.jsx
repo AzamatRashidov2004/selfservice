@@ -9,33 +9,116 @@ import {
   getPdfFileUrl,
 } from "../../../api/kronos/getKronos";
 import keycloak from "../../../keycloak";
+import CUSTOM_ACTION_NAMES from "../../../utility/customActionNames";
 
 export const CustomNode = (props) => {
   const { droppable, data } = props.node;
   const indent = props.depth * 24;
-  const { setCurrentFolder, getProjectForNode } = useFiles();
+  const { setCurrentFolder, getProjectForNode, currentFolder } = useFiles();
 
   const setPdfVisible = props.setPdfVisible;
   const setPdfUrl = props.setPdfUrl;
 
-  const handleToggle = (e, target) => {
-    e.stopPropagation();
+  const clearSelection = () => {
+    const newFolderButton = document.querySelector(
+      `button.chonky-baseButton[title="${CUSTOM_ACTION_NAMES.clearSelection}"]`
+    );
+    if (newFolderButton) {
+      newFolderButton.click();
+    }
+  }
 
-    if (target === "row") {
-      if (props.node.droppable) {
-        setCurrentFolder(props.node.id.toString());
-      } else {
-        setCurrentFolder(props.node.parent.toString());
-      }
-      props.setHighlightedNodeId(props.node.id); // Update the highlighted node in the parent component
+  const findChonkyContainerWithTimeout = (selector, timeout = 3000, interval = 100) => {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now();
+
+      const attemptFind = () => {
+        const element = document.querySelector(selector);
+        if (element) {
+          resolve(element);
+        } else if (Date.now() - startTime >= timeout) {
+          reject(new Error(`Element not found within ${timeout}ms: ${selector}`));
+        } else {
+          setTimeout(attemptFind, interval);
+        }
+      };
+
+      attemptFind();
+    });
+  };
+
+  const handleContextMenu = async (event) => {
+    if (event.altKey) {
+      return; // Do nothing if the Alt key is pressed
     }
 
+    // Prevent the default context menu from appearing
+    event.preventDefault();
+    clearSelection();
+    props.setHighlightedNodeId(props.node.id);
+    if (props.node.droppable) {
+      setCurrentFolder(props.node.parent.toString())
+    } else {
+      setCurrentFolder(props.node.parent.toString());
+
+      const chonkyContainer = document.querySelector('.chonky-fileListWrapper');
+    }
+
+    console.log("Right-click detected at coordinates:", event.clientX, event.clientY);
+
+    // Get the mouse position from the right-click event
+    const mouseX = event.clientX;
+    const mouseY = event.clientY;
+
+    // Find the Chonky container (assuming you have a selector for it)
+    const chonkyContainer = await findChonkyContainerWithTimeout(`span[title="${props.node.text}"]`) // Replace with the correct selector
+
+    if (chonkyContainer) {
+      // Create a new MouseEvent to simulate a right-click at the mouse position
+      const mouseEvent = new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        button: 2, // Right-click button
+        clientX: mouseX,
+        clientY: mouseY,
+      });
+
+      // Dispatch the right-click event within the Chonky container
+      chonkyContainer.dispatchEvent(mouseEvent);
+    }
+  };
+
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    props.setHighlightedNodeId(props.node.id);
     props.onToggle(props.node.id);
+
+    // Is it a file
+    if (!props.node.droppable) {
+      setCurrentFolder(props.node.parent.toString());
+      return;
+    }
+
+    // It is a folder
+    if (props.isOpen) {
+      setCurrentFolder(props.node.parent.toString());
+      return;
+    }
+
+    setCurrentFolder(props.node.id.toString());
   };
 
   useEffect(() => {
     props.updateNode(props.node);
   }, [props.parent]);
+
+  useEffect(() => {
+    // If current folder is set to this node and it is closed
+    if (parseInt(currentFolder) == props.node.id && !props.isOpen) {
+      props.onToggle(props.node.id);
+      props.setHighlightedNodeId(props.node.id);
+    }
+  }, [currentFolder])
 
   useEffect(() => {
     props.updateNode(props.node);
@@ -91,14 +174,15 @@ export const CustomNode = (props) => {
       }}
       className={`node-root depth-${props.depth}`}
       onClick={(e) => {
-        handleToggle(e, "row");
+        handleToggle(e);
       }}
-      onDoubleClick={data?.fileType === "pdf" ? handleDoubleClick : () => {}}
+      onDoubleClick={data?.fileType === "pdf" ? handleDoubleClick : () => { }}
+      onContextMenu={handleContextMenu}
     >
       <div
         className={`expandIconWrapper ${props.isOpen ? "isOpen" : ""}`}
         onClick={(e) => {
-          handleToggle(e, "arrow");
+          handleToggle(e);
         }}
       >
         {props.node.droppable && <ArrowRightIcon />}

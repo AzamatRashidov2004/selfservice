@@ -82,30 +82,27 @@ export const getCustomActions = (selectedFiles) => {
   const isEmpty = selectedFiles.length === 0;
   const isSingle = selectedFiles.length === 1;
   const hasDir = selectedFiles.some(item => item.isDir === true);
-
+  console.log(isEmpty, selectedFiles)
   if (!isEmpty){
     customActions.push(editFileAction);
     customActions.push(deleteFileOrFolder);
-    customActions.push(createFolderAction(false));
-    customActions.push(uploadFileAction(false));
   }
 
-  if (isEmpty){
+  if (isEmpty || (hasDir && isSingle)){
     customActions.push(createFolderAction(true));
     customActions.push(uploadFileAction(true));
   }
 
+  if (!isEmpty){ // Duplicate to put clear folder to end
+    customActions.push({
+      ...ChonkyActions.ClearSelection, 
+      ...{button: {...ChonkyActions.ClearSelection.button, group: null, toolbar: true, name: customActionNames.clearSelection}}
+    });
+  }
+  
   if (isSingle && !hasDir){
     customActions.push(downloadFile)
   }
-
-  if (!isEmpty){ // Duplicate if, clear selection should always be at the last spot
-    customActions.push({
-      ...ChonkyActions.ClearSelection, 
-      ...{button: {...ChonkyActions.ClearSelection.button, group: null, toolbar: false}}
-    });
-  }
-
   return customActions;
 }
 

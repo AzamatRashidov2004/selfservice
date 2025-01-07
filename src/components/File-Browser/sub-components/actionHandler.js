@@ -144,8 +144,19 @@ async function handleAction(
 
   // Handle Create File custom action
   if (data.id === "create_folder") {
+    let targetID = parseInt(currentFolder);
+
+    // If create folder is called on a folder, it should create the new folder inside it
+    if (data.state.selectedFiles.length === 1 && data.state.selectedFiles[0].isDir){ 
+      const selectedFolder = data.state.selectedFiles[0]
+      const selectedFolderID = parseInt(selectedFolder.id)
+      const targetNode = getNodeInfo(selectedFolderID)
+      targetID = targetNode.id;
+      setCurrentFolder(targetID.toString())
+    }
+
     createFolderModalEvent((folderName) => {
-      fileContext.addFolder(parseInt(currentFolder), folderName);
+      fileContext.addFolder(targetID, folderName);
     });
   }
 
@@ -174,8 +185,19 @@ async function handleAction(
   // Handle Create File custom action
   if (data.id === "upload") {
     if (!keycloak || !keycloak.token) return;
-    let path = getPathFromProject(parseInt(currentFolder));
-    const project = getProjectForNode(parseInt(currentFolder));
+    let targetID = parseInt(currentFolder);
+
+    // If upload is called on a folder, it should upload files inside it
+    if (data.state.selectedFiles.length === 1 && data.state.selectedFiles[0].isDir){ 
+      const selectedFolder = data.state.selectedFiles[0]
+      const selectedFolderID = parseInt(selectedFolder.id)
+      const targetNode = getNodeInfo(selectedFolderID)
+      targetID = targetNode.id;
+      setCurrentFolder(targetID.toString())
+    }
+
+    let path = getPathFromProject(parseInt(targetID));
+    const project = getProjectForNode(parseInt(targetID));
     if (path.lengt > 0) path = path.slice(0, -1);
     createUploadFileModalEvent(async (files) => {
       try {
@@ -189,7 +211,7 @@ async function handleAction(
         console.log("RESULT", result);
         if (result) {
           fileContext.addFiles(
-            parseInt(currentFolder),
+            parseInt(targetID),
             files,
             project.kronosProjectId,
             result

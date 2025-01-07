@@ -2,7 +2,8 @@
 
     &[title="Details"],
     &[title="New Folder"],
-    &[title="Upload"] {
+    &[title="Upload"],
+    &[title="Clear selection"] {
         display: none !important;
     }
 }

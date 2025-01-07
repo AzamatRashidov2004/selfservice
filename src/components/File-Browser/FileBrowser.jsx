@@ -91,6 +91,7 @@ export default function FileBrowser() {
     [
       ChonkyActions.EnableListView,
       ChonkyActions.EnableGridView,
+      ChonkyActions.OpenFileContextMenu,
       ...customActions
     ]);
 

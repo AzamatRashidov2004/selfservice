@@ -5,6 +5,7 @@ const CUSTOM_ACTION_NAMES = {
     newFolder: "New Folder",
     delete: "Delete",
     download: "Download",
+    clearSelection: "Clear selection"
 }
 
 export default CUSTOM_ACTION_NAMES
