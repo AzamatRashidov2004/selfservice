@@ -15,11 +15,6 @@
   margin-top: 50px;
 }
 
-/* body{
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-} */
-
 .react-resizable {
   min-height: 100% !important;
   max-width: 100%;
@@ -52,28 +47,6 @@
   overflow-y: hidden;
   /* Enable vertical scrolling */
   overflow-x: hidden !important;
-}
-
-.file-tree-new-button {
-  height: 84px;
-  display: flex;
-  justify-content: start;
-  margin-left: 18px;
-  align-items: center;
-
-  &>button {
-    position: relative;
-    width: 90%;
-    height: 80%;
-    z-index: 2;
-    border-radius: 0;
-    max-width: 300px;
-
-    &:hover>.new-button-options {
-      display: block;
-      width: 100%;
-    }
-  }
 }
 
 #root,

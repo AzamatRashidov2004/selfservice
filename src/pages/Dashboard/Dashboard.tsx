@@ -156,15 +156,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  /*const handleResize = (
-    event: React.SyntheticEvent,
-    data: ResizeCallbackData
-  ) => {
-    const deltaWidth = width - data.size.width;
-    setWidth(data.size.width);
-    setPosition(position + deltaWidth);
-  };*/
-
   // PDF viewer handler
   useEffect(() => {
     const targetPdf = document.getElementById("pdf-container");

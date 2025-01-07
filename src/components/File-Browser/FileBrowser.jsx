@@ -2,6 +2,7 @@ import { setChonkyDefaults } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
 import Loader from "../Loader/Loader";
+import "./FileBrowser.css"
 import {
   useEffect,
   useState,
