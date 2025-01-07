@@ -1,11 +1,12 @@
 import { defineFileAction, ChonkyIconName } from "chonky";
 import { ChonkyActions } from "chonky";
+import customActionNames from "../../../utility/customActionNames";
 
 const uploadFileAction = (showContext) => {return defineFileAction({
     id: "upload",
     fileFilter: (file) => file.isDir,
     button: {
-      name: "Upload",
+      name: customActionNames.upload,
       toolbar: true, // Show it in the toolbar
       contextMenu: showContext, // Also show it in the context menu
       icon: ChonkyIconName.upload,
@@ -21,7 +22,7 @@ const detailsAction = defineFileAction({
     return currentFolder && currentFolder.parentId !== null; // parentId !== null ensures not in root
   },
   button: {
-    name: "Details",
+    name: customActionNames.details,
     toolbar: true,
     contextMenu: false,
     icon: ChonkyIconName.info, // Fitting icon for a "details" action
@@ -32,7 +33,7 @@ const editFileAction = defineFileAction({
   id: "edit_file",
   requiresSelection: true,
   button: {
-    name: "Open",
+    name: customActionNames.open,
     toolbar: false, // No need to show in the toolbar
     contextMenu: true, // Show it in the right-click menu
     icon: ChonkyIconName.openFiles,
@@ -43,7 +44,7 @@ const createFolderAction = (showContext) => {return defineFileAction({
     id: "create_folder",
     requiresSelection: false,
     button: {
-      name: "New Folder",
+      name: customActionNames.newFolder,
       toolbar: true,
       contextMenu: showContext, // Also show in right-click menu
       icon: ChonkyIconName.folderCreate,
@@ -55,7 +56,7 @@ const deleteFileOrFolder = defineFileAction({
   id: "delete_files",
   requiresSelection: false,
   button: {
-    name: "Delete",
+    name: customActionNames.delete,
     toolbar: false,
     group: "Actions", // Put it in the same dropdown as Download/Delete
     contextMenu: true, // Also show in right-click menu
@@ -67,19 +68,7 @@ const downloadFile = defineFileAction({
   id: "download_files",
   requiresSelection: false,
   button: {
-    name: "Download",
-    toolbar: false,
-    group: "Actions",
-    contextMenu: true, // Also show in right-click menu
-    icon: ChonkyIconName.download,
-  },
-})
-
-const ClearSelection = defineFileAction({
-  id: "clear_selection",
-  requiresSelection: true,
-  button: {
-    name: "Clear",
+    name: customActionNames.download,
     toolbar: false,
     group: "Actions",
     contextMenu: true, // Also show in right-click menu

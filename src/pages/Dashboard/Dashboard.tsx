@@ -15,6 +15,7 @@ import "react-resizable/css/styles.css";
 import { useFiles } from "../../context/fileContext.tsx";
 import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
 import CodeEditor from "../../components/Code-Editor/CodeEditor.tsx";
+import CUSTOM_ACTION_NAMES from "../../utility/customActionNames.ts";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -51,7 +52,7 @@ const Dashboard: React.FC = () => {
 
   const handleCreateFolderClick = () => {
     const newFolderButton = document.querySelector(
-      'button.chonky-baseButton[title="New Folder"]'
+      `button.chonky-baseButton[title="${CUSTOM_ACTION_NAMES.newFolder}"]`
     ) as HTMLButtonElement;
     if (newFolderButton) {
       newFolderButton.click();
@@ -60,7 +61,7 @@ const Dashboard: React.FC = () => {
 
   const handleUploadClick = () => {
     const newFolderButton = document.querySelector(
-      'button.chonky-baseButton[title="Upload"]'
+      `button.chonky-baseButton[title="${CUSTOM_ACTION_NAMES.upload}"]`
     ) as HTMLButtonElement;
     if (newFolderButton) {
       newFolderButton.click();
