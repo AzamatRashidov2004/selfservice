@@ -6,7 +6,8 @@
   margin-top: 50px !important;
   position: absolute !important;
   top: 0px !important;
-  right: 0px !important;
+  right: 50% !important;
+  transform: translateX(50%);
 }
 
 .overlay {
