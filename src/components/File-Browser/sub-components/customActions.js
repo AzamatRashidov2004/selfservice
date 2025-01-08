@@ -14,7 +14,7 @@ const uploadFileAction = (showContext) => {return defineFileAction({
   });
 }
 
-const detailsAction = defineFileAction({
+const detailsAction = (context=false) => { return defineFileAction({
   id: "details",
   fileFilter: (file, fileMap) => {
     // Only show if we are inside a folder and not at the root level
@@ -24,10 +24,10 @@ const detailsAction = defineFileAction({
   button: {
     name: customActionNames.details,
     toolbar: true,
-    contextMenu: false,
+    contextMenu: context,
     icon: ChonkyIconName.info, // Fitting icon for a "details" action
   },
-});
+})};
 
 const editFileAction = defineFileAction({
   id: "edit_file",
@@ -76,13 +76,12 @@ const downloadFile = defineFileAction({
   },
 })
 
-export const getCustomActions = (selectedFiles) => {
-  const customActions = [detailsAction];
+export const getCustomActions = (selectedFiles, firstNodeInfo=null) => {
+  const customActions = [];
 
   const isEmpty = selectedFiles.length === 0;
   const isSingle = selectedFiles.length === 1;
   const hasDir = selectedFiles.some(item => item.isDir === true);
-  console.log(isEmpty, selectedFiles)
   if (!isEmpty){
     customActions.push(editFileAction);
     customActions.push(deleteFileOrFolder);
@@ -98,6 +97,12 @@ export const getCustomActions = (selectedFiles) => {
       ...ChonkyActions.ClearSelection, 
       ...{button: {...ChonkyActions.ClearSelection.button, group: null, toolbar: true, contextMenu: false, name: customActionNames.clearSelection}}
     });
+  }
+  console.log(firstNodeInfo)
+  if(isSingle && firstNodeInfo && firstNodeInfo.parent === 0){
+    customActions.push(detailsAction(true));
+  }else{
+    customActions.push(detailsAction(false));
   }
   
   if (isSingle && !hasDir){

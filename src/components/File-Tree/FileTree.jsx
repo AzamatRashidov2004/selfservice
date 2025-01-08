@@ -176,7 +176,6 @@ function FileTree() {
                     );
                   }
                   if (project_id_source !== project_id_target) {
-                    console.log("here");
                     return false;
                   }
                   let dropT = getDropTarget(dropTargetId);

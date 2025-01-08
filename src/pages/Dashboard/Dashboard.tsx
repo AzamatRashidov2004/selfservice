@@ -121,7 +121,6 @@ const Dashboard: React.FC = () => {
   );
   const minFileTreeWidth = window.innerWidth * 0.1; // Minimum width of the file-tree-container
   const parentWidth = window.innerWidth;
-  console.log("parent width: ", parentWidth);
 
   const handleResize = (
     event: React.SyntheticEvent,
@@ -129,11 +128,6 @@ const Dashboard: React.FC = () => {
   ) => {
     console.log(event);
     if (data.size.width <= window.innerWidth * 0.6) {
-      console.log(
-        "data size widht and window inner width 80",
-        data.size.width,
-        window.innerWidth * 0.8
-      );
       setFileBrowserWidth(data.size.width);
     }
   };

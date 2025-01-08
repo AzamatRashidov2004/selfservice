@@ -241,7 +241,6 @@ export async function getPdfFileUrl(
   docName: string,
   token: string
 ): Promise<string> {
-  console.log(docName);
   try {
     const projectResponse: Response = await fetch(
       `${apiUrl}/projects/${projectID}/knowledge_base/${docID}/source`,

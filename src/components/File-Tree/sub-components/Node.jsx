@@ -50,11 +50,7 @@ export const CustomNode = (props) => {
       setCurrentFolder(props.node.parent.toString())
     } else {
       setCurrentFolder(props.node.parent.toString());
-
-      const chonkyContainer = document.querySelector('.chonky-fileListWrapper');
     }
-
-    console.log("Right-click detected at coordinates:", event.clientX, event.clientY);
 
     // Get the mouse position from the right-click event
     const mouseX = event.clientX;
@@ -116,7 +112,6 @@ export const CustomNode = (props) => {
 
   async function handleDoubleClick() {
     setPdfVisible(true);
-    console.log("Double-clicked on PDF node.");
     if (!keycloak || !keycloak.token) return;
 
     const file = data;
@@ -137,8 +132,6 @@ export const CustomNode = (props) => {
             text,
             keycloak.token
           );
-          console.log("the url is: ", url);
-          console.log("token: ", keycloak.token);
           if (url != "") {
             setPdfVisible(true);
             setPdfUrl(url);

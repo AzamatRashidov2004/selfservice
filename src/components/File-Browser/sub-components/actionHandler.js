@@ -25,6 +25,8 @@ import {
   getItemFromCache,
 } from "../../../utility/Session_Storage";
 
+import { getCustomActions } from "./customActions";
+
 async function handleAction(
   data,
   setCurrentFolder,
@@ -38,7 +40,8 @@ async function handleAction(
   setCodeValue,
   setCodeLanguage,
   codeValue,
-  setCurrentProjectId
+  setCurrentProjectId,
+  setFileActions
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -61,6 +64,18 @@ async function handleAction(
     if (file?.isDir) {
       setCurrentFolder(file.id);
     }
+  }
+
+  if (data.id === "change_selection") {
+    let firstNodeInfo = null;
+    if (data.state.selectedFiles.length > 0) {
+      firstNodeInfo = getNodeInfo(parseInt(data.state.selectedFiles[0].id))
+    }
+    setFileActions([
+      ChonkyActions.EnableListView,
+      ChonkyActions.EnableGridView,
+      ...getCustomActions(data.state.selectedFiles, firstNodeInfo),
+    ])
   }
 
   if (data.id === ChonkyActions.EndDragNDrop.id) {
@@ -100,8 +115,6 @@ async function handleAction(
               });
             });
           } else {
-            // If file
-            console.log(currentNode);
             payload.push({
               _id: currentNode.kronosKB_id,
               project_id: currentNode.kronosProjectId,
@@ -124,7 +137,6 @@ async function handleAction(
         );
       }
       if (result) {
-        console.log(selectedFiles);
         fileContext.dragAndDropFile(destination.id, selectedFiles);
       } else {
         throw new Error("Drag and drop failed");
@@ -158,8 +170,8 @@ async function handleAction(
   }
 
   if (data.id === "details") {
-    const project = getProjectForNode(parseInt(currentFolder));
-    console.log(project);
+    const currentProjectId = parseInt(data.state.selectedFiles[0].id)
+    const project = getProjectForNode(parseInt(currentProjectId));
     if (project) {
       createNotificationEvent(
         "Project Info",
@@ -205,7 +217,6 @@ async function handleAction(
           keycloak.token,
           setFileUploadLoading
         );
-        console.log("RESULT", result);
         if (result) {
           fileContext.addFiles(
             parseInt(targetID),
@@ -259,7 +270,6 @@ async function handleAction(
     if (nodeInfo.text.toLowerCase().endsWith(".html")) {
       try {
         const selectedFileCurrent = data.state.selectedFiles[0];
-        console.log("selectedFileCurrent: ", selectedFileCurrent);
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         if (project_id) {
@@ -388,14 +398,12 @@ async function handleAction(
 
     // Since we know there's at least one selected file, grab the first one:
     const selectedFile = selectedFiles[0];
-    console.log("selected file is: ", selectedFile);
 
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
 
     if (nodeInfo.text.toLowerCase().endsWith(".html")) {
       try {
         const selectedFileCurrent = data.state.selectedFiles[0];
-        console.log("selectedFileCurrent: ", selectedFileCurrent);
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         if (project_id) {

@@ -8,7 +8,6 @@ export const kronosApiUrl: string = `${import.meta.env[`VITE_KRONOS_URL_${enviro
 const isLocalhost = () => {
   return window.location.hostname === 'localhost';
 };
-console.log("environment keycloak", `VITE_KEYCLOACK_${environment}_CLIENT_ID`)
 const keycloak = new Keycloak({
   url: import.meta.env.VITE_KEYCLOACK_URL,
   realm: import.meta.env.VITE_KEYCLOACK_REALM,

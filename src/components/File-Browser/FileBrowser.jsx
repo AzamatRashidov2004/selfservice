@@ -11,7 +11,7 @@ import {
 } from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
-import { customActions, getCustomActions } from "./sub-components/customActions";
+import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
 import { clearSelection } from "../../utility/chonkyActionCalls";
@@ -48,13 +48,6 @@ export default function FileBrowser() {
   const handleActionWrapper = useCallback(
     (data) => {
       console.log(data.state.selectedFiles);
-      if (data.id === "change_selection") {
-        setFileActions([
-          ChonkyActions.EnableListView,
-          ChonkyActions.EnableGridView,
-          ...getCustomActions(data.state.selectedFiles),
-        ])
-      }
       handleAction(
         data,
         setCurrentFolder,
@@ -79,7 +72,8 @@ export default function FileBrowser() {
         setCodeValue,
         setCodeLanguage,
         codeValue,
-        setCurrentProjectId
+        setCurrentProjectId,
+        setFileActions
       );
     },
     [getFileStructure, dragAndDropFile]

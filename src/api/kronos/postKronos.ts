@@ -110,7 +110,7 @@ export async function updatePdfConfig(
     if (!projectResponse.ok) {
       console.error(
         "Error while trying to update knowledge base" +
-          projectResponse.statusText
+        projectResponse.statusText
       );
       return false;
     }
@@ -231,7 +231,7 @@ export async function updatePathBulk(
     if (!projectResponse.ok) {
       console.error(
         "Error while trying to update knowledge base path" +
-          projectResponse.statusText
+        projectResponse.statusText
       );
       return false;
     }
@@ -269,7 +269,7 @@ export async function updatePathSingle(
     if (!projectResponse.ok) {
       console.error(
         "Error while trying to update knowledge base path" +
-          projectResponse.statusText
+        projectResponse.statusText
       );
       return false;
     }
@@ -302,7 +302,6 @@ export async function updateFile(
       fileType == "text/html"
         ? `${apiUrl}/resources/chatbot_html?project_id=${projectID}`
         : `${apiUrl}/resources/dialogue_fsm?project_id=${projectID}`;
-    console.log("the project id is: ", projectID);
     const projectResponse: Response = await fetch(_url, {
       method: "POST",
       headers: {
