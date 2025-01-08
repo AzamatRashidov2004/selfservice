@@ -5,11 +5,10 @@ import { TypeIcon } from "./Type-Icon";
 import { useFiles } from "../../../context/fileContext";
 import {
   getKbId,
-  getPdfFile,
   getPdfFileUrl,
 } from "../../../api/kronos/getKronos";
 import keycloak from "../../../keycloak";
-import CUSTOM_ACTION_NAMES from "../../../utility/customActionNames";
+import { clearSelection } from "../../../utility/chonkyActionCalls";
 
 export const CustomNode = (props) => {
   const { droppable, data } = props.node;
@@ -18,15 +17,6 @@ export const CustomNode = (props) => {
 
   const setPdfVisible = props.setPdfVisible;
   const setPdfUrl = props.setPdfUrl;
-
-  const clearSelection = () => {
-    const newFolderButton = document.querySelector(
-      `button.chonky-baseButton[title="${CUSTOM_ACTION_NAMES.clearSelection}"]`
-    );
-    if (newFolderButton) {
-      newFolderButton.click();
-    }
-  }
 
   const findChonkyContainerWithTimeout = (selector, timeout = 3000, interval = 100) => {
     return new Promise((resolve, reject) => {

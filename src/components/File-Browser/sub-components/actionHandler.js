@@ -14,14 +14,11 @@ import {
 } from "../../../api/kronos/postKronos";
 import { deleteBulkPdf } from "../../../api/kronos/deleteKronos";
 import {
-  getKbId,
   getPdfFile,
   getPdfFileUrl,
-  getHtmlFile,
   getHTMLFromProject,
   getFSMFromProject,
 } from "../../../api/kronos/getKronos";
-import { KeyboardReturnRounded } from "@mui/icons-material";
 import {
   addItemToCache,
   isItemInCache,

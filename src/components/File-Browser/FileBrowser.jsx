@@ -7,12 +7,14 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
 } from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
 import { customActions, getCustomActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
+import { clearSelection } from "../../utility/chonkyActionCalls";
 
 export default function FileBrowser() {
   const {
@@ -41,7 +43,7 @@ export default function FileBrowser() {
     setCurrentProjectId,
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
-
+  const chonkyRef = useRef(null);
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
@@ -95,15 +97,6 @@ export default function FileBrowser() {
       ...customActions
     ]);
 
-  // const fileActions = useMemo(
-  //   () => [
-  //     ChonkyActions.EnableListView,
-  //     ChonkyActions.EnableGridView,
-  //     ...customActions
-  //   ],
-  //   []
-  // );
-
   // Fetch the folder data and set the file and folder chain states
   useEffect(() => {
     const transformedData = getFileStructure(true); // Get the file structure from context
@@ -124,8 +117,24 @@ export default function FileBrowser() {
     setFiles(filesTemp);
   }, [currentFolder, getFileStructure]);
 
+  useEffect(() => {
+    const handleClick = (event) => {
+      if (chonkyRef.current && chonkyRef.current.contains(event.target)) {
+        const isFileClicked = event.target.closest('[data-chonky-file-id]');
+        if (!isFileClicked) {
+          clearSelection();
+        }
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, []);
+
   return (
-    <div style={{ width: "100%", height: "500px" }}>
+    <div ref={chonkyRef} style={{ width: "100%", height: "500px" }}>
       {fileUploadLoading ? (
         <div
           className="loader-container"

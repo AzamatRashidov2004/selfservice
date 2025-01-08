@@ -96,7 +96,7 @@ export const getCustomActions = (selectedFiles) => {
   if (!isEmpty){ // Duplicate to put clear folder to end
     customActions.push({
       ...ChonkyActions.ClearSelection, 
-      ...{button: {...ChonkyActions.ClearSelection.button, group: null, toolbar: true, name: customActionNames.clearSelection}}
+      ...{button: {...ChonkyActions.ClearSelection.button, group: null, toolbar: true, contextMenu: false, name: customActionNames.clearSelection}}
     });
   }
   
