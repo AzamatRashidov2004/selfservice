@@ -15,6 +15,7 @@ import "react-resizable/css/styles.css";
 import { useFiles } from "../../context/fileContext.tsx";
 import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
 import CodeEditor from "../../components/Code-Editor/CodeEditor.tsx";
+import ProjectAnalytics from "../../components/Project-Analytics/Project-Analytics.tsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -35,6 +36,7 @@ const Dashboard: React.FC = () => {
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
   const accordionRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isDetailsOpen, setDetailsOpen] = useState<boolean>(false);
 
   const { authenticated, keycloak } = useAuth();
   const navigate = useNavigate();
@@ -177,6 +179,7 @@ const Dashboard: React.FC = () => {
   return (
     <section className="dashboard-section">
       <main className="container-fluid main-container">
+        <button onClick={() => { setDetailsOpen(true) }}>touch me</button>
         <div id="pdf-container" className="hidden">
           <PdfViewer
             pdfUrl={pdfUrl}
@@ -224,7 +227,9 @@ const Dashboard: React.FC = () => {
                 onResize={handleResize}
                 style={{ minWidth: "500px" }}
               >
-                <FileBrowser />
+                {!isDetailsOpen
+                  ? <FileBrowser />
+                  : <ProjectAnalytics setOpenDetails={() => { setDetailsOpen(false) }} projectName="Nku Test" projectDescription="Short description" projectId="akmxzo18xcnjaw" />}
               </ResizableBox>
             </div>
           </div>
