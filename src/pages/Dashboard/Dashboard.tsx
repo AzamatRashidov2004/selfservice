@@ -179,7 +179,7 @@ const Dashboard: React.FC = () => {
   return (
     <section className="dashboard-section">
       <main className="container-fluid main-container">
-        <button onClick={() => { setDetailsOpen(true) }}>touch me</button>
+        <button onClick={() => { setDetailsOpen(true) }}>Press Me</button>
         <div id="pdf-container" className="hidden">
           <PdfViewer
             pdfUrl={pdfUrl}
