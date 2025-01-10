@@ -55,36 +55,6 @@ body {
   min-height: unset !important;
 }
 
-.new-button-options {
-  position: absolute;
-  padding-top: 100px;
-  bottom: -120px;
-  left: 0;
-  z-index: 0;
-  border-radius: 5px;
-  display: none;
-  width: 100%;
-
-  &>button {
-    width: 100%;
-    border-radius: 0;
-  }
-}
-
-@media (max-width: 800px) {
-
-  .new-button-options {
-    bottom: -170px;
-  }
-}
-
-@media (max-width: 700px) {
-
-  .new-button-options {
-    bottom: -190px;
-  }
-}
-
 .file-browser-container {
   flex-shrink: 0;
   flex-grow: 0;
