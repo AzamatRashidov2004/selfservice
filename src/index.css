@@ -11,6 +11,10 @@ body {
   min-height: calc(100vh - 90px);
 }
 
+p {
+  margin-bottom: 0;
+}
+
 .hidden,
 .locked-hidden {
   display: none !important;
