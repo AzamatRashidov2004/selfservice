@@ -41,7 +41,8 @@ async function handleAction(
   setCodeLanguage,
   codeValue,
   setCurrentProjectId,
-  setFileActions
+  setFileActions,
+  setDetailsOpen
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -172,23 +173,16 @@ async function handleAction(
   if (data.id === "details") {
     const currentProjectId = parseInt(data.state.selectedFiles[0].id)
     const project = getProjectForNode(parseInt(currentProjectId));
-    if (project) {
-      createNotificationEvent(
-        "Project Info",
-        `**Project Name:** ${project.text}
-        \n**Project ID:** ${project.kronosProjectId}
-        \n**Project Description**: ${project.description}`,
-        "",
-        8000
-      );
-    } else {
+    if (!project) {
       createNotificationEvent(
         "Select Project",
         `Please first select a project and then press the details button`,
         "",
         3000
       );
+      return;
     }
+    setDetailsOpen(true);
   }
 
   // Handle Create File custom action

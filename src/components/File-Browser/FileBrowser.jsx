@@ -1,4 +1,5 @@
 import { setChonkyDefaults } from "chonky";
+import PropTypes from 'prop-types';
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
 import Loader from "../Loader/Loader";
@@ -16,7 +17,8 @@ import { useFiles } from "../../context/fileContext"; // Import the useFiles hoo
 import { useAuth } from "../../context/authContext";
 import { clearSelection } from "../../utility/chonkyActionCalls";
 
-export default function FileBrowser() {
+
+export default function FileBrowser({ setDetailsOpen }) {
   const {
     getFileStructure,
     dragAndDropFile,
@@ -44,6 +46,7 @@ export default function FileBrowser() {
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
   const chonkyRef = useRef(null);
+  console.log("got the funx xxxxx", setDetailsOpen)
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
@@ -73,7 +76,8 @@ export default function FileBrowser() {
         setCodeLanguage,
         codeValue,
         setCurrentProjectId,
-        setFileActions
+        setFileActions,
+        setDetailsOpen
       );
     },
     [getFileStructure, dragAndDropFile]
@@ -156,3 +160,7 @@ export default function FileBrowser() {
     </div>
   );
 }
+
+FileBrowser.propTypes = {
+  setDetailsOpen: PropTypes.func.isRequired,
+};

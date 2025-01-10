@@ -179,7 +179,6 @@ const Dashboard: React.FC = () => {
   return (
     <section className="dashboard-section">
       <main className="container-fluid main-container">
-        <button onClick={() => { setDetailsOpen(true) }}>Press Me</button>
         <div id="pdf-container" className="hidden">
           <PdfViewer
             pdfUrl={pdfUrl}
@@ -228,7 +227,8 @@ const Dashboard: React.FC = () => {
                 style={{ minWidth: "500px" }}
               >
                 {!isDetailsOpen
-                  ? <FileBrowser />
+                  /* @ts-expect-error: Ignoring type error as the File Browser is a JSX file */
+                  ? <FileBrowser setDetailsOpen={setDetailsOpen} />
                   : <ProjectAnalytics setOpenDetails={() => { setDetailsOpen(false) }} projectName="Nku Test" projectDescription="Short description" projectId="akmxzo18xcnjaw" />}
               </ResizableBox>
             </div>
