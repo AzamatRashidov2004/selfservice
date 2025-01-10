@@ -115,9 +115,6 @@ const Dashboard: React.FC = () => {
     }
   });
 
-  //const [width, setWidth] = useState(window.innerWidth * 0.8);
-  //const [position, setPosition] = useState(0);
-
   const [fileBrowserWidth, setFileBrowserWidth] = useState<number>(
     window.innerWidth * 0.7 // Start with 70% of the window width
   );
