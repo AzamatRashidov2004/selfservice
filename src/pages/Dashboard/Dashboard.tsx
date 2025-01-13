@@ -184,11 +184,15 @@ const Dashboard: React.FC = () => {
 
   const handleMouseEnter = () => {
     const body = document.body;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    body.style.paddingRight = `${scrollbarWidth}px !important`; // Add padding to offset scrollbar disappearance
     body.classList.add("unscrollable");
   };
 
   const handleMouseLeave = () => {
     const body = document.body;
+    body.style.paddingRight = ""; // Remove padding
     body.classList.remove("unscrollable");
   };
 
