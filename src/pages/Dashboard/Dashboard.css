@@ -132,6 +132,25 @@ body {
   visibility: hidden !important;
 }
 
+.load-button {
+  background-color: white !important;
+  padding: 10px;
+  position: absolute;
+  width: 100%;
+  bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px !important;
+  border: 0px;
+  color: #999797;
+  font-size: large;
+}
+
+.load-button:hover {
+  text-decoration: underline;
+}
+
 .unscrollable {
   overflow: hidden !important;
 }
