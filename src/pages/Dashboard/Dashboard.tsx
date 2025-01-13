@@ -25,6 +25,7 @@ const Dashboard: React.FC = () => {
     setPdfUrl,
     setPdfVisible,
     pdfUrl,
+    incrementVisibleCount,
     codeLanguage,
     codeVisible,
     setCodeVisible,
@@ -132,7 +133,13 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // PDF viewer handler
+
+  const loadButtonRef = useRef<HTMLButtonElement>(null);
+  const handleLoadClick = () => {
+    loadButtonRef?.current?.classList.add("hidden");
+    incrementVisibleCount();
+  };
+
   useEffect(() => {
     const targetPdf = document.getElementById("pdf-container");
     const targetRest = document.getElementById("dashboard-part");
@@ -166,11 +173,15 @@ const Dashboard: React.FC = () => {
 
   const handleMouseEnter = () => {
     const body = document.body;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    body.style.paddingRight = `${scrollbarWidth}px !important`; // Add padding to offset scrollbar disappearance
     body.classList.add("unscrollable");
   };
 
   const handleMouseLeave = () => {
     const body = document.body;
+    body.style.paddingRight = ""; // Remove padding
     body.classList.remove("unscrollable");
   };
 
@@ -225,6 +236,14 @@ const Dashboard: React.FC = () => {
                 style={{ minWidth: "500px" }}
               >
                 <FileBrowser />
+                <button
+                  className="load-button"
+                  onClick={handleLoadClick}
+                  ref={loadButtonRef}
+                  id="load-more-button"
+                >
+                  Load more...
+                </button>
               </ResizableBox>
             </div>
           </div>
