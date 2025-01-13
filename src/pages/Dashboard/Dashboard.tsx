@@ -153,21 +153,6 @@ const Dashboard: React.FC = () => {
     loadButtonRef?.current?.classList.add("hidden");
     incrementVisibleCount();
   };
-  useEffect(() => {
-    setTimeout(() => {
-      if (
-        //currentFolder === "0" ||
-        totalFilesCount == 0 ||
-        visibleCount >= totalFilesCount
-      ) {
-        // Access the classList of the actual DOM element
-        loadButtonRef?.current?.classList.add("hidden");
-      } else {
-        console.log(loadButtonRef.current);
-        loadButtonRef?.current?.classList.remove("hidden");
-      }
-    }, 0);
-  }, [currentFolder, visibleCount, totalFilesCount]);
 
   useEffect(() => {
     const targetPdf = document.getElementById("pdf-container");

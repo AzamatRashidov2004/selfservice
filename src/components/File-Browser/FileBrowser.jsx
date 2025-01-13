@@ -151,10 +151,10 @@ export default function FileBrowser() {
     if (scrollableEl) {
       const handleScroll = () => {
         const { scrollTop, scrollHeight, clientHeight } = scrollableEl;
-        if (scrollTop + clientHeight >= scrollHeight - 10) {
+        if (scrollTop + clientHeight >= scrollHeight - 20) {
+
           if (visibleCount < totalFilesCount) {
             if (loadMoreButton) loadMoreButton.classList.remove("hidden");
-            if (fileListWrapper) fileListWrapper.classList.add("buttom-margin");
           }
         } else {
           if (loadMoreButton) loadMoreButton.classList.add("hidden");
@@ -196,7 +196,7 @@ export default function FileBrowser() {
         onFileAction={handleActionWrapper}
         disableDefaultFileActions={true}
         fileListAdditionalProps={{
-          style: { marginBottom: "20px !important" }, // Add extra space at bottom
+          style: { marginBottom: "28px !important" }, // Add extra space at bottom
         }}
       />
     </div>
