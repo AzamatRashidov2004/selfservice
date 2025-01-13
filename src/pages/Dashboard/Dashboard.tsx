@@ -46,6 +46,10 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  const handleNewProjectClick = () => {
+    navigate("/new-project");
+  };
+
   const fetchData = async (token: string | undefined) => {
     setLoading(true);
     await fetchProjectsData((allProjects: fetchProjectsDataReturn | null) => {
@@ -87,7 +91,6 @@ const Dashboard: React.FC = () => {
       root.style.setProperty("--even-analytical-project-bg", "#FFFFFF");
       root.style.setProperty("--odd-analytical-project-bg", "#F2F2F2");
     }
-    console.log("PROJECTS UPDATED", projects);
     setProjectsContext(projects);
   }, [projects]);
 
@@ -115,11 +118,10 @@ const Dashboard: React.FC = () => {
   //const [position, setPosition] = useState(0);
 
   const [fileBrowserWidth, setFileBrowserWidth] = useState<number>(
-    window.innerWidth * 0.6 // Start with 60% of the window width
+    window.innerWidth * 0.7 // Start with 70% of the window width
   );
-  const minFileTreeWidth = window.innerWidth * 0.2; // Minimum width of the file-tree-container
+  const minFileTreeWidth = window.innerWidth * 0.1; // Minimum width of the file-tree-container
   const parentWidth = window.innerWidth;
-  console.log("parent width: ", parentWidth);
 
   const handleResize = (
     event: React.SyntheticEvent,
@@ -127,23 +129,10 @@ const Dashboard: React.FC = () => {
   ) => {
     console.log(event);
     if (data.size.width <= window.innerWidth * 0.6) {
-      console.log(
-        "data size widht and window inner width 80",
-        data.size.width,
-        window.innerWidth * 0.8
-      );
       setFileBrowserWidth(data.size.width);
     }
   };
 
-  /*const handleResize = (
-    event: React.SyntheticEvent,
-    data: ResizeCallbackData
-  ) => {
-    const deltaWidth = width - data.size.width;
-    setWidth(data.size.width);
-    setPosition(position + deltaWidth);
-  };*/
 
   const loadButtonRef = useRef<HTMLButtonElement>(null);
   const handleLoadClick = () => {
@@ -216,10 +205,6 @@ const Dashboard: React.FC = () => {
           />
         </div>
         <div id="dashboard-part">
-          <div className="bg-primary p-4 rounded mb-4 text-center">
-            <h1 className="text-light">Available Projects</h1>
-            <p className="text-light">Choose a project to edit or delete</p>
-          </div>
           <br />
           <div className="loader-container">
             <Loader />
@@ -229,7 +214,12 @@ const Dashboard: React.FC = () => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="file-tree-container">
+            <div className="file-tree-container" id="file-tree-root">
+              <div className="file-tree-new-button">
+                <button onClick={handleNewProjectClick} className="btn btn-outline-success">
+                  New Project
+                </button>
+              </div>
               <div className="scrollable-content">
                 <FileTree />
               </div>

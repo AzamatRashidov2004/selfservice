@@ -34,11 +34,35 @@
   padding-inline-start: 12px !important;
 }
 
+.file-tree-new-button {
+  height: 84px;
+  display: flex;
+  justify-content: start;
+  margin: 0 10px 0 10px;
+  align-items: center;
+  border-bottom: solid 1px #e0e0e0;
+
+  &>button {
+    font-size: 18px !important;
+    margin-left: 8px;
+    position: relative;
+    width: 50%;
+    height: 50%;
+    z-index: 2;
+    border-radius: 10px;
+    max-width: 150px;
+
+    &:hover>.new-button-options {
+      display: block;
+      width: 100%;
+    }
+  }
+}
+
 .file-tree-border-wrapper {
   padding-top: 1px;
   margin-left: 10px;
   margin-right: 10px;
-  border-top: solid 1px #e0e0e0;
 }
 
 .depth-0 {

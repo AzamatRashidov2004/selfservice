@@ -12,13 +12,8 @@
 .dashboard-section {
   /* width: 100vw; */
   padding: 0 !important;
-  margin-top: 90px;
+  margin-top: 50px;
 }
-
-/* body{
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-} */
 
 .react-resizable {
   min-height: 100% !important;
@@ -32,7 +27,7 @@
 .file-browser-wrapper {
   display: flex;
   width: 100%;
-  height: 400px !important;
+  height: 500px !important;
   /* Adjust based on your header height */
   overflow: hidden;
 }
@@ -49,10 +44,45 @@
   min-width: 20%;
   /* Minimum width */
   border: 1px #e0e0e0 solid;
-  padding-top: 84px;
-  overflow-y: auto;
+  overflow-y: hidden;
   /* Enable vertical scrolling */
   overflow-x: hidden !important;
+}
+
+#root,
+body {
+  height: unset !important;
+  min-height: unset !important;
+}
+
+.new-button-options {
+  position: absolute;
+  padding-top: 100px;
+  bottom: -120px;
+  left: 0;
+  z-index: 0;
+  border-radius: 5px;
+  display: none;
+  width: 100%;
+
+  &>button {
+    width: 100%;
+    border-radius: 0;
+  }
+}
+
+@media (max-width: 800px) {
+
+  .new-button-options {
+    bottom: -170px;
+  }
+}
+
+@media (max-width: 700px) {
+
+  .new-button-options {
+    bottom: -190px;
+  }
 }
 
 .file-browser-container {
@@ -62,7 +92,7 @@
 }
 
 .scrollable-content {
-  height: 100%;
+  max-height: calc(100% - 84px);
   /* Limit the height for scrolling */
   overflow-y: auto;
   /* Enable vertical scrolling */

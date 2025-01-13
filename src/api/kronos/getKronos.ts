@@ -30,7 +30,7 @@ export async function getHTMLFromProject(
 
     const blob = await response.blob();
     return await blob.text();
-  } catch {
+  } catch (e: unknown) {
     return "handleError({ error: e, origin: getHTMLFromProject })";
   }
 }
@@ -57,7 +57,7 @@ export async function getFSMFromProject(
 
     const blob = await response.blob();
     return await blob.text();
-  } catch {
+  } catch (e: unknown) {
     return "handleError({ error: e, origin: getFSMFromProject })";
   }
 }
@@ -67,7 +67,7 @@ export async function getAllPdfsFromProject(
   token: string
 ): Promise<kronosKnowledgeBaseType[] | null> {
   try {
-    const _url = `${apiUrl}/projects/${projectId}/knowledge_base/?page_no=1&per_page=0`;
+    const _url = `${apiUrl}/projects/${projectId}/knowledge_base/`;
     const response: Response = await fetch(_url, {
       method: "GET",
       headers: {
@@ -279,7 +279,7 @@ export async function getKbId(
   token: string
 ): Promise<string | null> {
   try {
-    const _url = `${apiUrl}/projects/${projectId}/knowledge_base/?page_no=1&per_page=0`;
+    const _url = `${apiUrl}/projects/${projectId}/knowledge_base/?page_no=1&per_page=10`;
     const response: Response = await fetch(_url, {
       method: "GET",
       headers: {

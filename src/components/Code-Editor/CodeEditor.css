@@ -13,8 +13,11 @@
   overflow: hidden !important;
   margin-top: 0px !important;
   position: fixed !important;
+  left: 50%;
+  transform: translateX(-50%);
   border-radius: 20px !important;
 }
+
 .code-editor-section section {
   padding: 0 !important;
   text-align: start;
@@ -26,7 +29,8 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent grey */
+  background-color: rgba(0, 0, 0, 0.7);
+  /* Semi-transparent grey */
   z-index: 9997;
   border-radius: 0px !important;
 }
@@ -34,10 +38,12 @@
 /* Highlighted div */
 .highlighted-div-code {
   position: relative;
-  z-index: 9999; /* A very high z-index to make sure it's above everything */
+  z-index: 9999;
+  /* A very high z-index to make sure it's above everything */
   padding: 20px;
   width: 300px;
-  margin: 100px auto; /* Centered horizontally */
+  margin: 100px auto;
+  /* Centered horizontally */
 }
 
 .buttons-div {
@@ -66,6 +72,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50vh; /* Adjust based on the size you want */
+  height: 50vh;
+  /* Adjust based on the size you want */
   position: relative !important;
 }

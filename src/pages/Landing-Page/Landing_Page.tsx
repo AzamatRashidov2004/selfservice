@@ -66,7 +66,7 @@ const HeroSection: React.FC = () => {
           className="btn btn-primary btn-lg btn-call-to-action"
           onClick={handleSubmit}
         >
-          Create your bot
+          Login
         </a>
       </div>
     </section>

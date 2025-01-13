@@ -19,7 +19,7 @@ const Navbar: React.FC = () => {
         <div className="container-fluid navbar-wrapper">
           {/* Logo Text */}
           <Link className="navbar-brand" to="/">
-            CVUT CIIRC
+            Maestro Dashboard
           </Link>
 
           {/* Right-aligned buttons */}

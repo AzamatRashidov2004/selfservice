@@ -14,19 +14,18 @@ import {
 } from "../../../api/kronos/postKronos";
 import { deleteBulkPdf } from "../../../api/kronos/deleteKronos";
 import {
-  getKbId,
   getPdfFile,
   getPdfFileUrl,
-  getHtmlFile,
   getHTMLFromProject,
   getFSMFromProject,
 } from "../../../api/kronos/getKronos";
-import { KeyboardReturnRounded } from "@mui/icons-material";
 import {
   addItemToCache,
   isItemInCache,
   getItemFromCache,
 } from "../../../utility/Session_Storage";
+
+import { getCustomActions } from "./customActions";
 
 async function handleAction(
   data,
@@ -41,7 +40,8 @@ async function handleAction(
   setCodeValue,
   setCodeLanguage,
   codeValue,
-  setCurrentProjectId
+  setCurrentProjectId,
+  setFileActions
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log("ACTION", data);
@@ -64,6 +64,18 @@ async function handleAction(
     if (file?.isDir) {
       setCurrentFolder(file.id);
     }
+  }
+
+  if (data.id === "change_selection") {
+    let firstNodeInfo = null;
+    if (data.state.selectedFiles.length > 0) {
+      firstNodeInfo = getNodeInfo(parseInt(data.state.selectedFiles[0].id))
+    }
+    setFileActions([
+      ChonkyActions.EnableListView,
+      ChonkyActions.EnableGridView,
+      ...getCustomActions(data.state.selectedFiles, firstNodeInfo),
+    ])
   }
 
   if (data.id === ChonkyActions.EndDragNDrop.id) {
@@ -103,8 +115,6 @@ async function handleAction(
               });
             });
           } else {
-            // If file
-            console.log(currentNode);
             payload.push({
               _id: currentNode.kronosKB_id,
               project_id: currentNode.kronosProjectId,
@@ -127,7 +137,6 @@ async function handleAction(
         );
       }
       if (result) {
-        console.log(selectedFiles);
         fileContext.dragAndDropFile(destination.id, selectedFiles);
       } else {
         throw new Error("Drag and drop failed");
@@ -144,14 +153,25 @@ async function handleAction(
 
   // Handle Create File custom action
   if (data.id === "create_folder") {
+    let targetID = parseInt(currentFolder);
+
+    // If create folder is called on a folder, it should create the new folder inside it
+    if (data.state.selectedFiles.length === 1 && data.state.selectedFiles[0].isDir){ 
+      const selectedFolder = data.state.selectedFiles[0]
+      const selectedFolderID = parseInt(selectedFolder.id)
+      const targetNode = getNodeInfo(selectedFolderID)
+      targetID = targetNode.id;
+      setCurrentFolder(targetID.toString())
+    }
+
     createFolderModalEvent((folderName) => {
-      fileContext.addFolder(parseInt(currentFolder), folderName);
+      fileContext.addFolder(targetID, folderName);
     });
   }
 
   if (data.id === "details") {
-    const project = getProjectForNode(parseInt(currentFolder));
-    console.log(project);
+    const currentProjectId = parseInt(data.state.selectedFiles[0].id)
+    const project = getProjectForNode(parseInt(currentProjectId));
     if (project) {
       createNotificationEvent(
         "Project Info",
@@ -174,8 +194,19 @@ async function handleAction(
   // Handle Create File custom action
   if (data.id === "upload") {
     if (!keycloak || !keycloak.token) return;
-    let path = getPathFromProject(parseInt(currentFolder));
-    const project = getProjectForNode(parseInt(currentFolder));
+    let targetID = parseInt(currentFolder);
+
+    // If upload is called on a folder, it should upload files inside it
+    if (data.state.selectedFiles.length === 1 && data.state.selectedFiles[0].isDir){ 
+      const selectedFolder = data.state.selectedFiles[0]
+      const selectedFolderID = parseInt(selectedFolder.id)
+      const targetNode = getNodeInfo(selectedFolderID)
+      targetID = targetNode.id;
+      setCurrentFolder(targetID.toString())
+    }
+
+    let path = getPathFromProject(parseInt(targetID));
+    const project = getProjectForNode(parseInt(targetID));
     if (path.lengt > 0) path = path.slice(0, -1);
     createUploadFileModalEvent(async (files) => {
       try {
@@ -186,10 +217,9 @@ async function handleAction(
           keycloak.token,
           setFileUploadLoading
         );
-        console.log("RESULT", result);
         if (result) {
           fileContext.addFiles(
-            parseInt(currentFolder),
+            parseInt(targetID),
             files,
             project.kronosProjectId,
             result
@@ -240,7 +270,6 @@ async function handleAction(
     if (nodeInfo.text.toLowerCase().endsWith(".html")) {
       try {
         const selectedFileCurrent = data.state.selectedFiles[0];
-        console.log("selectedFileCurrent: ", selectedFileCurrent);
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         if (project_id) {
@@ -369,14 +398,12 @@ async function handleAction(
 
     // Since we know there's at least one selected file, grab the first one:
     const selectedFile = selectedFiles[0];
-    console.log("selected file is: ", selectedFile);
 
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
 
     if (nodeInfo.text.toLowerCase().endsWith(".html")) {
       try {
         const selectedFileCurrent = data.state.selectedFiles[0];
-        console.log("selectedFileCurrent: ", selectedFileCurrent);
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
         if (project_id) {

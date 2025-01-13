@@ -2,13 +2,12 @@ import { setChonkyDefaults } from "chonky";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
 import Loader from "../Loader/Loader";
+import "./FileBrowser.css"
 import {
   useEffect,
   useState,
   useCallback,
-  useMemo,
   useRef,
-  useContext,
 } from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
@@ -16,6 +15,8 @@ import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
 import "./FileBrowser.css";
+import { clearSelection } from "../../utility/chonkyActionCalls";
+
 
 export default function FileBrowser() {
   const {
@@ -52,9 +53,11 @@ export default function FileBrowser() {
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
   const [files, setFiles] = useState([]);
+  const chonkyRef = useRef(null);
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
+      console.log(data.state.selectedFiles);
       handleAction(
         data,
         setCurrentFolder,
@@ -79,7 +82,8 @@ export default function FileBrowser() {
         setCodeValue,
         setCodeLanguage,
         codeValue,
-        setCurrentProjectId
+        setCurrentProjectId,
+        setFileActions
       );
     },
     [getFileStructure, dragAndDropFile]
@@ -88,18 +92,13 @@ export default function FileBrowser() {
   // Set the Chonky icon set
   setChonkyDefaults({ iconComponent: ChonkyIconFA });
   const [folderChain, setFolderChain] = useState(null);
-
-  const fileActions = useMemo(
-    () => [
+  const [fileActions, setFileActions] = useState(
+    [
       ChonkyActions.EnableListView,
       ChonkyActions.EnableGridView,
-      //ChonkyActions.CreateFolder, // Make sure this is included
-      ...customActions,
-      ChonkyActions.DownloadFiles,
-      ChonkyActions.DeleteFiles,
-    ],
-    []
-  );
+      ChonkyActions.OpenFileContextMenu,
+      ...customActions
+    ]);
 
   // Fetch the folder data and set the file and folder chain states
   useEffect(() => {
@@ -169,8 +168,26 @@ export default function FileBrowser() {
       };
     }
   }, [visibleCount, files]);
+
+  useEffect(() => {
+    const handleClick = (event) => {
+      if (chonkyRef.current && chonkyRef.current.contains(event.target)) {
+        const isFileClicked = event.target.closest('[data-chonky-file-id]');
+        if (!isFileClicked) {
+          clearSelection();
+        }
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, []);
+
+
   return (
-    <div style={{ width: "100%", height: "400px" }}>
+    <div ref={chonkyRef} style={{ width: "100%", height: "500px" }}>
       {fileUploadLoading ? (
         <div
           className="loader-container"

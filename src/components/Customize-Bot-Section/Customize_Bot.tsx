@@ -42,11 +42,9 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
 
     async function dispatchUntilMounted() {
       let attempts = 0;
-      console.log(id, settings);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       while (!(window as any).isBotMounted && attempts < maxAttempts) {
         attempts++;
-        console.log(`Attempt ${attempts}: Bot is not mounted, dispatching initFsBot event...`);
         document.dispatchEvent(initFsBotEvent);
         await sleep(time); // Wait for 500ms before the next check
       }
