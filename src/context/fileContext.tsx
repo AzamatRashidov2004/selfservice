@@ -33,11 +33,6 @@ interface TreeNode {
 }
 
 interface FilesContextType {
-  visibleCount: number;
-  setVisibleCount: React.Dispatch<React.SetStateAction<number>>;
-  totalFilesCount: number;
-  setTotalFilesCount: React.Dispatch<React.SetStateAction<number>>;
-  incrementVisibleCount: () => void;
   codeVisible: boolean;
   setCodeVisible: React.Dispatch<React.SetStateAction<boolean>>;
   codeValue: string;
@@ -456,11 +451,6 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   const droppableTypes = ["folder", "project", "program"];
   const draggableTypes = ["text", "xlsx", "pdf", "csv", "program", "folder"];
   const [fileUploadLoading, setFileUploadLoading] = useState<boolean>(false);
-  const [visibleCount, setVisibleCount] = useState(20);
-  const incrementVisibleCount = () => {
-    setVisibleCount((prev) => prev + 20);
-  };
-  const [totalFilesCount, setTotalFilesCount] = useState(0);
 
   const [codeVisible, setCodeVisible] = useState<boolean>(false);
   const [codeValue, setCodeValue] = useState<string>("");
@@ -489,11 +479,6 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     pdfVisible,
     setPdfVisible,
     setPdfUrl,
-    visibleCount,
-    setVisibleCount,
-    incrementVisibleCount,
-    totalFilesCount,
-    setTotalFilesCount,
     codeValue,
     setCodeValue,
     codeVisible,
