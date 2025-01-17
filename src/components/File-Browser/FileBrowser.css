@@ -19,6 +19,7 @@
 
 .chonky-fileListWrapper {
   flex-basis: 100%;
+  height: 393px !important;
 }
 
 .chonky-navbarWrapper {
