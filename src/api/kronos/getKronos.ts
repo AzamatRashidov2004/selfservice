@@ -67,7 +67,7 @@ export async function getAllPdfsFromProject(
   token: string
 ): Promise<kronosKnowledgeBaseType[] | null> {
   try {
-    const _url = `${apiUrl}/projects/${projectId}/knowledge_base/`;
+    const _url = `${apiUrl}/projects/${projectId}/knowledge_base/?per_page=0`;
     const response: Response = await fetch(_url, {
       method: "GET",
       headers: {
