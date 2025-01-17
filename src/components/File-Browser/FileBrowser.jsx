@@ -140,7 +140,7 @@ export default function FileBrowser() {
             borderRadius: "10px",
           }}
         >
-          <Loader loader="white" />
+          <Loader loader="white" loaderText="Uploading File"/>
         </div>
       ) : (
         <></>
