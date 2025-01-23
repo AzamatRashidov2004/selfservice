@@ -5,7 +5,8 @@ import { Session } from "../../../utility/types";
 import { sessionData } from "./mockData";
 
 // Define a helper function to get days in a month
-function getDaysInMonth(month: number, year: number) {
+// todo not used
+/*function getDaysInMonth(month: number, year: number) {
   const date = new Date(year, month, 0);
   const monthName = date.toLocaleDateString("en-US", {
     month: "short",
@@ -18,7 +19,7 @@ function getDaysInMonth(month: number, year: number) {
     i += 1;
   }
   return days;
-}
+}*/
 
 // converts ugly timestamp to pretty format
 function formatTimestamp(timestamp: string): string {

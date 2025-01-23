@@ -1,65 +1,14 @@
-import React, { useState } from "react";
+import React from "react";
 import StatCard from "./sub-components/StatCard";
 import "./Project-Analytics.css";
 import CustomDataGrid from "./sub-components/DataGrid";
+import { DropDownButton } from "./sub-components/DropDownButton";
 
 type ProjectDetails = {
   projectName: string;
   projectId: string;
   projectDescription: string;
   setOpenDetails: () => void;
-};
-
-const DropDownButton = () => {
-  const [selectedOption, setSelectedOption] = useState<string>("Last Day");
-
-  const handleSelect = (option: string) => {
-    setSelectedOption(option);
-    console.log(`Selected: ${option}`); // Add your logic here
-  };
-
-  return (
-    <div className="dropdown">
-      {/* Dropdown button */}
-      <button
-        className="btn btn-secondary dropdown-toggle"
-        type="button"
-        id="dropdownMenuButton"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-      >
-        {selectedOption}
-      </button>
-
-      {/* Dropdown menu */}
-      <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
-        <li>
-          <button
-            className="dropdown-item"
-            onClick={() => handleSelect("Last Day")}
-          >
-            Last Day
-          </button>
-        </li>
-        <li>
-          <button
-            className="dropdown-item"
-            onClick={() => handleSelect("Last Week")}
-          >
-            Last Week
-          </button>
-        </li>
-        <li>
-          <button
-            className="dropdown-item"
-            onClick={() => handleSelect("Last Month")}
-          >
-            Last Month
-          </button>
-        </li>
-      </ul>
-    </div>
-  );
 };
 
 const ProjectAnalytics: React.FC<ProjectDetails> = ({
