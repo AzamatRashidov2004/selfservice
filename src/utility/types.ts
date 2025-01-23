@@ -186,3 +186,14 @@ export type fetchProjectsDataReturn = {
   analytical: ProjectType[];
   project: projectFetchReturn[];
 };
+
+// for DataGrid
+export type Session = {
+  session_id: string;
+  start_timestamp: string;
+  query_count: number;
+  feedback_count: number;
+  positive_feedback: number;
+  negative_feedback: number;
+  feedback_percentage: number;
+};
