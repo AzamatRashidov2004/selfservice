@@ -1,3 +1,15 @@
+.MuiDataGrid-cell[data-field="session_id"]{
+  text-decoration: underline;
+  color: rgb(39, 154, 255);
+}
+
+.session-grid-back{
+  margin-bottom: 20px;
+  display: flex;
+  width: 100%;
+  justify-content: end;
+}
+
 .analytics-dashboard-wrapper {
   border: 1px solid #e0e0e0;
   height: 500px;

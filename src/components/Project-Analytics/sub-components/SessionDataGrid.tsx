@@ -132,6 +132,9 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
   const rows: GridRowsProp = createRows(sessionData);
   return (
     <>
+    <div className="session-grid-back">
+        <button className="btn btn-outline-primary">All Sessions</button>
+    </div>
     {
         sessionData ? 
         <DataGrid
