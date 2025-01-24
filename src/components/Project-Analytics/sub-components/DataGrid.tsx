@@ -7,14 +7,14 @@ import { ProjectSessionResponse } from "../../../api/maestro/getMaestro";
 function formatTimestamp(timestamp: string): string {
   const date = new Date(timestamp);
 
-  const month = date.toLocaleString("default", { month: "short" }); // Short month name, e.g., "Jan"
-  const day = date.getDate(); // Day of the month
+  const day = date.getDate().toString().padStart(2, "0"); // Day of the month with leading zero
+  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month (1-based) with leading zero
   const year = date.getFullYear(); // Year
 
-  const hours = date.getHours().toString().padStart(2, "0"); // 24-hour format
+  const hours = date.getHours().toString().padStart(2, "0"); // 24-hour format with leading zero
   const minutes = date.getMinutes().toString().padStart(2, "0"); // Add leading zero to minutes
 
-  return `${month} ${day},${year},${hours}:${minutes}`;
+  return `${day}.${month}.${year}, ${hours}:${minutes}`;
 }
 
 // converts Sessions type to DataGrid Compatible Type
@@ -97,7 +97,7 @@ type DataGridParams = {
   sessionData: ProjectSessionResponse;
 };
 
-const SessionsDataGrid: React.FC<DataGridParams> = ({ sessionData })  =>{
+const SessionsDataGrid: React.FC<DataGridParams> = ({ sessionData }) => {
   const rows: GridRowsProp = createRows(sessionData);
   return (
     <DataGrid
@@ -141,6 +141,6 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ sessionData })  =>{
       }}
     />
   );
-}
+};
 
-export default SessionsDataGrid
+export default SessionsDataGrid;
