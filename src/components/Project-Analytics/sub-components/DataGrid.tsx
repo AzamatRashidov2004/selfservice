@@ -1,25 +1,7 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { Session } from "../../../utility/types";
-import { sessionData } from "./mockData";
-
-// Define a helper function to get days in a month
-// todo not used
-/*function getDaysInMonth(month: number, year: number) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString("en-US", {
-    month: "short",
-  });
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
-  }
-  return days;
-}*/
+import { ProjectSessionResponse } from "../../../api/maestro/getMaestro";
 
 // converts ugly timestamp to pretty format
 function formatTimestamp(timestamp: string): string {
@@ -36,8 +18,8 @@ function formatTimestamp(timestamp: string): string {
 }
 
 // converts Sessions type to DataGrid Compatible Type
-function createRows(sessions: Session[]) {
-  return sessions.map((session, index) => {
+function createRows(sessionData: ProjectSessionResponse) {
+  return sessionData.sessions.map((session, index) => {
     return {
       id: index + 1,
       session_id: session.session_id,
@@ -104,17 +86,19 @@ const columns: GridColDef[] = [
   },
   {
     field: "conversions",
-    headerName: "Daily Conversions",
+    headerName: "Feedback Ratio",
     flex: 1,
     minWidth: 150,
     renderCell: renderSparklineCell,
   },
 ];
 
-// creates rows for the DataGrid
-export const rows: GridRowsProp = createRows(sessionData);
+type DataGridParams = {
+  sessionData: ProjectSessionResponse;
+};
 
-export default function CustomDataGrid() {
+const SessionsDataGrid: React.FC<DataGridParams> = ({ sessionData })  =>{
+  const rows: GridRowsProp = createRows(sessionData);
   return (
     <DataGrid
       autoHeight
@@ -158,3 +142,5 @@ export default function CustomDataGrid() {
     />
   );
 }
+
+export default SessionsDataGrid

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import StatCard from "./sub-components/StatCard";
 import "./Project-Analytics.css";
-import CustomDataGrid from "./sub-components/DataGrid";
-import { DropDownButton } from "./sub-components/DropDownButton";
+import SessionsDataGrid from "./sub-components/DataGrid";
 
 import StatTotalCard from "./sub-components/StatTotalCard";
 
@@ -83,9 +82,12 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
             />
           </div>
         </div>
-        <div className="analytics-dashboard-row">
-          <CustomDataGrid />
-        </div>
+        {
+          sessionInfo ? 
+          <div className="analytics-dashboard-row">
+          <SessionsDataGrid sessionData={sessionInfo}/>
+        </div> : <></>
+        }
       </div>
     </div>
   );
