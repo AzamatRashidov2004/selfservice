@@ -24,19 +24,25 @@ export default function StatCard({ projectStats }: StatCardProps) {
   const values = [
     {
       label: "positive",
-      value:
-        (projectStats?.stats.total_positive_feedback /
-          (projectStats?.stats.total_positive_feedback +
-            projectStats?.stats.total_negative_feedback)) *
-        100,
+      value: parseFloat(
+        (
+          (projectStats?.stats.total_positive_feedback /
+            (projectStats?.stats.total_positive_feedback +
+              projectStats?.stats.total_negative_feedback)) *
+          100
+        ).toFixed(1)
+      ),
     },
     {
       label: "negative",
-      value:
-        (projectStats?.stats.total_negative_feedback /
-          (projectStats?.stats.total_positive_feedback +
-            projectStats?.stats.total_negative_feedback)) *
-        100,
+      value: parseFloat(
+        (
+          (projectStats?.stats.total_negative_feedback /
+            (projectStats?.stats.total_positive_feedback +
+              projectStats?.stats.total_negative_feedback)) *
+          100
+        ).toFixed(1)
+      ),
     },
   ];
 
