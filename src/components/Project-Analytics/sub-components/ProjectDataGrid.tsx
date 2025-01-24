@@ -2,6 +2,8 @@ import { DataGrid } from "@mui/x-data-grid";
 import { GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { ProjectSessionResponse } from "../../../api/maestro/getMaestro";
+import { useState } from "react";
+import SessionsDataGrid from "./SessionDataGrid";
 
 // converts ugly timestamp to pretty format
 function formatTimestamp(timestamp: string): string {
@@ -100,47 +102,66 @@ type DataGridParams = {
 const ProjectDataGrid: React.FC<DataGridParams> = ({ sessionData }) => {
   const rows: GridRowsProp = createRows(sessionData);
 
+  const [selectedSession, setSelectedSession] = useState<null | string>(null);
+
   return (
-    <DataGrid
-      autoHeight
-      rows={rows}
-      columns={columns}
-      getRowClassName={(params) =>
-        params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
-      }
-      initialState={{
-        pagination: { paginationModel: { pageSize: 20 } },
-      }}
-      pageSizeOptions={[20]}
-      disableColumnResize
-      density="compact"
-      slotProps={{
-        filterPanel: {
-          filterFormProps: {
-            logicOperatorInputProps: {
-              variant: "outlined",
-              size: "small",
-            },
-            columnInputProps: {
-              variant: "outlined",
-              size: "small",
-              sx: { mt: "auto" },
-            },
-            operatorInputProps: {
-              variant: "outlined",
-              size: "small",
-              sx: { mt: "auto" },
-            },
-            valueInputProps: {
-              InputComponentProps: {
-                variant: "outlined",
-                size: "small",
+    <>
+      {!selectedSession ? (
+        <DataGrid
+          autoHeight
+          rows={rows}
+          columns={columns}
+          getRowClassName={(params) =>
+            params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+          }
+          initialState={{
+            pagination: { paginationModel: { pageSize: 20 } },
+          }}
+          pageSizeOptions={[20]}
+          disableColumnResize
+          density="compact"
+          slotProps={{
+            filterPanel: {
+              filterFormProps: {
+                logicOperatorInputProps: {
+                  variant: "outlined",
+                  size: "small",
+                },
+                columnInputProps: {
+                  variant: "outlined",
+                  size: "small",
+                  sx: { mt: "auto" },
+                },
+                operatorInputProps: {
+                  variant: "outlined",
+                  size: "small",
+                  sx: { mt: "auto" },
+                },
+                valueInputProps: {
+                  InputComponentProps: {
+                    variant: "outlined",
+                    size: "small",
+                  },
+                },
               },
             },
-          },
-        },
-      }}
-    />
+          }}
+          onCellClick={(params) => {
+            if (params.field === "session_id") {
+              console.log("Clicked Session ID:", params.value);
+              setSelectedSession(params.value as string);
+            }
+          }}
+        />
+      ) : (
+        <SessionsDataGrid
+          session_id={selectedSession}
+          close={() => {
+            setSelectedSession(null);
+          }}
+        />
+      )}
+    </>
   );
 };
 

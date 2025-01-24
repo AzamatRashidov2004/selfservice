@@ -1,6 +1,11 @@
+.session-grid-wrapper{
+  width: 100%;
+}
+
 .MuiDataGrid-cell[data-field="session_id"]{
   text-decoration: underline;
-  color: rgb(39, 154, 255);
+  color: rgb(0, 66, 249);
+  cursor: pointer;
 }
 
 .session-grid-back{
@@ -26,11 +31,17 @@
 
 .stat-chart-wrapper {
   flex-basis: 31%;
+  margin: unset !important;
 }
 
 .analytics-dashboard-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: start;
+  gap: 50px;
+}
+
+.dropdown-toggle{
+  margin-bottom: 15px;
 }
 
 .total-graph-child {
@@ -38,7 +49,7 @@
 }
 
 .total-graph-parent {
-  align-items: center;
+  align-items: start;
 }
 
 .analytics-dashboard-nav {

@@ -111,10 +111,10 @@ const columns: GridColDef[] = [
 // SessionEventsResponse
 type DataGridParams = {
     session_id: string;
-
+    close: () => void;
 };
 
-const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
+const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
 
     const [sessionData, setSessionData] = useState<null | SessionEventsResponse>(null);
 
@@ -131,9 +131,9 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
 
   const rows: GridRowsProp = createRows(sessionData);
   return (
-    <>
+    <div className="session-grid-wrapper">
     <div className="session-grid-back">
-        <button className="btn btn-outline-primary">All Sessions</button>
+        <button className="btn btn-outline-primary" onClick={close}>All Sessions</button>
     </div>
     {
         sessionData ? 
@@ -179,7 +179,7 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
         /> : 
         <></>
     }
-    </>
+    </div>
   );
 };
 
