@@ -18,7 +18,7 @@ import { useAuth } from "../../context/authContext";
 import { clearSelection } from "../../utility/chonkyActionCalls";
 
 
-export default function FileBrowser({ setDetailsOpen }) {
+export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
   const {
     getFileStructure,
     dragAndDropFile,
@@ -46,7 +46,6 @@ export default function FileBrowser({ setDetailsOpen }) {
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
   const chonkyRef = useRef(null);
-  console.log("got the funx xxxxx", setDetailsOpen)
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
@@ -77,7 +76,8 @@ export default function FileBrowser({ setDetailsOpen }) {
         codeValue,
         setCurrentProjectId,
         setFileActions,
-        setDetailsOpen
+        setDetailsOpen,
+        setSelectedProjectId
       );
     },
     [getFileStructure, dragAndDropFile]

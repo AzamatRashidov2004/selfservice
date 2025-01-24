@@ -1,4 +1,4 @@
-const BASE_URL = "https://maestro-develop.flowstorm.ai"; // Replace with your actual base URL
+const BASE_URL = "https://maestro-develop.flowstorm.ai";
 
 // Types for the return values
 export interface SessionEvent {
@@ -22,12 +22,12 @@ export interface ProjectStatsSession {
   feedback_percentage: number;
 }
 
-export interface ProjectStatsResponse {
+export interface ProjectSessionResponse {
   status: string;
   sessions: ProjectStatsSession[];
 }
 
-export interface ProjectStatsSummaryResponse {
+export interface ProjectStatsResponse {
   status: string;
   stats: {
     total_queries: number;
@@ -61,7 +61,7 @@ export async function fetchSessionEvents(sessionId: string): Promise<SessionEven
 }
 
 // Fetch project stats
-export async function fetchProjectStats(projectId: string, timeRange: string = "day"): Promise<ProjectStatsResponse> {
+export async function fetchProjectSessions(projectId: string, timeRange: string = "day"): Promise<ProjectSessionResponse> {
   const url = `${BASE_URL}/project-stats?project_id=${encodeURIComponent(projectId)}&time_range=${encodeURIComponent(timeRange)}`;
 
   try {
@@ -84,7 +84,7 @@ export async function fetchProjectStats(projectId: string, timeRange: string = "
 }
 
 // Fetch project stats summary
-export async function fetchProjectStatsSummary(projectId: string, timeRange: string = "day"): Promise<ProjectStatsSummaryResponse> {
+export async function fetchProjectStats(projectId: string, timeRange: string = "day"): Promise<ProjectStatsResponse> {
   const url = `${BASE_URL}/project-stats-summary?project_id=${encodeURIComponent(projectId)}&time_range=${encodeURIComponent(timeRange)}`;
 
   try {
