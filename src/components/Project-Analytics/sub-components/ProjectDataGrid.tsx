@@ -100,29 +100,6 @@ type DataGridParams = {
 
 const ProjectDataGrid: React.FC<DataGridParams> = ({ sessionData }) => {
   const rows: GridRowsProp = createRows(sessionData);
-  useEffect(() => {
-    // Run the code after the component mounts
-    const divs = document.querySelectorAll(
-      'div.MuiDataGrid-cell[data-colindex="0"]'
-    );
-
-    divs.forEach((htmlDiv) => {
-      const div = htmlDiv as HTMLDivElement;
-      div.style.color = "blue";
-      div.style.textDecoration = "underline";
-      div.style.cursor = "pointer";
-    });
-
-    // Cleanup function to remove event listeners on component unmount
-    return () => {
-      divs.forEach((htmlDiv) => {
-        const div = htmlDiv as HTMLDivElement;
-        div.style.color = "blue";
-        div.style.textDecoration = "underline";
-        div.style.cursor = "pointer";
-      });
-    };
-  }, []);
 
   return (
     <DataGrid
