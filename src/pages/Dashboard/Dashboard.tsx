@@ -37,6 +37,7 @@ const Dashboard: React.FC = () => {
   const accordionRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDetailsOpen, setDetailsOpen] = useState<boolean>(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<null | string>(null);
 
   const { authenticated, keycloak } = useAuth();
   const navigate = useNavigate();
@@ -225,8 +226,8 @@ const Dashboard: React.FC = () => {
               >
                 {!isDetailsOpen
                   /* @ts-expect-error: Ignoring type error as the File Browser is a JSX file */
-                  ? <FileBrowser setDetailsOpen={setDetailsOpen} />
-                  : <ProjectAnalytics setOpenDetails={() => { setDetailsOpen(false) }} projectName="Nku Test" projectDescription="Short description" projectId="akmxzo18xcnjaw" />}
+                  ? <FileBrowser setDetailsOpen={setDetailsOpen} setSelectedProjectId={setSelectedProjectId} />
+                  : <ProjectAnalytics selectedProjectId={selectedProjectId} setOpenDetails={() => { setDetailsOpen(false) }} projectName="Nku Test" projectDescription="Short description" projectId="akmxzo18xcnjaw" />}
               </ResizableBox>
             </div>
           </div>

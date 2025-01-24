@@ -1,31 +1,31 @@
-import { ChonkyActions } from "chonky";
-import { findFile } from "./folderSearch";
+import { ChonkyActions } from 'chonky';
+import { findFile } from './folderSearch';
 import {
   createFolderModalEvent,
   createUploadFileModalEvent,
   createNotificationEvent,
-} from "../../../utility/Modal_Util";
+} from '../../../utility/Modal_Util';
 
-import { updateSinglePath } from "../../../utility/Api_Utils";
-import handlePathChangeAtDepth from "../../../utility/FileSystem_Utils";
+import { updateSinglePath } from '../../../utility/Api_Utils';
+import handlePathChangeAtDepth from '../../../utility/FileSystem_Utils';
 import {
   updatePathBulk,
   uploadMultiplePdfs,
-} from "../../../api/kronos/postKronos";
-import { deleteBulkPdf } from "../../../api/kronos/deleteKronos";
+} from '../../../api/kronos/postKronos';
+import { deleteBulkPdf } from '../../../api/kronos/deleteKronos';
 import {
   getPdfFile,
   getPdfFileUrl,
   getHTMLFromProject,
   getFSMFromProject,
-} from "../../../api/kronos/getKronos";
+} from '../../../api/kronos/getKronos';
 import {
   addItemToCache,
   isItemInCache,
   getItemFromCache,
-} from "../../../utility/Session_Storage";
+} from '../../../utility/Session_Storage';
 
-import { getCustomActions } from "./customActions";
+import { getCustomActions } from './customActions';
 
 async function handleAction(
   data,
@@ -42,10 +42,11 @@ async function handleAction(
   codeValue,
   setCurrentProjectId,
   setFileActions,
-  setDetailsOpen
+  setDetailsOpen,
+  setSelectedProjectId
 ) {
   const fileData = fileContext.getFileStructure(true);
-  console.log("ACTION", data);
+  console.log('ACTION', data);
 
   const {
     getFileStructure,
@@ -67,16 +68,16 @@ async function handleAction(
     }
   }
 
-  if (data.id === "change_selection") {
+  if (data.id === 'change_selection') {
     let firstNodeInfo = null;
     if (data.state.selectedFiles.length > 0) {
-      firstNodeInfo = getNodeInfo(parseInt(data.state.selectedFiles[0].id))
+      firstNodeInfo = getNodeInfo(parseInt(data.state.selectedFiles[0].id));
     }
     setFileActions([
       ChonkyActions.EnableListView,
       ChonkyActions.EnableGridView,
       ...getCustomActions(data.state.selectedFiles, firstNodeInfo),
-    ])
+    ]);
   }
 
   if (data.id === ChonkyActions.EndDragNDrop.id) {
@@ -140,29 +141,32 @@ async function handleAction(
       if (result) {
         fileContext.dragAndDropFile(destination.id, selectedFiles);
       } else {
-        throw new Error("Drag and drop failed");
+        throw new Error('Drag and drop failed');
       }
     } catch (error) {
       createNotificationEvent(
-        "Something Went Wrong",
-        "Drag and drop failed. Please try again.",
-        "danger",
+        'Something Went Wrong',
+        'Drag and drop failed. Please try again.',
+        'danger',
         4000
       );
     }
   }
 
   // Handle Create File custom action
-  if (data.id === "create_folder") {
+  if (data.id === 'create_folder') {
     let targetID = parseInt(currentFolder);
 
     // If create folder is called on a folder, it should create the new folder inside it
-    if (data.state.selectedFiles.length === 1 && data.state.selectedFiles[0].isDir){ 
-      const selectedFolder = data.state.selectedFiles[0]
-      const selectedFolderID = parseInt(selectedFolder.id)
-      const targetNode = getNodeInfo(selectedFolderID)
+    if (
+      data.state.selectedFiles.length === 1 &&
+      data.state.selectedFiles[0].isDir
+    ) {
+      const selectedFolder = data.state.selectedFiles[0];
+      const selectedFolderID = parseInt(selectedFolder.id);
+      const targetNode = getNodeInfo(selectedFolderID);
       targetID = targetNode.id;
-      setCurrentFolder(targetID.toString())
+      setCurrentFolder(targetID.toString());
     }
 
     createFolderModalEvent((folderName) => {
@@ -170,33 +174,39 @@ async function handleAction(
     });
   }
 
-  if (data.id === "details") {
-    const currentProjectId = parseInt(data.state.selectedFiles[0].id)
+  if (data.id === 'details') {
+    const currentProjectId = parseInt(data.state.selectedFiles[0].id);
     const project = getProjectForNode(parseInt(currentProjectId));
     if (!project) {
       createNotificationEvent(
-        "Select Project",
+        'Select Project',
         `Please first select a project and then press the details button`,
-        "",
+        '',
         3000
       );
       return;
     }
     setDetailsOpen(true);
+    setSelectedProjectId(project.kronosProjectId);
+    console.log('askldmawklmdlkawmkd', currentProjectId);
+    console.log(project.kronosProjectId);
   }
 
   // Handle Create File custom action
-  if (data.id === "upload") {
+  if (data.id === 'upload') {
     if (!keycloak || !keycloak.token) return;
     let targetID = parseInt(currentFolder);
 
     // If upload is called on a folder, it should upload files inside it
-    if (data.state.selectedFiles.length === 1 && data.state.selectedFiles[0].isDir){ 
-      const selectedFolder = data.state.selectedFiles[0]
-      const selectedFolderID = parseInt(selectedFolder.id)
-      const targetNode = getNodeInfo(selectedFolderID)
+    if (
+      data.state.selectedFiles.length === 1 &&
+      data.state.selectedFiles[0].isDir
+    ) {
+      const selectedFolder = data.state.selectedFiles[0];
+      const selectedFolderID = parseInt(selectedFolder.id);
+      const targetNode = getNodeInfo(selectedFolderID);
       targetID = targetNode.id;
-      setCurrentFolder(targetID.toString())
+      setCurrentFolder(targetID.toString());
     }
 
     let path = getPathFromProject(parseInt(targetID));
@@ -219,20 +229,20 @@ async function handleAction(
             result
           );
         } else {
-          throw new Error("File upload failed");
+          throw new Error('File upload failed');
         }
       } catch (error) {
         createNotificationEvent(
-          "Something Went Wrong",
-          "File upload failed. Please try again.",
-          "danger",
+          'Something Went Wrong',
+          'File upload failed. Please try again.',
+          'danger',
           4000
         );
       }
     });
   }
 
-  if (data.id === "download_files") {
+  if (data.id === 'download_files') {
     if (!keycloak || !keycloak.token) return;
 
     const selectedFile = data.state.selectedFiles[0];
@@ -247,21 +257,21 @@ async function handleAction(
     );
     if (!res) {
       createNotificationEvent(
-        "Something Went Wrong",
-        "Download has failed. Try again later.",
-        "danger",
+        'Something Went Wrong',
+        'Download has failed. Try again later.',
+        'danger',
         4000
       );
     }
   }
 
-  if (data.id === "open_files") {
+  if (data.id === 'open_files') {
     if (!keycloak || !keycloak.token) return;
 
     const selectedFile = data.payload.files[0];
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
 
-    if (nodeInfo.text.toLowerCase().endsWith(".html")) {
+    if (nodeInfo.text.toLowerCase().endsWith('.html')) {
       try {
         const selectedFileCurrent = data.state.selectedFiles[0];
         const project = getProjectForNode(parseInt(selectedFile.id));
@@ -269,33 +279,33 @@ async function handleAction(
         if (project_id) {
           setCurrentProjectId(project_id);
           var htmlData;
-          if (isItemInCache(project_id + ".html")) {
-            htmlData = getItemFromCache(project_id + ".html");
+          if (isItemInCache(project_id + '.html')) {
+            htmlData = getItemFromCache(project_id + '.html');
           } else {
             htmlData = await getHTMLFromProject(project_id, keycloak.token);
-            addItemToCache(project_id + ".html", htmlData);
+            addItemToCache(project_id + '.html', htmlData);
           }
 
-          if (htmlData !== "") {
+          if (htmlData !== '') {
             setCodeVisible(true);
             setCodeValue(htmlData);
-            setCodeLanguage("html");
+            setCodeLanguage('html');
           } else {
             setCodeVisible(false);
-            throw new Error("HTML content not found.");
+            throw new Error('HTML content not found.');
           }
         } else {
-          throw new Error("Project id not found.");
+          throw new Error('Project id not found.');
         }
       } catch (error) {
         createNotificationEvent(
-          "Something Went Wrong",
-          "Failed to open HTML file. Please try again.",
-          "danger",
+          'Something Went Wrong',
+          'Failed to open HTML file. Please try again.',
+          'danger',
           4000
         );
       }
-    } else if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
+    } else if (nodeInfo.text.toLowerCase().endsWith('.fsm')) {
       try {
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
@@ -305,32 +315,32 @@ async function handleAction(
           setCurrentProjectId(project_id);
           setCodeVisible(true);
           var fsmData;
-          if (isItemInCache(project_id + ".fsm")) {
-            fsmData = getItemFromCache(project_id + ".fsm");
+          if (isItemInCache(project_id + '.fsm')) {
+            fsmData = getItemFromCache(project_id + '.fsm');
           } else {
             fsmData = await getFSMFromProject(project_id, keycloak.token);
-            addItemToCache(project_id + ".fsm", fsmData);
+            addItemToCache(project_id + '.fsm', fsmData);
           }
-          if (fsmData !== "") {
+          if (fsmData !== '') {
             setCodeVisible(true);
             setCodeValue(fsmData);
-            setCodeLanguage("json");
+            setCodeLanguage('json');
           } else {
             setCodeVisible(false);
-            throw new Error("FSM file not found.");
+            throw new Error('FSM file not found.');
           }
         } else {
-          throw new Error("Project id not found.");
+          throw new Error('Project id not found.');
         }
       } catch (error) {
         createNotificationEvent(
-          "Something Went Wrong",
-          "Failed to open FSM file. Please try again.",
-          "danger",
+          'Something Went Wrong',
+          'Failed to open FSM file. Please try again.',
+          'danger',
           4000
         );
       }
-    } else if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
+    } else if (nodeInfo.text.toLowerCase().endsWith('.pdf')) {
       try {
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
@@ -354,19 +364,19 @@ async function handleAction(
             if (pdfUrl) {
               setPdfUrl(pdfUrl);
             } else {
-              throw new Error("PDF URL not found.");
+              throw new Error('PDF URL not found.');
             }
           } else {
-            throw new Error("KB id not found.");
+            throw new Error('KB id not found.');
           }
         } else {
-          throw new Error("Project id not found.");
+          throw new Error('Project id not found.');
         }
       } catch (error) {
         createNotificationEvent(
-          "Something Went Wrong",
-          "Failed to open PDF file. Please try again.",
-          "danger",
+          'Something Went Wrong',
+          'Failed to open PDF file. Please try again.',
+          'danger',
           4000
         );
       }
@@ -375,16 +385,16 @@ async function handleAction(
     }
   }
 
-  if (data.id === "edit_file") {
+  if (data.id === 'edit_file') {
     if (!keycloak || !keycloak.token) return;
 
     const selectedFiles = data.state.selectedFiles;
     if (!selectedFiles || selectedFiles.length === 0) {
       // No selected files, so we cannot edit anything
       createNotificationEvent(
-        "No File Selected",
-        "Please select a file before trying to edit.",
-        "warning",
+        'No File Selected',
+        'Please select a file before trying to edit.',
+        'warning',
         4000
       );
       return;
@@ -395,7 +405,7 @@ async function handleAction(
 
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
 
-    if (nodeInfo.text.toLowerCase().endsWith(".html")) {
+    if (nodeInfo.text.toLowerCase().endsWith('.html')) {
       try {
         const selectedFileCurrent = data.state.selectedFiles[0];
         const project = getProjectForNode(parseInt(selectedFile.id));
@@ -403,33 +413,33 @@ async function handleAction(
         if (project_id) {
           setCurrentProjectId(project_id);
           var htmlData;
-          if (isItemInCache(project_id + ".html")) {
-            htmlData = getItemFromCache(project_id + ".html");
+          if (isItemInCache(project_id + '.html')) {
+            htmlData = getItemFromCache(project_id + '.html');
           } else {
             htmlData = await getHTMLFromProject(project_id, keycloak.token);
-            addItemToCache(project_id + ".html", htmlData);
+            addItemToCache(project_id + '.html', htmlData);
           }
 
-          if (htmlData !== "") {
+          if (htmlData !== '') {
             setCodeVisible(true);
             setCodeValue(htmlData);
-            setCodeLanguage("html");
+            setCodeLanguage('html');
           } else {
             setCodeVisible(false);
-            throw new Error("HTML content not found.");
+            throw new Error('HTML content not found.');
           }
         } else {
-          throw new Error("Project id not found.");
+          throw new Error('Project id not found.');
         }
       } catch (error) {
         createNotificationEvent(
-          "Something Went Wrong",
-          "Failed to open HTML file. Please try again.",
-          "danger",
+          'Something Went Wrong',
+          'Failed to open HTML file. Please try again.',
+          'danger',
           4000
         );
       }
-    } else if (nodeInfo.text.toLowerCase().endsWith(".fsm")) {
+    } else if (nodeInfo.text.toLowerCase().endsWith('.fsm')) {
       try {
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
@@ -439,32 +449,32 @@ async function handleAction(
           setCurrentProjectId(project_id);
           setCodeVisible(true);
           var fsmData;
-          if (isItemInCache(project_id + ".fsm")) {
-            fsmData = getItemFromCache(project_id + ".fsm");
+          if (isItemInCache(project_id + '.fsm')) {
+            fsmData = getItemFromCache(project_id + '.fsm');
           } else {
             fsmData = await getFSMFromProject(project_id, keycloak.token);
-            addItemToCache(project_id + ".fsm", fsmData);
+            addItemToCache(project_id + '.fsm', fsmData);
           }
-          if (fsmData !== "") {
+          if (fsmData !== '') {
             setCodeVisible(true);
             setCodeValue(fsmData);
-            setCodeLanguage("json");
+            setCodeLanguage('json');
           } else {
             setCodeVisible(false);
-            throw new Error("FSM file not found.");
+            throw new Error('FSM file not found.');
           }
         } else {
-          throw new Error("Project id not found.");
+          throw new Error('Project id not found.');
         }
       } catch (error) {
         createNotificationEvent(
-          "Something Went Wrong",
-          "Failed to open FSM file. Please try again.",
-          "danger",
+          'Something Went Wrong',
+          'Failed to open FSM file. Please try again.',
+          'danger',
           4000
         );
       }
-    } else if (nodeInfo.text.toLowerCase().endsWith(".pdf")) {
+    } else if (nodeInfo.text.toLowerCase().endsWith('.pdf')) {
       try {
         const project = getProjectForNode(parseInt(selectedFile.id));
         const project_id = project.kronosProjectId;
@@ -488,19 +498,19 @@ async function handleAction(
             if (pdfUrl) {
               setPdfUrl(pdfUrl);
             } else {
-              throw new Error("PDF URL not found.");
+              throw new Error('PDF URL not found.');
             }
           } else {
-            throw new Error("KB id not found.");
+            throw new Error('KB id not found.');
           }
         } else {
-          throw new Error("Project id not found.");
+          throw new Error('Project id not found.');
         }
       } catch (error) {
         createNotificationEvent(
-          "Something Went Wrong",
-          "Failed to open PDF file. Please try again.",
-          "danger",
+          'Something Went Wrong',
+          'Failed to open PDF file. Please try again.',
+          'danger',
           4000
         );
       }
@@ -509,9 +519,9 @@ async function handleAction(
       if (!selectedFiles || selectedFiles.length === 0) {
         // No selected files, so we cannot edit anything
         createNotificationEvent(
-          "No File Selected",
-          "Please select a file before trying to edit.",
-          "warning",
+          'No File Selected',
+          'Please select a file before trying to edit.',
+          'warning',
           4000
         );
         return;
@@ -526,7 +536,7 @@ async function handleAction(
     }
   }
 
-  if (data.id === "delete_files") {
+  if (data.id === 'delete_files') {
     if (!keycloak || !keycloak.token) return;
 
     const selectedFiles = data.state.selectedFiles;
@@ -554,13 +564,13 @@ async function handleAction(
           selectedFiles.map((file) => parseInt(file.id))
         );
       } else {
-        throw new Error("Delete action failed.");
+        throw new Error('Delete action failed.');
       }
     } catch (error) {
       createNotificationEvent(
-        "Something Went Wrong",
-        "Delete action failed. Please try again.",
-        "danger",
+        'Something Went Wrong',
+        'Delete action failed. Please try again.',
+        'danger',
         4000
       );
     }
