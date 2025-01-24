@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import StatCard from "./sub-components/StatCard";
 import "./Project-Analytics.css";
-import SessionsDataGrid from "./sub-components/DataGrid";
+import ProjectDataGrid from "./sub-components/ProjectDataGrid";
 
 import StatTotalCard from "./sub-components/StatTotalCard";
 
@@ -92,7 +92,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
             </div>
             {sessionInfo ? (
               <div className="analytics-dashboard-row">
-                <SessionsDataGrid sessionData={sessionInfo} />
+                <ProjectDataGrid sessionData={sessionInfo} />
               </div>
             ) : (
               <></>
