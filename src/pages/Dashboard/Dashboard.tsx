@@ -16,6 +16,7 @@ import { useFiles } from "../../context/fileContext.tsx";
 import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
 import CodeEditor from "../../components/Code-Editor/CodeEditor.tsx";
 import ProjectAnalytics from "../../components/Project-Analytics/Project-Analytics.tsx";
+import SessionsDataGrid from "../../components/Project-Analytics/sub-components/SessionDataGrid.tsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -177,6 +178,7 @@ const Dashboard: React.FC = () => {
   return (
     <section className="dashboard-section">
       <main className="container-fluid main-container">
+        <SessionsDataGrid session_id="81107aa3-7076-412e-be2e-d9e5d63bd9ca"/>
         <div id="pdf-container" className="hidden">
           <PdfViewer
             pdfUrl={pdfUrl}

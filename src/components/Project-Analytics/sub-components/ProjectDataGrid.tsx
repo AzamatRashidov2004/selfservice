@@ -97,7 +97,7 @@ type DataGridParams = {
   sessionData: ProjectSessionResponse;
 };
 
-const SessionsDataGrid: React.FC<DataGridParams> = ({ sessionData }) => {
+const ProjectDataGrid: React.FC<DataGridParams> = ({ sessionData }) => {
   const rows: GridRowsProp = createRows(sessionData);
   return (
     <DataGrid
@@ -143,4 +143,4 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ sessionData }) => {
   );
 };
 
-export default SessionsDataGrid;
+export default ProjectDataGrid;
