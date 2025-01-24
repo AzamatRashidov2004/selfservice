@@ -1,20 +1,23 @@
-import { useTheme } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { DropDownButton } from "./DropDownButton";
+import DropDownButton from "./DropDownButton";
 import { ProjectStatsResponse } from "../../../api/maestro/getMaestro";
 
 export type StatCardProps = {
   projectStats: null | ProjectStatsResponse;
+  setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
 };
 
 //todo there was a data it props
-export default function StatTotalCard({ projectStats }: StatCardProps) {
+export default function StatTotalCard({
+  projectStats,
+  setSelectedTimeInterval,
+}: StatCardProps) {
   return (
     <>
-      <DropDownButton />
+      <DropDownButton setSelectedTimeInterval={setSelectedTimeInterval} />
       <Card variant="outlined" sx={{ height: "100%", flexGrow: 1 }}>
         <CardContent>
           <Stack
