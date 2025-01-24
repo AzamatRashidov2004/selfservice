@@ -5,102 +5,46 @@ import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { PieChart, pieArcLabelClasses } from "@mui/x-charts/PieChart";
-import { areaElementClasses } from "@mui/x-charts/LineChart";
+import { ProjectStatsResponse } from "../../../api/maestro/getMaestro";
 
 export type StatCardProps = {
-  title: string;
-  value: string;
-  interval: string;
-  trend: "up" | "down" | "neutral";
-  data: number[];
+  projectStats: null | ProjectStatsResponse;
 };
 
-function getDaysInMonth(month: number, year: number) {
-  const date = new Date(year, month, 0);
-  const monthName = date.toLocaleDateString("en-US", {
-    month: "short",
-  });
-  const daysInMonth = date.getDate();
-  const days = [];
-  let i = 1;
-  while (days.length < daysInMonth) {
-    days.push(`${monthName} ${i}`);
-    i += 1;
-  }
-  return days;
-}
-
-function AreaGradient({ color, id }: { color: string; id: string }) {
-  console.log("color", color);
-  return (
-    <defs>
-      <linearGradient id={id} x1="50%" y1="0%" x2="50%" y2="100%">
-        <stop offset="0%" stopColor={color} stopOpacity={0.9} />
-        <stop offset="100%" stopColor={color} stopOpacity={0} />
-      </linearGradient>
-    </defs>
-  );
-}
-
 //todo there was a data it props
-export default function StatCard({
-  title,
-  value,
-  interval,
-  trend,
-}: StatCardProps) {
-  const theme = useTheme();
-  const daysInWeek = getDaysInMonth(4, 2024);
-
-  const trendColors = {
-    up:
-      theme.palette.mode === "light"
-        ? theme.palette.success.main
-        : theme.palette.success.dark,
-    down: "#D32F2F",
-    neutral: "#BDBDBD",
-  };
-
-  const labelColors = {
-    up: "success" as const,
-    down: "error" as const,
-    neutral: "default" as const,
-  };
-
-  const chartColor = trendColors[trend];
-  console.log(chartColor);
-
+export default function StatCard({ projectStats }: StatCardProps) {
   const size = {
     width: 250,
     height: 150,
   };
 
-  const desktopOS = [
+  console.log("XXX", projectStats);
+
+  if (!projectStats) return null;
+
+  const values = [
     {
-      label: "Windows",
-      value: 72.72,
+      label: "positive",
+      value:
+        (projectStats?.stats.total_positive_feedback /
+          (projectStats?.stats.total_positive_feedback +
+            projectStats?.stats.total_negative_feedback)) *
+        100,
     },
     {
-      label: "OS X",
-      value: 16.38,
-    },
-    {
-      label: "Linux",
-      value: 3.83,
-    },
-    {
-      label: "Chrome OS",
-      value: 2.42,
-    },
-    {
-      label: "Other",
-      value: 4.65,
+      label: "negative",
+      value:
+        (projectStats?.stats.total_negative_feedback /
+          (projectStats?.stats.total_positive_feedback +
+            projectStats?.stats.total_negative_feedback)) *
+        100,
     },
   ];
+
   const valueFormatter = (item: { value: number }) => `${item.value}%`;
 
   const data = {
-    data: desktopOS,
+    data: values,
     valueFormatter,
   };
   return (
@@ -116,21 +60,17 @@ export default function StatCard({
               sx={{ justifyContent: "space-between", alignItems: "left" }}
             >
               <Typography component="h2" variant="subtitle2" gutterBottom>
-                Feedback count: 0
+                Feedback count:{" "}
+                {projectStats.stats.total_negative_feedback +
+                  projectStats.stats.total_positive_feedback}
               </Typography>
               <Typography component="h2" variant="subtitle2" gutterBottom>
-                Positive: 1
+                Positive: {projectStats.stats.total_positive_feedback}
               </Typography>
               <Typography component="h2" variant="subtitle2" gutterBottom>
-                Negative: 0
-              </Typography>
-              <Typography component="h2" variant="subtitle2" gutterBottom>
-                Percentage: 30%
+                Negative: {projectStats.stats.total_negative_feedback}
               </Typography>
             </Stack>
-            <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              {interval}
-            </Typography>
           </Stack>
           <Box sx={{ width: "50%", height: 150 }}>
             <PieChart
@@ -150,6 +90,7 @@ export default function StatCard({
                   visibility: "hidden !important",
                 },
               }}
+              colors={["hsl(115, 90.40%, 51.00%)", "hsl(0, 86.00%, 58.00%)"]}
               {...size}
             />
           </Box>

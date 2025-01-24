@@ -38,9 +38,13 @@ export interface ProjectStatsResponse {
 }
 
 // Fetch session events
-export async function fetchSessionEvents(sessionId: string): Promise<SessionEventsResponse> {
-  const url = `${BASE_URL}/session-events?session_id=${encodeURIComponent(sessionId)}`;
-  
+export async function fetchSessionEvents(
+  sessionId: string
+): Promise<SessionEventsResponse> {
+  const url = `${BASE_URL}/session-events?session_id=${encodeURIComponent(
+    sessionId
+  )}`;
+
   try {
     const response = await fetch(url, {
       method: "GET",
@@ -61,8 +65,13 @@ export async function fetchSessionEvents(sessionId: string): Promise<SessionEven
 }
 
 // Fetch project stats
-export async function fetchProjectSessions(projectId: string, timeRange: string = "day"): Promise<ProjectSessionResponse> {
-  const url = `${BASE_URL}/project-stats?project_id=${encodeURIComponent(projectId)}&time_range=${encodeURIComponent(timeRange)}`;
+export async function fetchProjectSessions(
+  projectId: string,
+  timeRange: string = "day"
+): Promise<ProjectSessionResponse> {
+  const url = `${BASE_URL}/project-stats?project_id=${encodeURIComponent(
+    projectId
+  )}&time_range=${encodeURIComponent(timeRange)}`;
 
   try {
     const response = await fetch(url, {
@@ -84,8 +93,13 @@ export async function fetchProjectSessions(projectId: string, timeRange: string 
 }
 
 // Fetch project stats summary
-export async function fetchProjectStats(projectId: string, timeRange: string = "day"): Promise<ProjectStatsResponse> {
-  const url = `${BASE_URL}/project-stats-summary?project_id=${encodeURIComponent(projectId)}&time_range=${encodeURIComponent(timeRange)}`;
+export async function fetchProjectStats(
+  projectId: string,
+  timeRange: string = "day"
+): Promise<ProjectStatsResponse> {
+  const url = `${BASE_URL}/project-stats-summary?project_id=${encodeURIComponent(
+    projectId
+  )}&time_range=${encodeURIComponent(timeRange)}`;
 
   try {
     const response = await fetch(url, {
@@ -96,7 +110,9 @@ export async function fetchProjectStats(projectId: string, timeRange: string = "
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch project stats summary: ${response.statusText}`);
+      throw new Error(
+        `Failed to fetch project stats summary: ${response.statusText}`
+      );
     }
 
     return await response.json();
