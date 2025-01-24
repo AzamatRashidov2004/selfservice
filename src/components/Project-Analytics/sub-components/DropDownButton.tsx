@@ -9,7 +9,7 @@ export const DropDownButton = () => {
   };
 
   return (
-    <div className="dropdown">
+    <div className="dropdown" style={{ position: "relative" }}>
       {/* Dropdown button */}
       <style>
         {`
@@ -29,7 +29,7 @@ export const DropDownButton = () => {
         id="dropdownMenuButton"
         data-bs-toggle="dropdown"
         aria-expanded="false"
-        style={{ minWidth: "150px" }} // Adjusted width
+        style={{ minWidth: "100px" }} // Adjusted width
       >
         {selectedOption}
       </button>
@@ -38,7 +38,7 @@ export const DropDownButton = () => {
       <ul
         className="dropdown-menu"
         aria-labelledby="dropdownMenuButton"
-        style={{ minWidth: "150px" }} // Adjusted menu width to match the button
+        style={{ minWidth: "150px", position: "absolute", zIndex: 10500 }} // Adjusted menu width to match the button
       >
         <li>
           <button
