@@ -5,8 +5,13 @@ import SessionsDataGrid from "./sub-components/DataGrid";
 
 import StatTotalCard from "./sub-components/StatTotalCard";
 
-import { ProjectStatsResponse, ProjectSessionResponse, fetchProjectSessions, fetchProjectStats  } from "../../api/maestro/getMaestro";
-
+import {
+  ProjectStatsResponse,
+  ProjectSessionResponse,
+  fetchProjectSessions,
+  fetchProjectStats,
+} from "../../api/maestro/getMaestro";
+import Loader from "../Loader/Loader";
 
 type ProjectDetails = {
   projectName: string;
@@ -17,32 +22,38 @@ type ProjectDetails = {
 };
 
 const ProjectAnalytics: React.FC<ProjectDetails> = ({
-  projectName, 
+  projectName,
   setOpenDetails,
-  selectedProjectId
+  selectedProjectId,
 }) => {
-  const [projectStats, setProjectState] = useState<null | ProjectStatsResponse>(null);
-  const [sessionInfo, setSessionInfo] = useState<null | ProjectSessionResponse>(null);
+  const [projectStats, setProjectState] = useState<null | ProjectStatsResponse>(
+    null
+  );
+  const [sessionInfo, setSessionInfo] = useState<null | ProjectSessionResponse>(
+    null
+  );
 
   useEffect(() => {
-    async function fetchData(){
+    async function fetchData() {
       if (!selectedProjectId) return;
 
       fetchProjectSessions(selectedProjectId, "day").then((response) => {
         // Assuming response.session is an array
-        const filteredSessions = response.sessions.filter(session => session.query_count !== 0);
+        const filteredSessions = response.sessions.filter(
+          (session) => session.query_count !== 0
+        );
         console.log("1 response", filteredSessions);
-        setSessionInfo({status: response.status, sessions: filteredSessions});
+        setSessionInfo({ status: response.status, sessions: filteredSessions });
       });
 
       fetchProjectStats(selectedProjectId, "day").then((response) => {
         console.log("2 repsonse", response);
         setProjectState(response);
-      })
+      });
     }
 
     fetchData();
-  }, [selectedProjectId])
+  }, [selectedProjectId]);
 
   console.log(projectStats, sessionInfo);
   return (
@@ -55,32 +66,18 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
       </div>
       <div className="analytics-dashboard-content">
         <div className="analytics-dashboard-row total-graph-parent">
-          <div className="stat-chart-wrapper total-graph-child">
-            <StatCard
-              title="Sessions"
-              value="200"
-              interval="Last 30 days"
-              trend="neutral"
-              data={[
-                200, 24, 220, 260, 240, 380, 100, 240, 280, 240, 300, 340, 320,
-                360, 340, 380, 360, 400, 380, 420, 400, 640, 340, 460, 440, 480,
-                460, 30, 880, 920,
-              ]}
-            />
-          </div>
-          <div className="stat-chart-wrapper total-graph-child">
-            <StatTotalCard
-              title="Sessions"
-              value="200"
-              interval="Last 30 days"
-              trend="neutral"
-              data={[
-                200, 24, 220, 260, 240, 380, 100, 240, 280, 240, 300, 340, 320,
-                360, 340, 380, 360, 400, 380, 420, 400, 640, 340, 460, 440, 480,
-                460, 30, 880, 920,
-              ]}
-            />
-          </div>
+          {projectStats == null ? (
+            <Loader />
+          ) : (
+            <>
+              <div className="stat-chart-wrapper total-graph-child">
+                <StatCard projectStats={projectStats} />
+              </div>
+              <div className="stat-chart-wrapper total-graph-child">
+                <StatTotalCard projectStats={projectStats} />
+              </div>
+            </>
+          )}
         </div>
         {
           sessionInfo ? 
