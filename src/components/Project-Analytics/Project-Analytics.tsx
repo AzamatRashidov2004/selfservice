@@ -3,6 +3,7 @@ import StatCard from "./sub-components/StatCard";
 import "./Project-Analytics.css";
 import CustomDataGrid from "./sub-components/DataGrid";
 import { DropDownButton } from "./sub-components/DropDownButton";
+import StatTotalCard from "./sub-components/StatTotalCard";
 
 type ProjectDetails = {
   projectName: string;
@@ -28,9 +29,8 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
         </button>
       </div>
       <div className="analytics-dashboard-content">
-        <DropDownButton />
-        <div className="analytics-dashboard-row">
-          <div className="stat-chart-wrapper">
+        <div className="analytics-dashboard-row total-graph-parent">
+          <div className="stat-chart-wrapper total-graph-child">
             <StatCard
               title="Sessions"
               value="200"
@@ -43,29 +43,16 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
               ]}
             />
           </div>
-          <div className="stat-chart-wrapper">
-            <StatCard
-              title="People"
+          <div className="stat-chart-wrapper total-graph-child">
+            <StatTotalCard
+              title="Sessions"
               value="200"
               interval="Last 30 days"
-              trend="up"
+              trend="neutral"
               data={[
-                200, 24, 220, 260, 240, 380, 100, 240, 280, 240, 300, 940, 320,
+                200, 24, 220, 260, 240, 380, 100, 240, 280, 240, 300, 340, 320,
                 360, 340, 380, 360, 400, 380, 420, 400, 640, 340, 460, 440, 480,
-                460, 600, 880, 920,
-              ]}
-            />
-          </div>
-          <div className="stat-chart-wrapper">
-            <StatCard
-              title="Hawkeye"
-              value="200"
-              interval="Last 30 days"
-              trend="down"
-              data={[
-                200, 24, 220, 260, 240, 380, 100, 240, 280, 240, 300, 140, 320,
-                360, 340, 380, 360, 400, 380, 420, 400, 640, 340, 460, 440, 480,
-                460, 600, 880, 920,
+                460, 30, 880, 920,
               ]}
             />
           </div>
