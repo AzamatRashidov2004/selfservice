@@ -2,6 +2,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { ProjectSessionResponse } from "../../../api/maestro/getMaestro";
+import { useEffect } from "react";
 
 // converts ugly timestamp to pretty format
 function formatTimestamp(timestamp: string): string {
@@ -99,6 +100,30 @@ type DataGridParams = {
 
 const SessionsDataGrid: React.FC<DataGridParams> = ({ sessionData }) => {
   const rows: GridRowsProp = createRows(sessionData);
+  useEffect(() => {
+    // Run the code after the component mounts
+    const divs = document.querySelectorAll(
+      'div.MuiDataGrid-cell[data-colindex="0"]'
+    );
+
+    divs.forEach((htmlDiv) => {
+      const div = htmlDiv as HTMLDivElement;
+      div.style.color = "blue";
+      div.style.textDecoration = "underline";
+      div.style.cursor = "pointer";
+    });
+
+    // Cleanup function to remove event listeners on component unmount
+    return () => {
+      divs.forEach((htmlDiv) => {
+        const div = htmlDiv as HTMLDivElement;
+        div.style.color = "blue";
+        div.style.textDecoration = "underline";
+        div.style.cursor = "pointer";
+      });
+    };
+  }, []);
+
   return (
     <DataGrid
       autoHeight
