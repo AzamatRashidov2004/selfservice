@@ -1,15 +1,35 @@
 import { useState } from "react";
 
-export const DropDownButton = () => {
-  const [selectedOption, setSelectedOption] = useState<string>("Day"); // Default: "Day"
+type DropDownButtonProps = {
+  setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
+};
+
+export default function DropDownButton({
+  setSelectedTimeInterval,
+}: DropDownButtonProps) {
+  const [selectedOption, setSelectedOption] = useState<string>("Last Day"); // Default: "Day"
 
   const handleSelect = (option: string) => {
-    setSelectedOption(option);
-    console.log(`Selected: ${option}`); // Add logic for handling the selection
+    if (option == "Day") {
+      setSelectedOption("Last Day");
+    }
+    if (option == "Hour") {
+      setSelectedOption("Last Hour");
+    }
+    if (option == "Week") {
+      setSelectedOption("Last Week");
+    }
+    if (option == "Month") {
+      setSelectedOption("Last Month");
+    }
+    if (option == "All") {
+      setSelectedOption("All");
+    }
+    setSelectedTimeInterval(option.toLowerCase());
   };
 
   return (
-    <div className="dropdown" style={{ position: "relative" }}>
+    <div className="dropdown" style={{ position: "relative", width: "200p" }}>
       {/* Dropdown button */}
       <style>
         {`
@@ -45,12 +65,12 @@ export const DropDownButton = () => {
             className="dropdown-item"
             onClick={() => handleSelect("Hour")}
           >
-            Hour
+            Last Hour
           </button>
         </li>
         <li>
           <button className="dropdown-item" onClick={() => handleSelect("Day")}>
-            Day
+            Last Day
           </button>
         </li>
         <li>
@@ -58,13 +78,13 @@ export const DropDownButton = () => {
             className="dropdown-item"
             onClick={() => handleSelect("Week")}
           >
-            Week
+            Last Week
           </button>
         </li>
         <li>
           <button
             className="dropdown-item"
-            onClick={() => handleSelect("Last Month")}
+            onClick={() => handleSelect("Month")}
           >
             Last Month
           </button>
@@ -77,4 +97,4 @@ export const DropDownButton = () => {
       </ul>
     </div>
   );
-};
+}

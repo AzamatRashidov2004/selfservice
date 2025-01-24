@@ -26,6 +26,9 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
   setOpenDetails,
   selectedProjectId,
 }) => {
+  const [selectedTimeInterval, setSelectedTimeInterval] =
+    useState<string>("day");
+
   const [projectStats, setProjectState] = useState<null | ProjectStatsResponse>(
     null
   );
@@ -37,23 +40,30 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     async function fetchData() {
       if (!selectedProjectId) return;
 
-      fetchProjectSessions(selectedProjectId, "day").then((response) => {
-        // Assuming response.session is an array
-        const filteredSessions = response.sessions.filter(
-          (session) => session.query_count !== 0
-        );
-        console.log("1 response", filteredSessions);
-        setSessionInfo({ status: response.status, sessions: filteredSessions });
-      });
+      fetchProjectSessions(selectedProjectId, selectedTimeInterval).then(
+        (response) => {
+          // Assuming response.session is an array
+          const filteredSessions = response.sessions.filter(
+            (session) => session.query_count !== 0
+          );
+          console.log("1 response", filteredSessions);
+          setSessionInfo({
+            status: response.status,
+            sessions: filteredSessions,
+          });
+        }
+      );
 
-      fetchProjectStats(selectedProjectId, "day").then((response) => {
-        console.log("2 repsonse", response);
-        setProjectState(response);
-      });
+      fetchProjectStats(selectedProjectId, selectedTimeInterval).then(
+        (response) => {
+          console.log("2 repsonse", response);
+          setProjectState(response);
+        }
+      );
     }
 
     fetchData();
-  }, [selectedProjectId]);
+  }, [selectedProjectId, selectedTimeInterval]);
 
   console.log(projectStats, sessionInfo);
   return (
@@ -65,26 +75,30 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
         </button>
       </div>
       <div className="analytics-dashboard-content">
-        <div className="analytics-dashboard-row total-graph-parent">
-          {projectStats == null ? (
-            <Loader />
-          ) : (
-            <>
+        {projectStats == null && sessionInfo == null ? (
+          <Loader />
+        ) : (
+          <>
+            <div className="analytics-dashboard-row total-graph-parent">
               <div className="stat-chart-wrapper total-graph-child">
                 <StatCard projectStats={projectStats} />
               </div>
               <div className="stat-chart-wrapper total-graph-child">
-                <StatTotalCard projectStats={projectStats} />
+                <StatTotalCard
+                  projectStats={projectStats}
+                  setSelectedTimeInterval={setSelectedTimeInterval}
+                />
               </div>
-            </>
-          )}
-        </div>
-        {
-          sessionInfo ? 
-          <div className="analytics-dashboard-row">
-          <SessionsDataGrid sessionData={sessionInfo}/>
-        </div> : <></>
-        }
+            </div>
+            {sessionInfo ? (
+              <div className="analytics-dashboard-row">
+                <SessionsDataGrid sessionData={sessionInfo} />
+              </div>
+            ) : (
+              <></>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
