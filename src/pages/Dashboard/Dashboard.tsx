@@ -15,6 +15,7 @@ import "react-resizable/css/styles.css";
 import { useFiles } from "../../context/fileContext.tsx";
 import PdfViewer from "../../components/PDF-viewer/PdfViewer.tsx";
 import CodeEditor from "../../components/Code-Editor/CodeEditor.tsx";
+import ProjectAnalytics from "../../components/Project-Analytics/Project-Analytics.tsx";
 
 const Dashboard: React.FC = () => {
   const [projects, setProjects] = useState<projectFetchReturn[]>([]);
@@ -36,6 +37,8 @@ const Dashboard: React.FC = () => {
   const kronosProjectsWrapperRef = useRef<HTMLTableRowElement>(null);
   const accordionRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [isDetailsOpen, setDetailsOpen] = useState<boolean>(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<null | string>(null);
 
   const { authenticated, keycloak } = useAuth();
   const navigate = useNavigate();
@@ -113,9 +116,6 @@ const Dashboard: React.FC = () => {
       }
     }
   });
-
-  //const [width, setWidth] = useState(window.innerWidth * 0.8);
-  //const [position, setPosition] = useState(0);
 
   const [fileBrowserWidth, setFileBrowserWidth] = useState<number>(
     window.innerWidth * 0.7 // Start with 70% of the window width
@@ -235,15 +235,22 @@ const Dashboard: React.FC = () => {
                 onResize={handleResize}
                 style={{ minWidth: "500px" }}
               >
-                <FileBrowser />
-                <button
-                  className="load-button"
-                  onClick={handleLoadClick}
-                  ref={loadButtonRef}
-                  id="load-more-button"
-                >
-                  Load more...
-                </button>
+                {isDetailsOpen
+                  ? <ProjectAnalytics selectedProjectId={selectedProjectId} setOpenDetails={() => { setDetailsOpen(false) }} projectName="Nku Test" projectDescription="Short description" projectId="akmxzo18xcnjaw" />
+                  :
+                  <>
+                    {/* @ts-expect-error: no need for the error */}
+                    <FileBrowser setDetailsOpen={setDetailsOpen} setSelectedProjectId={setSelectedProjectId} />
+                    <button
+                      className="load-button"
+                      onClick={handleLoadClick}
+                      ref={loadButtonRef}
+                      id="load-more-button"
+                    >
+                      Load more...
+                    </button>
+                  </>
+                }
               </ResizableBox>
             </div>
           </div>

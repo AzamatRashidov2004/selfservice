@@ -1,0 +1,79 @@
+.session-grid-wrapper{
+  width: 100%;
+}
+
+.MuiDataGrid-cell[data-field="session_id"]{
+  text-decoration: underline;
+  color: rgb(0, 66, 249);
+  cursor: pointer;
+}
+
+.session-grid-back{
+  margin-bottom: 20px;
+  display: flex;
+  width: 100%;
+  justify-content: end;
+}
+
+.analytics-dashboard-wrapper {
+  border: 1px solid #e0e0e0;
+  height: 500px;
+
+  & * {
+    font-size: 13px;
+  }
+
+  & h3 {
+    font-size: 19px;
+    margin-bottom: 0px;
+  }
+}
+
+.stat-chart-wrapper {
+  flex-basis: 31%;
+  margin: unset !important;
+}
+
+.analytics-dashboard-row {
+  display: flex;
+  justify-content: start;
+  gap: 50px;
+}
+
+.dropdown-toggle{
+  margin-bottom: 15px;
+}
+
+.total-graph-child {
+  margin: 0 auto;
+}
+
+.total-graph-parent {
+  align-items: start;
+}
+
+.analytics-dashboard-nav {
+  height: 84px;
+  border-bottom: solid 1px #e0e0e0;
+  margin: 0 8px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.analytics-dashboard-content {
+  padding: 10px 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  justify-content: start;
+  align-items: space-between;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.analytics-project-details {
+  justify-content: space-between;
+}

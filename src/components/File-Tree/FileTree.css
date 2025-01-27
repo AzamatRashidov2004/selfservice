@@ -53,11 +53,6 @@
     z-index: 2;
     border-radius: 10px;
     max-width: 150px;
-
-    &:hover>.new-button-options {
-      display: block;
-      width: 100%;
-    }
   }
 }
 

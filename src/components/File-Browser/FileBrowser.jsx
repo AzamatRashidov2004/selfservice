@@ -1,4 +1,5 @@
 import { setChonkyDefaults } from "chonky";
+import PropTypes from 'prop-types';
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
 import Loader from "../Loader/Loader";
@@ -18,7 +19,8 @@ import "./FileBrowser.css";
 import { clearSelection } from "../../utility/chonkyActionCalls";
 
 
-export default function FileBrowser() {
+
+export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
   const {
     getFileStructure,
     dragAndDropFile,
@@ -83,7 +85,9 @@ export default function FileBrowser() {
         setCodeLanguage,
         codeValue,
         setCurrentProjectId,
-        setFileActions
+        setFileActions,
+        setDetailsOpen,
+        setSelectedProjectId
       );
     },
     [getFileStructure, dragAndDropFile]
@@ -219,3 +223,7 @@ export default function FileBrowser() {
     </div>
   );
 }
+
+FileBrowser.propTypes = {
+  setDetailsOpen: PropTypes.func.isRequired,
+};
