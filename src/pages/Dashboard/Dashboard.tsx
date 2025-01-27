@@ -221,7 +221,8 @@ const Dashboard: React.FC = () => {
                 </button>
               </div>
               <div className="scrollable-content">
-                <FileTree />
+                {/* @ts-expect-error: The component is js so it doesnt find types */}
+                <FileTree  setDetailsOpen={setDetailsOpen} setSelectedProjectId={setSelectedProjectId}/>
               </div>
             </div>
 
@@ -239,7 +240,7 @@ const Dashboard: React.FC = () => {
                   ? <ProjectAnalytics selectedProjectId={selectedProjectId} setOpenDetails={() => { setDetailsOpen(false) }} projectName="Nku Test" projectDescription="Short description" projectId="akmxzo18xcnjaw" />
                   :
                   <>
-                    {/* @ts-expect-error: no need for the error */}
+                    {/* @ts-expect-error: The component is js so it doesnt find types */}
                     <FileBrowser setDetailsOpen={setDetailsOpen} setSelectedProjectId={setSelectedProjectId} />
                     <button
                       className="load-button"

@@ -17,7 +17,6 @@ export default function StatCard({ projectStats }: StatCardProps) {
     height: 150,
   };
 
-  console.log("XXX", projectStats);
 
   if (!projectStats) return null;
 

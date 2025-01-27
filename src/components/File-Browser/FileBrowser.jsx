@@ -59,7 +59,6 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
-      console.log(data.state.selectedFiles);
       handleAction(
         data,
         setCurrentFolder,

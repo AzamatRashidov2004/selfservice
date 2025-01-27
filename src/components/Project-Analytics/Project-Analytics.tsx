@@ -46,7 +46,6 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           const filteredSessions = response.sessions.filter(
             (session) => session.query_count !== 0
           );
-          console.log("1 response", filteredSessions);
           setSessionInfo({
             status: response.status,
             sessions: filteredSessions,
@@ -56,7 +55,6 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
 
       fetchProjectStats(selectedProjectId, selectedTimeInterval).then(
         (response) => {
-          console.log("2 repsonse", response);
           setProjectState(response);
         }
       );
@@ -65,7 +63,6 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     fetchData();
   }, [selectedProjectId, selectedTimeInterval]);
 
-  console.log(projectStats, sessionInfo);
   return (
     <div className="analytics-dashboard-wrapper">
       <div className="analytics-dashboard-nav">

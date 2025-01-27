@@ -188,8 +188,6 @@ async function handleAction(
     }
     setDetailsOpen(true);
     setSelectedProjectId(project.kronosProjectId);
-    console.log('askldmawklmdlkawmkd', currentProjectId);
-    console.log(project.kronosProjectId);
   }
 
   // Handle Create File custom action
