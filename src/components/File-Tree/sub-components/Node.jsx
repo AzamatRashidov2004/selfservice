@@ -57,7 +57,7 @@ export const CustomNode = (props) => {
     const mouseY = event.clientY;
 
     props.setDetailsOpen(false);
-    props.setSelectedProjectId(null);
+    props.setSelectedProjectData(null);
 
     // Find the Chonky container (assuming you have a selector for it)
     const chonkyContainer = await findChonkyContainerWithTimeout(`span[title="${props.node.text}"]`) // Replace with the correct selector

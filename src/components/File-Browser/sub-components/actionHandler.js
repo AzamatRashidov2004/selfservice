@@ -43,7 +43,7 @@ async function handleAction(
   setCurrentProjectId,
   setFileActions,
   setDetailsOpen,
-  setSelectedProjectId
+  setSelectedProjectData
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log('ACTION', data);
@@ -187,7 +187,10 @@ async function handleAction(
       return;
     }
     setDetailsOpen(true);
-    setSelectedProjectId(project.kronosProjectId);
+    setSelectedProjectData({
+      projectId: project.kronosProjectId,
+      title: project.text,
+    });
   }
 
   // Handle Create File custom action

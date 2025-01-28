@@ -20,7 +20,7 @@ import { clearSelection } from "../../utility/chonkyActionCalls";
 
 
 
-export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
+export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) {
   const {
     getFileStructure,
     dragAndDropFile,
@@ -86,7 +86,7 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
         setCurrentProjectId,
         setFileActions,
         setDetailsOpen,
-        setSelectedProjectId
+        setSelectedProjectData
       );
     },
     [getFileStructure, dragAndDropFile]

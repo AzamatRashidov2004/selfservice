@@ -16,7 +16,7 @@ import { updateSinglePath } from "../../utility/Api_Utils";
 import { updatePathBulk } from "../../api/kronos/postKronos";
 import handlePathChangeAtDepth from "../../utility/FileSystem_Utils";
 
-function FileTree({ setDetailsOpen, setSelectedProjectId }) {
+function FileTree({ setDetailsOpen, setSelectedProjectData }) {
   const {
     getFileStructure,
     dragAndDropFile,
@@ -138,7 +138,7 @@ function FileTree({ setDetailsOpen, setSelectedProjectId }) {
               ) => (
                 <CustomNode
                   setDetailsOpen={setDetailsOpen}
-                  setSelectedProjectId={setSelectedProjectId}
+                  setSelectedProjectData={setSelectedProjectData}
                   node={node}
                   depth={depth}
                   isOpen={isOpen}

@@ -14,17 +14,13 @@ import {
 import Loader from "../Loader/Loader";
 
 type ProjectDetails = {
-  projectName: string;
-  projectId: string;
-  projectDescription: string;
   setOpenDetails: () => void;
-  selectedProjectId: string | null;
+  selectedProjectData: {projectId: string, title: string} | null;
 };
 
 const ProjectAnalytics: React.FC<ProjectDetails> = ({
-  projectName,
   setOpenDetails,
-  selectedProjectId,
+  selectedProjectData,
 }) => {
   const [selectedTimeInterval, setSelectedTimeInterval] =
     useState<string>("day");
@@ -38,9 +34,9 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
 
   useEffect(() => {
     async function fetchData() {
-      if (!selectedProjectId) return;
+      if (!selectedProjectData) return;
 
-      fetchProjectSessions(selectedProjectId, selectedTimeInterval).then(
+      fetchProjectSessions(selectedProjectData.projectId, selectedTimeInterval).then(
         (response) => {
           // Assuming response.session is an array
           const filteredSessions = response.sessions.filter(
@@ -53,7 +49,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
         }
       );
 
-      fetchProjectStats(selectedProjectId, selectedTimeInterval).then(
+      fetchProjectStats(selectedProjectData.projectId, selectedTimeInterval).then(
         (response) => {
           setProjectState(response);
         }
@@ -61,12 +57,15 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     }
 
     fetchData();
-  }, [selectedProjectId, selectedTimeInterval]);
+  }, [selectedProjectData, selectedTimeInterval]);
 
   return (
     <div className="analytics-dashboard-wrapper">
       <div className="analytics-dashboard-nav">
-        <h3>{projectName}</h3>
+        <div>
+          <h3>{selectedProjectData ? selectedProjectData.title : ""}</h3>
+          <span className="analytics-id-wrapper">id: {selectedProjectData ? selectedProjectData.projectId : ""}</span>
+        </div>
         <button className="btn btn-outline-primary" onClick={setOpenDetails}>
           File Browser
         </button>

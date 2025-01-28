@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
   const accordionRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDetailsOpen, setDetailsOpen] = useState<boolean>(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<null | string>(null);
+  const [selectedProjectData, setSelectedProjectData] = useState<null | {projectId: string, title: string}>(null);
 
   const { authenticated, keycloak } = useAuth();
   const navigate = useNavigate();
@@ -222,7 +222,7 @@ const Dashboard: React.FC = () => {
               </div>
               <div className="scrollable-content">
                 {/* @ts-expect-error: The component is js so it doesnt find types */}
-                <FileTree  setDetailsOpen={setDetailsOpen} setSelectedProjectId={setSelectedProjectId}/>
+                <FileTree  setDetailsOpen={setDetailsOpen} setSelectedProjectData={setSelectedProjectData}/>
               </div>
             </div>
 
@@ -237,11 +237,11 @@ const Dashboard: React.FC = () => {
                 style={{ minWidth: "500px" }}
               >
                 {isDetailsOpen
-                  ? <ProjectAnalytics selectedProjectId={selectedProjectId} setOpenDetails={() => { setDetailsOpen(false) }} projectName="Nku Test" projectDescription="Short description" projectId="akmxzo18xcnjaw" />
+                  ? <ProjectAnalytics selectedProjectData={selectedProjectData} setOpenDetails={() => { setDetailsOpen(false) }} />
                   :
                   <>
                     {/* @ts-expect-error: The component is js so it doesnt find types */}
-                    <FileBrowser setDetailsOpen={setDetailsOpen} setSelectedProjectId={setSelectedProjectId} />
+                    <FileBrowser setDetailsOpen={setDetailsOpen} setSelectedProjectData={setSelectedProjectData} />
                     <button
                       className="load-button"
                       onClick={handleLoadClick}
