@@ -77,6 +77,17 @@ const columns: GridColDef[] = [
     align: "left",
     flex: 1,
     minWidth: 200,
+    renderCell: (params) => (
+      <div
+        style={{
+          padding: "3px 0",
+          minHeight: "36px"
+        }}
+      >
+        {params.value}
+      </div>
+    ),
+
   },
   {
     field: "feedback",
@@ -125,9 +136,9 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
     {
         sessionData ? 
         <DataGrid
-          autoHeight
           rows={rows}
           columns={columns}
+          getRowHeight={() => "auto"}
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
           }
