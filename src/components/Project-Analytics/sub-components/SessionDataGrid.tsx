@@ -2,20 +2,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import { GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import { fetchSessionEvents, SessionEventsResponse } from "../../../api/maestro/getMaestro";
 import { useEffect, useState } from "react";
-
-// converts ugly timestamp to pretty format
-function formatTimestamp(timestamp: string): string {
-  const date = new Date(timestamp);
-
-  const day = date.getDate().toString().padStart(2, "0"); // Day of the month with leading zero
-  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month (1-based) with leading zero
-  const year = date.getFullYear(); // Year
-
-  const hours = date.getHours().toString().padStart(2, "0"); // 24-hour format with leading zero
-  const minutes = date.getMinutes().toString().padStart(2, "0"); // Add leading zero to minutes
-
-  return `${day}.${month}.${year}, ${hours}:${minutes}`;
-}
+import { formatTimestamp } from "../../../utility/Date_Util";
 
 function createRows(sessionData: SessionEventsResponse | null) {
     if (!sessionData) return [];
