@@ -23,9 +23,12 @@ function createRows(sessionData: ProjectSessionResponse) {
 // Define the function to render sparklines
 // @ts-expect-error any is okay
 function renderSparklineCell(params) {
-  const uData = [params.row.conversions[0]];
-  const pData = [params.row.conversions[1]];
-  console.log("recieved params", params.row);
+  const uData = params.row.conversions[0];
+  const pData = params.row.conversions[1];
+
+  // Handle case where either uData or pData is 0
+  const total = uData + pData;
+  const percentage = total > 0 ? `${((pData / total) * 100).toFixed(1)}%` : "";
 
   return (
     <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
@@ -34,8 +37,8 @@ function renderSparklineCell(params) {
         height={120}
         colors={["hsl(115, 90.40%, 51.00%)", "hsl(0, 86.00%, 58.00%)"]}
         series={[
-          { data: pData, stack: "total", type: "bar" },
-          { data: uData, stack: "total", type: "bar" },
+          { data: [pData], stack: "total", type: "bar" },
+          { data: [uData], stack: "total", type: "bar" },
         ]}
         layout="horizontal"
         sx={{
@@ -44,6 +47,7 @@ function renderSparklineCell(params) {
           },
         }}
       />
+      <span>{percentage}</span>
     </div>
   );
 }
