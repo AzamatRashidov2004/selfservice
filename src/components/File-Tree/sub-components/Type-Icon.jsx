@@ -21,6 +21,7 @@ export const TypeIcon = (props) => {
       return <PictureAsPdfIcon fontSize="13px" />;
     case "html":
     case "json":
+    case "fsm":
       return <CodeIcon fontSize="13px" />; // Reusing code icon for both HTML and JSON
     case "project":
       return <AssignmentIcon fontSize="13px" />; // Using an assignment icon to remind of a "Project"
