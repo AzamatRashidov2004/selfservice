@@ -1,7 +1,6 @@
 import React from "react";
 import FolderIcon from "@mui/icons-material/Folder";
 import ImageIcon from "@mui/icons-material/Image";
-import ListAltIcon from "@mui/icons-material/ListAlt";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"; // PDF icon
 import TableChartIcon from "@mui/icons-material/TableChart"; // For CSV and XLSX

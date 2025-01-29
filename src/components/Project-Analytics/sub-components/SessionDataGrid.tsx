@@ -76,7 +76,7 @@ const columns: GridColDef[] = [
     headerAlign: "left",
     align: "left",
     flex: 1,
-    minWidth: 200,
+    minWidth: 600,
     renderCell: (params) => (
       <div
         style={{
