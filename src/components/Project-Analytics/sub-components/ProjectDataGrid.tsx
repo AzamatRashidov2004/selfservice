@@ -15,7 +15,7 @@ function createRows(sessionData: ProjectSessionResponse) {
       queries: session.query_count,
       feedback: session.feedback_count,
       timestamp: formatTimestamp(session.start_timestamp),
-      conversions: [session.positive_feedback, session.negative_feedback],
+      conversions: [session.negative_feedback, session.positive_feedback],
     };
   });
 }
@@ -25,6 +25,7 @@ function createRows(sessionData: ProjectSessionResponse) {
 function renderSparklineCell(params) {
   const uData = [params.row.conversions[0]];
   const pData = [params.row.conversions[1]];
+  console.log("recieved params", params.row);
 
   return (
     <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
