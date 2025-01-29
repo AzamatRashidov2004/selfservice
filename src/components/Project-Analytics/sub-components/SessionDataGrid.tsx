@@ -3,6 +3,7 @@ import { GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import { fetchSessionEvents, SessionEventsResponse } from "../../../api/maestro/getMaestro";
 import { useEffect, useState } from "react";
 import { formatTimestamp } from "../../../utility/Date_Util";
+import ReactMarkdown from "react-markdown";
 
 function createRows(sessionData: SessionEventsResponse | null) {
     if (!sessionData) return [];
@@ -81,13 +82,13 @@ const columns: GridColDef[] = [
       <div
         style={{
           padding: "3px 0",
-          minHeight: "36px"
+          minHeight: "36px",
         }}
       >
-        {params.value}
+        {/* Render the Markdown */}
+        <ReactMarkdown>{params.value || ""}</ReactMarkdown>
       </div>
     ),
-
   },
   {
     field: "feedback",
