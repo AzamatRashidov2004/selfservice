@@ -5,19 +5,21 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { PieChart, pieArcLabelClasses } from "@mui/x-charts/PieChart";
 import { ProjectStatsResponse } from "../../../api/maestro/getMaestro";
+import DropDownButton from "./DropDownButton";
 
 export type StatCardProps = {
   projectStats: null | ProjectStatsResponse;
+  setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
 };
 
-//todo there was a data it props
-export default function StatCard({ projectStats }: StatCardProps) {
+export default function StatCard({
+  projectStats,
+  setSelectedTimeInterval,
+}: StatCardProps) {
   const size = {
-    width: 250,
-    height: 150,
+    width: 300,
+    height: 300,
   };
-
-  console.log("XXX", projectStats);
 
   if (!projectStats) return null;
 
@@ -46,61 +48,79 @@ export default function StatCard({ projectStats }: StatCardProps) {
     },
   ];
 
-  const valueFormatter = (item: { value: number }) => `${item.value}%`;
-
-  const data = {
-    data: values,
-    valueFormatter,
-  };
   return (
-    <Card variant="outlined" sx={{ height: "100%", flexGrow: 1 }}>
-      <CardContent>
-        <Stack
-          direction="row"
-          sx={{ justifyContent: "space-between", flexGrow: "1", gap: 1 }}
-        >
-          <Stack sx={{ justifyContent: "space-between" }}>
-            <Stack
-              direction="column"
-              sx={{ justifyContent: "space-between", alignItems: "left" }}
-            >
-              <Typography component="h2" variant="subtitle2" gutterBottom>
-                Feedback count:{" "}
-                {projectStats.stats.total_negative_feedback +
-                  projectStats.stats.total_positive_feedback}
-              </Typography>
-              <Typography component="h2" variant="subtitle2" gutterBottom>
-                Positive: {projectStats.stats.total_positive_feedback}
-              </Typography>
-              <Typography component="h2" variant="subtitle2" gutterBottom>
-                Negative: {projectStats.stats.total_negative_feedback}
-              </Typography>
+    <>
+      <Card
+        variant="outlined"
+        sx={{
+          height: 290,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+        }}
+      >
+        <CardContent>
+          <Stack
+            direction="row"
+            sx={{
+              justifyContent: "space-between",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
+            <Stack sx={{ justifyContent: "space-between" }}>
+              <Stack
+                direction="column"
+                sx={{ justifyContent: "space-between", alignItems: "left" }}
+              >
+                <DropDownButton
+                  setSelectedTimeInterval={setSelectedTimeInterval}
+                />
+                <Typography component="h2" variant="subtitle2" gutterBottom>
+                  Total Feedback:{" "}
+                  {projectStats.stats.total_negative_feedback +
+                    projectStats.stats.total_positive_feedback}
+                </Typography>
+                <Typography component="h2" variant="subtitle2" gutterBottom>
+                  Total Queries: {projectStats.stats.total_queries}
+                </Typography>
+                <Typography component="h2" variant="subtitle2" gutterBottom>
+                  Total Sessions: {projectStats.stats.total_sessions}
+                </Typography>
+              </Stack>
             </Stack>
-          </Stack>
-          <Box sx={{ width: "50%", height: 150 }}>
-            <PieChart
-              series={[
-                {
-                  arcLabel: (item) => `${item.value}%`,
-                  arcLabelMinAngle: 35,
-                  arcLabelRadius: "60%",
-                  ...data,
-                },
-              ]}
+            <Box
               sx={{
-                [`& .${pieArcLabelClasses.root}`]: {
-                  fontWeight: "bold",
-                },
-                "& .MuiChartsLegend-root": {
-                  visibility: "hidden !important",
-                },
+                width: "60%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-              colors={["hsl(115, 90.40%, 51.00%)", "hsl(0, 86.00%, 58.00%)"]}
-              {...size}
-            />
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
+            >
+              <PieChart
+                series={[
+                  {
+                    arcLabel: (item) => `${item.value}%`,
+                    arcLabelMinAngle: 35,
+                    arcLabelRadius: "60%",
+                    data: values,
+                  },
+                ]}
+                sx={{
+                  [`& .${pieArcLabelClasses.root}`]: {
+                    fontWeight: "bold",
+                  },
+                  "& .MuiChartsLegend-root": {
+                    visibility: "hidden !important",
+                  },
+                }}
+                colors={["hsl(115, 90.40%, 51.00%)", "hsl(0, 86.00%, 58.00%)"]}
+                {...size}
+              />
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
+    </>
   );
 }
