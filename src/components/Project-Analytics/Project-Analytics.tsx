@@ -81,10 +81,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           <>
             <div className="analytics-dashboard-row total-graph-parent">
               <div className="stat-chart-wrapper total-graph-child">
-                <StatTotalCard
-                  projectStats={projectStats}
-                  setSelectedTimeInterval={setSelectedTimeInterval}
-                />
+                <StatTotalCard projectStats={projectStats} />
               </div>
               <div className="stat-chart-wrapper total-graph-child">
                 <StatCard
