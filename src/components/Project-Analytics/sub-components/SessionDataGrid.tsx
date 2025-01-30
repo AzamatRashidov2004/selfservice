@@ -2,20 +2,8 @@ import { DataGrid } from "@mui/x-data-grid";
 import { GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import { fetchSessionEvents, SessionEventsResponse } from "../../../api/maestro/getMaestro";
 import { useEffect, useState } from "react";
-
-// converts ugly timestamp to pretty format
-function formatTimestamp(timestamp: string): string {
-  const date = new Date(timestamp);
-
-  const day = date.getDate().toString().padStart(2, "0"); // Day of the month with leading zero
-  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month (1-based) with leading zero
-  const year = date.getFullYear(); // Year
-
-  const hours = date.getHours().toString().padStart(2, "0"); // 24-hour format with leading zero
-  const minutes = date.getMinutes().toString().padStart(2, "0"); // Add leading zero to minutes
-
-  return `${day}.${month}.${year}, ${hours}:${minutes}`;
-}
+import { formatTimestamp } from "../../../utility/Date_Util";
+import ReactMarkdown from "react-markdown";
 
 function createRows(sessionData: SessionEventsResponse | null) {
     if (!sessionData) return [];
@@ -89,7 +77,18 @@ const columns: GridColDef[] = [
     headerAlign: "left",
     align: "left",
     flex: 1,
-    minWidth: 200,
+    minWidth: 600,
+    renderCell: (params) => (
+      <div
+        style={{
+          padding: "3px 0",
+          minHeight: "36px",
+        }}
+      >
+        {/* Render the Markdown */}
+        <ReactMarkdown>{params.value || ""}</ReactMarkdown>
+      </div>
+    ),
   },
   {
     field: "feedback",
@@ -138,9 +137,9 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
     {
         sessionData ? 
         <DataGrid
-          autoHeight
           rows={rows}
           columns={columns}
+          getRowHeight={() => "auto"}
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
           }

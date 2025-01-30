@@ -15,10 +15,12 @@ import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
+import "./FileBrowser.css";
 import { clearSelection } from "../../utility/chonkyActionCalls";
 
 
-export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
+
+export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) {
   const {
     getFileStructure,
     dragAndDropFile,
@@ -38,6 +40,13 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
     pdfVisible,
     pdfUrl,
     setPdfUrl,
+    //files,
+    //setFiles,
+    visibleCount,
+    setVisibleCount,
+    incrementVisibleCount,
+    totalFilesCount,
+    setTotalFilesCount,
     setCodeVisible,
     setCodeValue,
     setCodeLanguage,
@@ -45,11 +54,11 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
     setCurrentProjectId,
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
+  const [files, setFiles] = useState([]);
   const chonkyRef = useRef(null);
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
-      console.log(data.state.selectedFiles);
       handleAction(
         data,
         setCurrentFolder,
@@ -77,7 +86,7 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
         setCurrentProjectId,
         setFileActions,
         setDetailsOpen,
-        setSelectedProjectId
+        setSelectedProjectData
       );
     },
     [getFileStructure, dragAndDropFile]
@@ -85,7 +94,6 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
 
   // Set the Chonky icon set
   setChonkyDefaults({ iconComponent: ChonkyIconFA });
-  const [files, setFiles] = useState(null);
   const [folderChain, setFolderChain] = useState(null);
   const [fileActions, setFileActions] = useState(
     [
@@ -112,8 +120,57 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
       folderChainTemp = folderChainTemp1;
     }
     setFolderChain(folderChainTemp);
-    setFiles(filesTemp);
-  }, [currentFolder, getFileStructure]);
+
+    // Make sure filesTemp is an array before slicing
+    if (Array.isArray(filesTemp)) {
+      setTotalFilesCount(filesTemp.length);
+      setFiles(filesTemp.slice(0, visibleCount));
+    } else {
+      setFiles([]); // Fallback to an empty array if filesTemp is not valid
+    }
+  }, [currentFolder, getFileStructure, visibleCount]);
+
+  // Reset visible count when changing folders
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [currentFolder]);
+
+  const loadMoreButton = document.getElementById("load-more-button");
+  loadMoreButton?.classList.add("hidden");
+
+  // After the FullFileBrowser is rendered:
+  useEffect(() => {
+    var scrollableEl;
+    document.querySelectorAll("div").forEach((div) => {
+      if ([...div.classList].some((cls) => cls.includes("listContainer"))) {
+        scrollableEl = div;
+      }
+    });
+
+    console.log("the scrollableEl is: ", scrollableEl);
+    const fileListWrapper = document.querySelector(".chonky-fileListWrapper");
+
+    if (scrollableEl) {
+      const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = scrollableEl;
+        if (scrollTop + clientHeight >= scrollHeight - 20) {
+
+          if (visibleCount < totalFilesCount) {
+            if (loadMoreButton) loadMoreButton.classList.remove("hidden");
+          }
+        } else {
+          if (loadMoreButton) loadMoreButton.classList.add("hidden");
+          if (fileListWrapper)
+            fileListWrapper.classList.remove("buttom-margin");
+        }
+      };
+      scrollableEl.addEventListener("scroll", handleScroll);
+
+      return () => {
+        scrollableEl.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, [visibleCount, files]);
 
   useEffect(() => {
     const handleClick = (event) => {
@@ -131,6 +188,7 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
     };
   }, []);
 
+
   return (
     <div ref={chonkyRef} style={{ width: "100%", height: "500px" }}>
       {fileUploadLoading ? (
@@ -142,9 +200,10 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.7)",
             borderRadius: "10px",
+            zIndex: "1000",
           }}
         >
-          <Loader loader="white" />
+          <Loader loader="white" loaderText="Uploading File"/>
         </div>
       ) : (
         <></>
@@ -156,6 +215,9 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectId }) {
         fileActions={fileActions}
         onFileAction={handleActionWrapper}
         disableDefaultFileActions={true}
+        fileListAdditionalProps={{
+          style: { marginBottom: "28px !important" }, // Add extra space at bottom
+        }}
       />
     </div>
   );

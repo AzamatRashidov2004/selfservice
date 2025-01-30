@@ -26,6 +26,7 @@ const Dashboard: React.FC = () => {
     setPdfUrl,
     setPdfVisible,
     pdfUrl,
+    incrementVisibleCount,
     codeLanguage,
     codeVisible,
     setCodeVisible,
@@ -37,7 +38,7 @@ const Dashboard: React.FC = () => {
   const accordionRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDetailsOpen, setDetailsOpen] = useState<boolean>(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<null | string>(null);
+  const [selectedProjectData, setSelectedProjectData] = useState<null | {projectId: string, title: string}>(null);
 
   const { authenticated, keycloak } = useAuth();
   const navigate = useNavigate();
@@ -132,7 +133,13 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  // PDF viewer handler
+
+  const loadButtonRef = useRef<HTMLButtonElement>(null);
+  const handleLoadClick = () => {
+    loadButtonRef?.current?.classList.add("hidden");
+    incrementVisibleCount();
+  };
+
   useEffect(() => {
     const targetPdf = document.getElementById("pdf-container");
     const targetRest = document.getElementById("dashboard-part");
@@ -166,11 +173,15 @@ const Dashboard: React.FC = () => {
 
   const handleMouseEnter = () => {
     const body = document.body;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    body.style.paddingRight = `${scrollbarWidth}px !important`; // Add padding to offset scrollbar disappearance
     body.classList.add("unscrollable");
   };
 
   const handleMouseLeave = () => {
     const body = document.body;
+    body.style.paddingRight = ""; // Remove padding
     body.classList.remove("unscrollable");
   };
 
@@ -210,7 +221,8 @@ const Dashboard: React.FC = () => {
                 </button>
               </div>
               <div className="scrollable-content">
-                <FileTree />
+                {/* @ts-expect-error: The component is js so it doesnt find types */}
+                <FileTree  setDetailsOpen={setDetailsOpen} setSelectedProjectData={setSelectedProjectData}/>
               </div>
             </div>
 
@@ -224,10 +236,22 @@ const Dashboard: React.FC = () => {
                 onResize={handleResize}
                 style={{ minWidth: "500px" }}
               >
-                {!isDetailsOpen
-                  /* @ts-expect-error: Ignoring type error as the File Browser is a JSX file */
-                  ? <FileBrowser setDetailsOpen={setDetailsOpen} setSelectedProjectId={setSelectedProjectId} />
-                  : <ProjectAnalytics selectedProjectId={selectedProjectId} setOpenDetails={() => { setDetailsOpen(false) }} projectName="Nku Test" projectDescription="Short description" projectId="akmxzo18xcnjaw" />}
+                {isDetailsOpen
+                  ? <ProjectAnalytics selectedProjectData={selectedProjectData} setOpenDetails={() => { setDetailsOpen(false) }} />
+                  :
+                  <>
+                    {/* @ts-expect-error: The component is js so it doesnt find types */}
+                    <FileBrowser setDetailsOpen={setDetailsOpen} setSelectedProjectData={setSelectedProjectData} />
+                    <button
+                      className="load-button"
+                      onClick={handleLoadClick}
+                      ref={loadButtonRef}
+                      id="load-more-button"
+                    >
+                      Load more...
+                    </button>
+                  </>
+                }
               </ResizableBox>
             </div>
           </div>

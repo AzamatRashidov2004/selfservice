@@ -4,20 +4,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import { ProjectSessionResponse } from "../../../api/maestro/getMaestro";
 import { useState } from "react";
 import SessionsDataGrid from "./SessionDataGrid";
-
-// converts ugly timestamp to pretty format
-function formatTimestamp(timestamp: string): string {
-  const date = new Date(timestamp);
-
-  const day = date.getDate().toString().padStart(2, "0"); // Day of the month with leading zero
-  const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Month (1-based) with leading zero
-  const year = date.getFullYear(); // Year
-
-  const hours = date.getHours().toString().padStart(2, "0"); // 24-hour format with leading zero
-  const minutes = date.getMinutes().toString().padStart(2, "0"); // Add leading zero to minutes
-
-  return `${day}.${month}.${year}, ${hours}:${minutes}`;
-}
+import { formatTimestamp } from "../../../utility/Date_Util";
 
 // converts Sessions type to DataGrid Compatible Type
 function createRows(sessionData: ProjectSessionResponse) {
@@ -28,7 +15,7 @@ function createRows(sessionData: ProjectSessionResponse) {
       queries: session.query_count,
       feedback: session.feedback_count,
       timestamp: formatTimestamp(session.start_timestamp),
-      conversions: [session.positive_feedback, session.negative_feedback],
+      conversions: [session.negative_feedback, session.positive_feedback],
     };
   });
 }
@@ -36,8 +23,12 @@ function createRows(sessionData: ProjectSessionResponse) {
 // Define the function to render sparklines
 // @ts-expect-error any is okay
 function renderSparklineCell(params) {
-  const uData = [params.row.conversions[0]];
-  const pData = [params.row.conversions[1]];
+  const uData = params.row.conversions[0];
+  const pData = params.row.conversions[1];
+
+  // Handle case where either uData or pData is 0
+  const total = uData + pData;
+  const percentage = total > 0 ? `${((pData / total) * 100).toFixed(1)}%` : "";
 
   return (
     <div style={{ display: "flex", alignItems: "center", height: "100%" }}>
@@ -46,8 +37,8 @@ function renderSparklineCell(params) {
         height={120}
         colors={["hsl(115, 90.40%, 51.00%)", "hsl(0, 86.00%, 58.00%)"]}
         series={[
-          { data: pData, stack: "total", type: "bar" },
-          { data: uData, stack: "total", type: "bar" },
+          { data: [pData], stack: "total", type: "bar" },
+          { data: [uData], stack: "total", type: "bar" },
         ]}
         layout="horizontal"
         sx={{
@@ -56,6 +47,7 @@ function renderSparklineCell(params) {
           },
         }}
       />
+      <span>{percentage}</span>
     </div>
   );
 }

@@ -55,11 +55,15 @@
 .analytics-dashboard-nav {
   height: 84px;
   border-bottom: solid 1px #e0e0e0;
-  margin: 0 8px;
+  margin: 0 12px;
   padding: 0 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.analytics-id-wrapper{
+  margin-left: 1px;
 }
 
 .analytics-dashboard-content {

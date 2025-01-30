@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type DropDownButtonProps = {
   setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
@@ -7,29 +7,49 @@ type DropDownButtonProps = {
 export default function DropDownButton({
   setSelectedTimeInterval,
 }: DropDownButtonProps) {
-  const [selectedOption, setSelectedOption] = useState<string>("Last Day"); // Default: "Day"
+  const [selectedOption, setSelectedOption] = useState<string>("Last Day"); // Default: "Last Day"
+
+  useEffect(() => {
+    // Load cached selection from sessionStorage
+    const cachedOption = sessionStorage.getItem("selectedTimeInterval");
+    if (cachedOption) {
+      setSelectedOption(cachedOption); // Update local state
+      setSelectedTimeInterval(cachedOption.toLowerCase()); // Sync parent state
+    }
+  }, [setSelectedTimeInterval]);
 
   const handleSelect = (option: string) => {
-    if (option == "Day") {
-      setSelectedOption("Last Day");
+    let displayText = "";
+    switch (option) {
+      case "Hour":
+        displayText = "Last Hour";
+        break;
+      case "Day":
+        displayText = "Last Day";
+        break;
+      case "Week":
+        displayText = "Last Week";
+        break;
+      case "Month":
+        displayText = "Last Month";
+        break;
+      case "All":
+        displayText = "All";
+        break;
+      default:
+        displayText = "Last Day";
     }
-    if (option == "Hour") {
-      setSelectedOption("Last Hour");
-    }
-    if (option == "Week") {
-      setSelectedOption("Last Week");
-    }
-    if (option == "Month") {
-      setSelectedOption("Last Month");
-    }
-    if (option == "All") {
-      setSelectedOption("All");
-    }
+
+    // Update local state and parent state
+    setSelectedOption(displayText);
     setSelectedTimeInterval(option.toLowerCase());
+
+    // Cache the selection in sessionStorage
+    sessionStorage.setItem("selectedTimeInterval", displayText);
   };
 
   return (
-    <div className="dropdown" style={{ position: "relative", width: "200p" }}>
+    <div className="dropdown" style={{ position: "relative", width: "200px" }}>
       {/* Dropdown button */}
       <style>
         {`

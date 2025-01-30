@@ -16,7 +16,7 @@ export const isItemInCache = (key: string) => {
   if (!sessionStorage.getItem(key)) {
     return false;
   }
-  return true;
+  return false;
 };
 
 export const getItemFromCache = (key: string) => {
