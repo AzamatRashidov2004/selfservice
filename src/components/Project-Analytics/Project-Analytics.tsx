@@ -15,7 +15,7 @@ import Loader from "../Loader/Loader";
 
 type ProjectDetails = {
   setOpenDetails: () => void;
-  selectedProjectData: {projectId: string, title: string} | null;
+  selectedProjectData: { projectId: string; title: string } | null;
 };
 
 const ProjectAnalytics: React.FC<ProjectDetails> = ({
@@ -36,24 +36,26 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     async function fetchData() {
       if (!selectedProjectData) return;
 
-      fetchProjectSessions(selectedProjectData.projectId, selectedTimeInterval).then(
-        (response) => {
-          // Assuming response.session is an array
-          const filteredSessions = response.sessions.filter(
-            (session) => session.query_count !== 0
-          );
-          setSessionInfo({
-            status: response.status,
-            sessions: filteredSessions,
-          });
-        }
-      );
+      fetchProjectSessions(
+        selectedProjectData.projectId,
+        selectedTimeInterval
+      ).then((response) => {
+        // Assuming response.session is an array
+        const filteredSessions = response.sessions.filter(
+          (session) => session.query_count !== 0
+        );
+        setSessionInfo({
+          status: response.status,
+          sessions: filteredSessions,
+        });
+      });
 
-      fetchProjectStats(selectedProjectData.projectId, selectedTimeInterval).then(
-        (response) => {
-          setProjectState(response);
-        }
-      );
+      fetchProjectStats(
+        selectedProjectData.projectId,
+        selectedTimeInterval
+      ).then((response) => {
+        setProjectState(response);
+      });
     }
 
     fetchData();
@@ -64,7 +66,9 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
       <div className="analytics-dashboard-nav">
         <div>
           <h3>{selectedProjectData ? selectedProjectData.title : ""}</h3>
-          <span className="analytics-id-wrapper">id: {selectedProjectData ? selectedProjectData.projectId : ""}</span>
+          <span className="analytics-id-wrapper">
+            id: {selectedProjectData ? selectedProjectData.projectId : ""}
+          </span>
         </div>
         <button className="btn btn-outline-primary" onClick={setOpenDetails}>
           File Browser
@@ -77,7 +81,10 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           <>
             <div className="analytics-dashboard-row total-graph-parent">
               <div className="stat-chart-wrapper total-graph-child">
-                <StatTotalCard projectStats={projectStats} />
+                <StatTotalCard
+                  projectStats={projectStats}
+                  setSelectedTimeInterval={setSelectedTimeInterval}
+                />
               </div>
               <div className="stat-chart-wrapper total-graph-child">
                 <StatCard
