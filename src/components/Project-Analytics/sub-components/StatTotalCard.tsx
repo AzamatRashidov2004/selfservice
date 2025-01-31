@@ -208,11 +208,13 @@ export default function StatCard({
                 // Provide your two series for negative and positive
                 series={[
                   {
+                    label: "Negative feedback",
                     data: dataSets.negative,
                     color: "#F44336", // Red color for negative
                     stack: "total",
                   },
                   {
+                    label: "Positive feedback",
                     data: dataSets.positive,
                     color: "#4CAF50", // Green color for positive
                     stack: "total",
