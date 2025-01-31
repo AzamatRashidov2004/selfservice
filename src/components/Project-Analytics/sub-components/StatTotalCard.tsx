@@ -46,10 +46,7 @@ const dayLabels = [
   "22:00",
 ];
 
-// For this example, hour is treated the same as day.
-// Adjust if your logic differs.
-const hourLabels = dayLabels;
-
+const hourLabels = dayLabels; // For simplicity, treat 'hour' the same as 'day'
 const weekLabels = [
   "Day 1",
   "Day 2",
@@ -59,9 +56,7 @@ const weekLabels = [
   "Day 6",
   "Day 7",
 ];
-
 const monthLabels = ["Week 1", "Week 2", "Week 3", "Week 4"];
-
 const allLabels = [
   "Jan",
   "Feb",
@@ -94,6 +89,38 @@ function getXLabels(interval: string): string[] {
   }
 }
 
+/**
+ * Create data arrays matching the length of the labels.
+ * Any missing or zero data is handled by returning 0.
+ */
+function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
+  const negativeArr: number[] = [];
+  const positiveArr: number[] = [];
+
+  for (let i = 0; i < labelCount; i++) {
+    const item = stats[i];
+    if (!item) {
+      // No data for this index => 0
+      negativeArr.push(0);
+      positiveArr.push(0);
+      continue;
+    }
+
+    const total = item.total_negative_feedback + item.total_positive_feedback;
+    if (total === 0) {
+      // Prevent divide-by-zero or NaN
+      negativeArr.push(0);
+      positiveArr.push(0);
+    } else {
+      // Calculate percentages
+      negativeArr.push((item.total_negative_feedback / total) * 100);
+      positiveArr.push((item.total_positive_feedback / total) * 100);
+    }
+  }
+
+  return { negative: negativeArr, positive: positiveArr };
+}
+
 export default function StatCard({
   graphFeedbackInfo,
   selectedTimeInterval,
@@ -106,38 +133,18 @@ export default function StatCard({
   });
 
   useEffect(() => {
-    // 1. Determine the labels based on the selected interval.
     const labelSet = getXLabels(selectedTimeInterval);
     setXLabels(labelSet);
 
-    // 2. If we have valid stats data, compute the percentage data.
-    if (
-      graphFeedbackInfo &&
-      Array.isArray(graphFeedbackInfo.stats) &&
-      graphFeedbackInfo.stats.length > 0
-    ) {
-      // Make sure there's a matching number of labels and data points.
-      // (If your data can mismatch in length, handle that accordingly.)
-      const negativeData = graphFeedbackInfo.stats.map((item: Stat) => {
-        const total =
-          item.total_negative_feedback + item.total_positive_feedback;
-        if (total === 0) return 0;
-        return (item.total_negative_feedback / total) * 100;
-      });
-
-      const positiveData = graphFeedbackInfo.stats.map((item: Stat) => {
-        const total =
-          item.total_negative_feedback + item.total_positive_feedback;
-        if (total === 0) return 0;
-        return (item.total_positive_feedback / total) * 100;
-      });
-
-      setDataSets({
-        negative: negativeData,
-        positive: positiveData,
-      });
+    if (graphFeedbackInfo && Array.isArray(graphFeedbackInfo.stats)) {
+      // Create data arrays that match the length of labelSet
+      const newDataSets = createDataSets(
+        graphFeedbackInfo.stats,
+        labelSet.length
+      );
+      setDataSets(newDataSets);
     } else {
-      // No data or empty array: clear the chart
+      // No data => empty arrays
       setDataSets({ negative: [], positive: [] });
     }
   }, [graphFeedbackInfo, selectedTimeInterval]);
@@ -211,8 +218,7 @@ export default function StatCard({
                     stack: "total",
                   },
                 ]}
-                // With `stackOffset="none"`, stacked bars will sum directly
-                // to show total 100 (since we did the math for percentages).
+                // stackOffset="none" so each bar sums up to 100
                 width={500}
                 height={300}
               />
