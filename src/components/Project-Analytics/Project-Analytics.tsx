@@ -10,6 +10,7 @@ import {
   ProjectSessionResponse,
   fetchProjectSessions,
   fetchProjectStats,
+  fetchProjectStatsTimeRange,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
 
@@ -31,6 +32,12 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
   const [sessionInfo, setSessionInfo] = useState<null | ProjectSessionResponse>(
     null
   );
+
+  const [graphFeedbackInfo, setGraphFeedbackInfo] =
+    useState<null | ProjectStatsResponse>(null);
+
+  const [feedbackGraphLoading, setFeedbackGraphLoading] =
+    useState<boolean>(true);
 
   useEffect(() => {
     async function fetchData() {
@@ -55,6 +62,16 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
         selectedTimeInterval
       ).then((response) => {
         setProjectState(response);
+      });
+      setFeedbackGraphLoading(true);
+      fetchProjectStatsTimeRange(
+        selectedProjectData.projectId,
+        selectedTimeInterval
+      ).then((response) => {
+        setGraphFeedbackInfo(response);
+        if (response != null) {
+          setFeedbackGraphLoading(false);
+        }
       });
     }
 
@@ -81,7 +98,11 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           <>
             <div className="analytics-dashboard-row total-graph-parent">
               <div className="stat-chart-wrapper total-graph-child">
-                <StatTotalCard projectStats={projectStats} />
+                <StatTotalCard
+                  graphFeedbackInfo={graphFeedbackInfo}
+                  selectedTimeInterval={selectedTimeInterval}
+                  loading={feedbackGraphLoading}
+                />
               </div>
               <div className="stat-chart-wrapper total-graph-child">
                 <StatCard
