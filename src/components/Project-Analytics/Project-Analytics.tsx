@@ -96,20 +96,16 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           <Loader />
         ) : (
           <>
-            <div className="analytics-dashboard-row total-graph-parent">
-              <div className="stat-chart-wrapper total-graph-child">
-                <StatTotalCard
-                  graphFeedbackInfo={graphFeedbackInfo}
-                  selectedTimeInterval={selectedTimeInterval}
-                  loading={feedbackGraphLoading}
-                />
-              </div>
-              <div className="stat-chart-wrapper total-graph-child">
-                <StatCard
-                  projectStats={projectStats}
-                  setSelectedTimeInterval={setSelectedTimeInterval}
-                />
-              </div>
+            <div className="total-graph-parent">
+              <StatTotalCard
+                graphFeedbackInfo={graphFeedbackInfo}
+                selectedTimeInterval={selectedTimeInterval}
+                loading={feedbackGraphLoading}
+              />
+              <StatCard
+                projectStats={projectStats}
+                setSelectedTimeInterval={setSelectedTimeInterval}
+              />
             </div>
             {sessionInfo ? (
               <div className="analytics-dashboard-row">

@@ -12,7 +12,7 @@ import Loader from "../../Loader/Loader";
  */
 export type StatCardProps = {
   graphFeedbackInfo: ProjectStatsResponse | null;
-  selectedTimeInterval: "hour" | "day" | "week" | "month" | "all";
+  selectedTimeInterval: string;
   loading: boolean;
 };
 
@@ -91,7 +91,7 @@ function getXLabels(interval: string): string[] {
 
 /**
  * Create data arrays matching the length of the labels.
- * Any missing or zero data is handled by returning 0.
+ * The values are percentages computed from the raw data.
  */
 function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
   const negativeArr: number[] = [];
@@ -100,7 +100,6 @@ function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
   for (let i = 0; i < labelCount; i++) {
     const item = stats[i];
     if (!item) {
-      // No data for this index => 0
       negativeArr.push(0);
       positiveArr.push(0);
       continue;
@@ -108,11 +107,9 @@ function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
 
     const total = item.total_negative_feedback + item.total_positive_feedback;
     if (total === 0) {
-      // Prevent divide-by-zero or NaN
       negativeArr.push(0);
       positiveArr.push(0);
     } else {
-      // Calculate percentages
       negativeArr.push((item.total_negative_feedback / total) * 100);
       positiveArr.push((item.total_positive_feedback / total) * 100);
     }
@@ -137,26 +134,24 @@ export default function StatCard({
     setXLabels(labelSet);
 
     if (graphFeedbackInfo && Array.isArray(graphFeedbackInfo.stats)) {
-      // Create data arrays that match the length of labelSet
+      // Create percentage arrays matching the number of labels
       const newDataSets = createDataSets(
         graphFeedbackInfo.stats,
         labelSet.length
       );
       setDataSets(newDataSets);
     } else {
-      // No data => empty arrays
+      // No data: empty arrays
       setDataSets({ negative: [], positive: [] });
     }
   }, [graphFeedbackInfo, selectedTimeInterval]);
-
-  console.log("xLabels:", xLabels);
-  console.log("dataSets:", dataSets);
 
   return (
     <Card
       variant="outlined"
       sx={{
         height: "290px",
+        minWidth: "50%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -205,22 +200,41 @@ export default function StatCard({
                     max: 100,
                   },
                 ]}
-                // Provide your two series for negative and positive
+                // Two series with valueFormatter to show raw counts
                 series={[
                   {
                     label: "Negative feedback",
                     data: dataSets.negative,
-                    color: "#F44336", // Red color for negative
+                    color: "#F44336",
                     stack: "total",
+                    valueFormatter: (v, { dataIndex }) => {
+                      if (
+                        !graphFeedbackInfo ||
+                        !Array.isArray(graphFeedbackInfo.stats)
+                      ) {
+                        return "";
+                      }
+                      const stat = graphFeedbackInfo.stats[dataIndex];
+                      return `${stat.total_negative_feedback}`;
+                    },
                   },
                   {
                     label: "Positive feedback",
                     data: dataSets.positive,
-                    color: "#4CAF50", // Green color for positive
+                    color: "#4CAF50",
                     stack: "total",
+                    valueFormatter: (v, { dataIndex }) => {
+                      if (
+                        !graphFeedbackInfo ||
+                        !Array.isArray(graphFeedbackInfo.stats)
+                      ) {
+                        return "";
+                      }
+                      const stat = graphFeedbackInfo.stats[dataIndex];
+                      return `${stat.total_positive_feedback}`;
+                    },
                   },
                 ]}
-                // stackOffset="none" so each bar sums up to 100
                 width={500}
                 height={300}
               />

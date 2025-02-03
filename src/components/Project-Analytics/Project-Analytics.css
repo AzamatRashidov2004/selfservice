@@ -1,14 +1,14 @@
-.session-grid-wrapper{
+.session-grid-wrapper {
   width: 100%;
 }
 
-.MuiDataGrid-cell[data-field="session_id"]{
+.MuiDataGrid-cell[data-field="session_id"] {
   text-decoration: underline;
   color: rgb(0, 66, 249);
   cursor: pointer;
 }
 
-.session-grid-back{
+.session-grid-back {
   margin-bottom: 20px;
   display: flex;
   width: 100%;
@@ -32,6 +32,7 @@
 .stat-chart-wrapper {
   flex-basis: 31%;
   margin: unset !important;
+  padding: 20px;
 }
 
 .analytics-dashboard-row {
@@ -40,7 +41,7 @@
   gap: 50px;
 }
 
-.dropdown-toggle{
+.dropdown-toggle {
   margin-bottom: 15px;
 }
 
@@ -49,7 +50,11 @@
 }
 
 .total-graph-parent {
-  align-items: start;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  padding: 20px;
 }
 
 .analytics-dashboard-nav {
@@ -62,7 +67,7 @@
   justify-content: space-between;
 }
 
-.analytics-id-wrapper{
+.analytics-id-wrapper {
   margin-left: 1px;
 }
 

@@ -92,6 +92,7 @@ export default function StatCard({
             <Box
               sx={{
                 width: "60%",
+                height: "100%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
