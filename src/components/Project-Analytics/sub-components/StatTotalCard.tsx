@@ -18,8 +18,8 @@ export type StatCardProps = {
 
 interface Stat {
   total_queries: number;
-  total_positive_feedback: number;
-  total_negative_feedback: number;
+  total_positive_feedback: number | undefined;
+  total_negative_feedback: number | undefined;
   total_sessions: number;
 }
 
@@ -100,6 +100,15 @@ function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
   for (let i = 0; i < labelCount; i++) {
     const item = stats[i];
     if (!item) {
+      negativeArr.push(0);
+      positiveArr.push(0);
+      continue;
+    }
+
+    if (
+      item.total_negative_feedback == undefined ||
+      item.total_positive_feedback == undefined
+    ) {
       negativeArr.push(0);
       positiveArr.push(0);
       continue;
@@ -215,7 +224,11 @@ export default function StatCard({
                         return "";
                       }
                       const stat = graphFeedbackInfo.stats[dataIndex];
-                      return `${stat.total_negative_feedback}`;
+                      return `${
+                        stat && stat.total_negative_feedback != undefined
+                          ? stat.total_negative_feedback
+                          : 0
+                      }`;
                     },
                   },
                   {
@@ -231,7 +244,11 @@ export default function StatCard({
                         return "";
                       }
                       const stat = graphFeedbackInfo.stats[dataIndex];
-                      return `${stat.total_positive_feedback}`;
+                      return `${
+                        stat && stat.total_positive_feedback != undefined
+                          ? stat.total_positive_feedback
+                          : 0
+                      }`;
                     },
                   },
                 ]}

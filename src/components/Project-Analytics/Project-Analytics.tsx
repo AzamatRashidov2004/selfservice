@@ -57,22 +57,38 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
         });
       });
 
-      fetchProjectStats(
-        selectedProjectData.projectId,
-        selectedTimeInterval
-      ).then((response) => {
-        setProjectState(response);
-      });
       setFeedbackGraphLoading(true);
-      fetchProjectStatsTimeRange(
-        selectedProjectData.projectId,
-        selectedTimeInterval
-      ).then((response) => {
-        setGraphFeedbackInfo(response);
-        if (response != null) {
-          setFeedbackGraphLoading(false);
-        }
-      });
+      if (selectedTimeInterval == "hour") {
+        fetchProjectStatsTimeRange(selectedProjectData.projectId, "day").then(
+          (response) => {
+            setGraphFeedbackInfo(response);
+            if (response != null) {
+              setFeedbackGraphLoading(false);
+            }
+          }
+        );
+        fetchProjectStats(selectedProjectData.projectId, "day").then(
+          (response) => {
+            setProjectState(response);
+          }
+        );
+      } else {
+        fetchProjectStatsTimeRange(
+          selectedProjectData.projectId,
+          selectedTimeInterval
+        ).then((response) => {
+          setGraphFeedbackInfo(response);
+          if (response != null) {
+            setFeedbackGraphLoading(false);
+          }
+        });
+        fetchProjectStats(
+          selectedProjectData.projectId,
+          selectedTimeInterval
+        ).then((response) => {
+          setProjectState(response);
+        });
+      }
     }
 
     fetchData();
