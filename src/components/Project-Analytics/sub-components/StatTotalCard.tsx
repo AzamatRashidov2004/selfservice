@@ -221,7 +221,7 @@ export default function StatCard({
                   {
                     label: "Positive feedback",
                     data: dataSets.positive,
-                    color: "#4CAF50",
+                    color: "#74ef4b",
                     stack: "total",
                     valueFormatter: (v, { dataIndex }) => {
                       if (
