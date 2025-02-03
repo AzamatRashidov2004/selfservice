@@ -47,16 +47,26 @@ const dayLabels = [
 ];
 
 const hourLabels = dayLabels; // For simplicity, treat 'hour' the same as 'day'
+
+// For week interval, show actual day names.
 const weekLabels = [
-  "Day 1",
-  "Day 2",
-  "Day 3",
-  "Day 4",
-  "Day 5",
-  "Day 6",
-  "Day 7",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
 ];
-const monthLabels = ["Week 1", "Week 2", "Week 3", "Week 4"];
+
+// For month interval, show date ranges instead of generic "Week 1" labels.
+const monthLabels = [
+  "23.01 - 30.01",
+  "31.01 - 07.02",
+  "08.02 - 14.02",
+  "15.02 - 21.02",
+];
+
 const allLabels = [
   "Jan",
   "Feb",
@@ -106,8 +116,8 @@ function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
     }
 
     if (
-      item.total_negative_feedback == undefined ||
-      item.total_positive_feedback == undefined
+      item.total_negative_feedback === undefined ||
+      item.total_positive_feedback === undefined
     ) {
       negativeArr.push(0);
       positiveArr.push(0);
@@ -195,11 +205,14 @@ export default function StatCard({
               </div>
             ) : (
               <BarChart
-                // X-axis configuration for your labels
+                // X-axis configuration for your labels with tick settings to force all labels
                 xAxis={[
                   {
                     scaleType: "band",
                     data: xLabels,
+                    tick: {
+                      autoSkip: false,
+                    },
                   },
                 ]}
                 // Y-axis from 0 to 100 for the percentage range
@@ -225,7 +238,7 @@ export default function StatCard({
                       }
                       const stat = graphFeedbackInfo.stats[dataIndex];
                       return `${
-                        stat && stat.total_negative_feedback != undefined
+                        stat && stat.total_negative_feedback !== undefined
                           ? stat.total_negative_feedback
                           : 0
                       }`;
@@ -245,14 +258,15 @@ export default function StatCard({
                       }
                       const stat = graphFeedbackInfo.stats[dataIndex];
                       return `${
-                        stat && stat.total_positive_feedback != undefined
+                        stat && stat.total_positive_feedback !== undefined
                           ? stat.total_positive_feedback
                           : 0
                       }`;
                     },
                   },
                 ]}
-                width={500}
+                // Increase width if necessary so labels have enough room
+                width={600}
                 height={300}
               />
             )}
