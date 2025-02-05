@@ -54,6 +54,7 @@ export default function StatCard({
         variant="outlined"
         sx={{
           height: 290,
+          width: "45%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",

@@ -29,7 +29,7 @@ interface FeedbackDataSets {
 }
 
 /**
- * Label arrays for each time interval
+ * Static labels for the "hour" interval.
  */
 const dayLabels = [
   "00:00",
@@ -46,67 +46,104 @@ const dayLabels = [
   "22:00",
 ];
 
-const hourLabels = dayLabels; // For simplicity, treat 'hour' the same as 'day'
+/**
+ * Generate week labels in ascending order.
+ * The first label corresponds to 6 days ago and the last label is today.
+ */
+function getWeekLabels(): string[] {
+  const labels: string[] = [];
+  const now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(now.getDate() - i);
+    const dayName = date.toLocaleDateString(undefined, { weekday: "long" });
+    labels.push(dayName);
+  }
+  return labels;
+}
 
-// For week interval, show actual day names.
-const weekLabels = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
+/**
+ * Generate month labels in ascending order over a 30‑day period,
+ * split into 4 segments. The label format is improved for readability.
+ *
+ * Example: "28 Jan - 3 Feb"
+ */
+function getMonthLabels(): string[] {
+  const numSegments = 4;
+  const totalDays = 30;
+  const daysPerSegment = Math.floor(totalDays / numSegments);
+  const labels: string[] = [];
+  const now = new Date();
+  const startDate = new Date(now);
+  startDate.setDate(now.getDate() - totalDays + 1);
 
-// For month interval, show date ranges instead of generic "Week 1" labels.
-const monthLabels = [
-  "23.01 - 30.01",
-  "31.01 - 07.02",
-  "08.02 - 14.02",
-  "15.02 - 21.02",
-];
+  let segmentStart = new Date(startDate);
+  for (let i = 0; i < numSegments; i++) {
+    let segmentEnd = new Date(segmentStart);
+    if (i < numSegments - 1) {
+      segmentEnd.setDate(segmentStart.getDate() + daysPerSegment - 1);
+    } else {
+      segmentEnd = new Date(now);
+    }
+    const formatDate = (date: Date) =>
+      date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    labels.push(`${formatDate(segmentStart)} - ${formatDate(segmentEnd)}`);
+    segmentStart = new Date(segmentEnd);
+    segmentStart.setDate(segmentEnd.getDate() + 1);
+  }
+  return labels;
+}
 
-const allLabels = [
-  "Jan",
-  "Feb",
-  "Mar",
-  "Apr",
-  "May",
-  "Jun",
-  "Jul",
-  "Aug",
-  "Sep",
-  "Oct",
-  "Nov",
-  "Dec",
-];
+/**
+ * Generate year labels (for the "all" interval) over the past 12 months.
+ * We start 11 months ago so that the labels appear in ascending order.
+ *
+ * For example, if today is February, this returns:
+ * ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"]
+ */
+function getYearLabels(): string[] {
+  const labels: string[] = [];
+  const currentDate = new Date();
+  const startDate = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - 11,
+    1
+  );
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+    const monthLabel = d.toLocaleDateString("en-US", { month: "short" });
+    labels.push(monthLabel);
+  }
+  return labels;
+}
 
+/**
+ * Choose labels based on the selected time interval.
+ */
 function getXLabels(interval: string): string[] {
   switch (interval) {
     case "hour":
-      return hourLabels;
+      return dayLabels;
     case "day":
       return dayLabels;
     case "week":
-      return weekLabels;
+      return getWeekLabels();
     case "month":
-      return monthLabels;
+      return getMonthLabels();
     case "all":
-      return allLabels;
+      return getYearLabels();
     default:
       return [];
   }
 }
 
 /**
- * Create data arrays matching the length of the labels.
- * The values are percentages computed from the raw data.
+ * Create data arrays using raw feedback counts.
+ * This ensures that the bar height reflects the total number of feedback.
  */
 function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
   const negativeArr: number[] = [];
   const positiveArr: number[] = [];
-
   for (let i = 0; i < labelCount; i++) {
     const item = stats[i];
     if (!item) {
@@ -114,26 +151,11 @@ function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
       positiveArr.push(0);
       continue;
     }
-
-    if (
-      item.total_negative_feedback === undefined ||
-      item.total_positive_feedback === undefined
-    ) {
-      negativeArr.push(0);
-      positiveArr.push(0);
-      continue;
-    }
-
-    const total = item.total_negative_feedback + item.total_positive_feedback;
-    if (total === 0) {
-      negativeArr.push(0);
-      positiveArr.push(0);
-    } else {
-      negativeArr.push((item.total_negative_feedback / total) * 100);
-      positiveArr.push((item.total_positive_feedback / total) * 100);
-    }
+    const neg = item.total_negative_feedback || 0;
+    const pos = item.total_positive_feedback || 0;
+    negativeArr.push(neg);
+    positiveArr.push(pos);
   }
-
   return { negative: negativeArr, positive: positiveArr };
 }
 
@@ -147,21 +169,33 @@ export default function StatCard({
     negative: [],
     positive: [],
   });
+  // This state holds the computed maximum total feedback count.
+  const [yAxisMax, setYAxisMax] = useState<number>(100);
 
   useEffect(() => {
     const labelSet = getXLabels(selectedTimeInterval);
     setXLabels(labelSet);
 
     if (graphFeedbackInfo && Array.isArray(graphFeedbackInfo.stats)) {
-      // Create percentage arrays matching the number of labels
-      const newDataSets = createDataSets(
-        graphFeedbackInfo.stats,
-        labelSet.length
+      let statsData = graphFeedbackInfo.stats;
+      // For the "all" interval, if 13 data points are returned, ignore the first.
+      if (selectedTimeInterval === "all" && statsData.length === 13) {
+        statsData = statsData.slice(1);
+      }
+      // Compute the maximum total feedback across all segments.
+      const totals = statsData.map(
+        (stat) =>
+          (stat.total_negative_feedback || 0) +
+          (stat.total_positive_feedback || 0)
       );
+      const computedMax = Math.max(...totals, 1);
+      setYAxisMax(computedMax);
+
+      const newDataSets = createDataSets(statsData, labelSet.length);
       setDataSets(newDataSets);
     } else {
-      // No data: empty arrays
       setDataSets({ negative: [], positive: [] });
+      setYAxisMax(100);
     }
   }, [graphFeedbackInfo, selectedTimeInterval]);
 
@@ -170,7 +204,7 @@ export default function StatCard({
       variant="outlined"
       sx={{
         height: "290px",
-        minWidth: "50%",
+        width: "50%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -195,34 +229,19 @@ export default function StatCard({
             }}
           >
             {loading ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
+              <div style={{ display: "flex", alignItems: "center" }}>
                 <Loader />
               </div>
             ) : (
               <BarChart
-                // X-axis configuration for your labels with tick settings to force all labels
                 xAxis={[
                   {
                     scaleType: "band",
                     data: xLabels,
-                    tick: {
-                      autoSkip: false,
-                    },
+                    tick: { autoSkip: false },
                   },
                 ]}
-                // Y-axis from 0 to 100 for the percentage range
-                yAxis={[
-                  {
-                    min: 0,
-                    max: 100,
-                  },
-                ]}
-                // Two series with valueFormatter to show raw counts
+                yAxis={[{ min: 0, max: yAxisMax }]}
                 series={[
                   {
                     label: "Negative feedback",
@@ -233,15 +252,17 @@ export default function StatCard({
                       if (
                         !graphFeedbackInfo ||
                         !Array.isArray(graphFeedbackInfo.stats)
-                      ) {
+                      )
                         return "";
-                      }
-                      const stat = graphFeedbackInfo.stats[dataIndex];
-                      return `${
-                        stat && stat.total_negative_feedback !== undefined
-                          ? stat.total_negative_feedback
-                          : 0
-                      }`;
+                      const offset =
+                        selectedTimeInterval === "all" &&
+                        graphFeedbackInfo.stats.length === 13
+                          ? 1
+                          : 0;
+                      const stat = graphFeedbackInfo.stats[dataIndex + offset];
+                      return stat && stat.total_negative_feedback !== undefined
+                        ? String(stat.total_negative_feedback)
+                        : "0";
                     },
                   },
                   {
@@ -253,19 +274,20 @@ export default function StatCard({
                       if (
                         !graphFeedbackInfo ||
                         !Array.isArray(graphFeedbackInfo.stats)
-                      ) {
+                      )
                         return "";
-                      }
-                      const stat = graphFeedbackInfo.stats[dataIndex];
-                      return `${
-                        stat && stat.total_positive_feedback !== undefined
-                          ? stat.total_positive_feedback
-                          : 0
-                      }`;
+                      const offset =
+                        selectedTimeInterval === "all" &&
+                        graphFeedbackInfo.stats.length === 13
+                          ? 1
+                          : 0;
+                      const stat = graphFeedbackInfo.stats[dataIndex + offset];
+                      return stat && stat.total_positive_feedback !== undefined
+                        ? String(stat.total_positive_feedback)
+                        : "0";
                     },
                   },
                 ]}
-                // Increase width if necessary so labels have enough room
                 width={600}
                 height={300}
               />
