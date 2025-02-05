@@ -4,6 +4,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import { ProjectSessionResponse } from "../../../api/maestro/getMaestro";
 import { useState } from "react";
 import { formatTimestamp } from "../../../utility/Date_Util";
+import SessionsDataGrid from "./SessionDataGrid";
 
 // converts Sessions type to DataGrid Compatible Type
 function createRows(sessionData: ProjectSessionResponse) {
