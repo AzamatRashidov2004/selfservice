@@ -177,7 +177,8 @@ export default function StatCard({
     setXLabels(labelSet);
 
     if (graphFeedbackInfo && Array.isArray(graphFeedbackInfo.stats)) {
-      let statsData = graphFeedbackInfo.stats;
+      // Cast stats to our defined Stat[] type.
+      let statsData = graphFeedbackInfo.stats as Stat[];
       // For the "all" interval, if 13 data points are returned, ignore the first.
       if (selectedTimeInterval === "all" && statsData.length === 13) {
         statsData = statsData.slice(1);
@@ -238,7 +239,7 @@ export default function StatCard({
                   {
                     scaleType: "band",
                     data: xLabels,
-                    tick: { autoSkip: false },
+                    // Removed 'tick' property since it is not recognized by the current type.
                   },
                 ]}
                 yAxis={[{ min: 0, max: yAxisMax }]}
@@ -248,7 +249,7 @@ export default function StatCard({
                     data: dataSets.negative,
                     color: "#F44336",
                     stack: "total",
-                    valueFormatter: (v, { dataIndex }) => {
+                    valueFormatter: (_v, { dataIndex }) => {
                       if (
                         !graphFeedbackInfo ||
                         !Array.isArray(graphFeedbackInfo.stats)
@@ -259,7 +260,9 @@ export default function StatCard({
                         graphFeedbackInfo.stats.length === 13
                           ? 1
                           : 0;
-                      const stat = graphFeedbackInfo.stats[dataIndex + offset];
+                      const stat = graphFeedbackInfo.stats[
+                        dataIndex + offset
+                      ] as Stat | undefined;
                       return stat && stat.total_negative_feedback !== undefined
                         ? String(stat.total_negative_feedback)
                         : "0";
@@ -270,7 +273,7 @@ export default function StatCard({
                     data: dataSets.positive,
                     color: "#74ef4b",
                     stack: "total",
-                    valueFormatter: (v, { dataIndex }) => {
+                    valueFormatter: (_v, { dataIndex }) => {
                       if (
                         !graphFeedbackInfo ||
                         !Array.isArray(graphFeedbackInfo.stats)
@@ -281,7 +284,9 @@ export default function StatCard({
                         graphFeedbackInfo.stats.length === 13
                           ? 1
                           : 0;
-                      const stat = graphFeedbackInfo.stats[dataIndex + offset];
+                      const stat = graphFeedbackInfo.stats[
+                        dataIndex + offset
+                      ] as Stat | undefined;
                       return stat && stat.total_positive_feedback !== undefined
                         ? String(stat.total_positive_feedback)
                         : "0";
