@@ -1,5 +1,6 @@
 body {
-  font-family: "Poppins", sans-serif; /* Use Poppins as the default font */
+  font-family: "Poppins", sans-serif;
+  /* Use Poppins as the default font */
 }
 
 .landing-page-body {
@@ -25,13 +26,17 @@ body {
   justify-content: center;
   align-items: center;
   background-image: url("../../assets/hero-bg.jpg");
-  background-size: cover; /* Ensures the image covers the entire hero section */
-  background-position: center; /* Centers the background image */
+  background-size: cover;
+  /* Ensures the image covers the entire hero section */
+  background-position: center;
+  /* Centers the background image */
   background-repeat: no-repeat;
-  background-attachment: fixed; /* Ensures the background doesn't repeat */
+  background-attachment: fixed;
+  /* Ensures the background doesn't repeat */
   position: relative;
   overflow: hidden;
-  padding: 2rem 5rem; /* Increase padding for more space */
+  padding: 2rem 5rem;
+  /* Increase padding for more space */
 }
 
 .hero::before {
@@ -41,25 +46,29 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(
-    0,
-    0,
-    0,
-    0.65
-  ); /* Adjusted overlay for better contrast */
+  background-color: rgba(0,
+      0,
+      0,
+      0.45);
+  /* Adjusted overlay for better contrast */
   z-index: 1;
 }
 
 .hero .container {
   position: relative;
-  z-index: 2; /* Ensures the content is above the overlay */
-  color: #ffffff; /* Make the text white to stand out on the dark overlay */
+  z-index: 2;
+  /* Ensures the content is above the overlay */
+  color: #ffffff;
+  /* Make the text white to stand out on the dark overlay */
 }
 
 .sub-heading {
-  font-size: 1.25rem; /* Smaller than the main heading */
-  color: rgba(255, 255, 255, 0.85); /* Slightly lighter color */
-  margin-bottom: 2rem; /* Added space between text and button */
+  font-size: 1.25rem;
+  /* Smaller than the main heading */
+  color: rgba(255, 255, 255, 0.85);
+  /* Slightly lighter color */
+  margin-bottom: 2rem;
+  /* Added space between text and button */
 }
 
 .features h2 {
@@ -83,37 +92,43 @@ body {
 @keyframes highlightFromLeft {
   0% {
     background-size: 0% 100%;
-    color: inherit; /* Initial text color */
+    color: inherit;
+    /* Initial text color */
   }
+
   50% {
-    color: inherit; /* Keep the initial color while background grows */
+    color: inherit;
+    /* Keep the initial color while background grows */
   }
+
   100% {
     background-size: 100% 100%;
-    color: #dff0d8; /* Final text color after the highlight */
+    color: #dff0d8;
+    /* Final text color after the highlight */
   }
 }
 
 .highlight-text {
   display: inline-block;
   padding: 0 20px;
-  background-image: linear-gradient(
-    90deg,
-    rgba(255, 255, 0, 0.5),
-    rgba(255, 255, 0, 0.5)
-  );
+  background-image: linear-gradient(90deg,
+      rgba(255, 255, 0, 0.5),
+      rgba(255, 255, 0, 0.5));
   background-position: 0 100%;
   background-repeat: no-repeat;
   background-size: 0% 100%;
   transition: background-size 1s ease-in-out;
   animation: highlightFromLeft 1s ease forwards;
-  color: inherit; /* Text starts with initial inherited color */
+  color: inherit;
+  /* Text starts with initial inherited color */
   border-radius: 20px;
 }
 
 .btn-call-to-action {
-  padding: 1rem 3rem; /* Increased padding for larger button */
-  font-size: 1.25rem; /* Larger font for emphasis */
+  padding: 1rem 3rem;
+  /* Increased padding for larger button */
+  font-size: 1.25rem;
+  /* Larger font for emphasis */
   background-color: #007bff;
   border-color: #0056b3;
   transition: background-color 0.3s ease;

@@ -1,3 +1,15 @@
+.loader-text{
+  color: black;
+  position: absolute;
+  margin: 0;
+  bottom: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  &.loader-text-white{
+    color: white !important;
+  }
+}
+
 .lds-roller,
 .lds-roller div,
 .lds-roller div:after {

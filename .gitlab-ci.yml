@@ -17,6 +17,7 @@ variables:
   VITE_KEYCLOACK_PRODUCTION_CLIENT_ID: $VITE_KEYCLOACK_PRODUCTION_CLIENT_ID
   VITE_KEYCLOACK_REALM: $VITE_KEYCLOACK_REALM
   VITE_KEYCLOACK_URL: $VITE_KEYCLOACK_URL
+  VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID: $VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID
   FIREBASE_TOKEN: $FIREBASE_TOKEN
 
 build:
@@ -36,6 +37,8 @@ build:
         echo "Branch is not 'main' or 'development'. Setting environment to unknown."
       fi
 
+    
+    
     # Step 2: Create the .env file dynamically with the appropriate environment variables
     - echo "Creating .env file for Vite..."
     - |
@@ -53,6 +56,7 @@ build:
       echo "VITE_KEYCLOACK_REALM=$VITE_KEYCLOACK_REALM" >> .env
       echo "VITE_KEYCLOACK_URL=$VITE_KEYCLOACK_URL" >> .env
       echo "FIREBASE_TOKEN=$FIREBASE_TOKEN" >> .env
+      echo "VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID=$VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID" >> .env
 
     # Step 3: Verify that the .env file was created correctly
     - cat .env
@@ -60,7 +64,7 @@ build:
     # Step 4: Install dependencies
     - npm install
 
-    # Step 5: Build the project and generate the 'dist' directory
+    # Step 6: Build the project and generate the 'dist' directory
     - npm run build
 
   artifacts:

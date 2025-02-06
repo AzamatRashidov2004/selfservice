@@ -155,7 +155,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     >
       {loading ? (
         <div className="loader-container-code h-100">
-          <Loader />
+          <Loader loaderText="Loading Code"/>
         </div>
       ) : (
         <div className="code-container">

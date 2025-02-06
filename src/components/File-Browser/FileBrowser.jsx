@@ -1,22 +1,26 @@
 import { setChonkyDefaults } from "chonky";
+import PropTypes from 'prop-types';
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
 import Loader from "../Loader/Loader";
+import "./FileBrowser.css"
 import {
   useEffect,
   useState,
   useCallback,
-  useMemo,
   useRef,
-  useContext,
 } from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
 import { useFiles } from "../../context/fileContext"; // Import the useFiles hook
 import { useAuth } from "../../context/authContext";
+import "./FileBrowser.css";
+import { clearSelection } from "../../utility/chonkyActionCalls";
 
-export default function FileBrowser() {
+
+
+export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) {
   const {
     getFileStructure,
     dragAndDropFile,
@@ -36,6 +40,13 @@ export default function FileBrowser() {
     pdfVisible,
     pdfUrl,
     setPdfUrl,
+    //files,
+    //setFiles,
+    visibleCount,
+    setVisibleCount,
+    incrementVisibleCount,
+    totalFilesCount,
+    setTotalFilesCount,
     setCodeVisible,
     setCodeValue,
     setCodeLanguage,
@@ -43,7 +54,8 @@ export default function FileBrowser() {
     setCurrentProjectId,
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
-
+  const [files, setFiles] = useState([]);
+  const chonkyRef = useRef(null);
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
@@ -71,7 +83,10 @@ export default function FileBrowser() {
         setCodeValue,
         setCodeLanguage,
         codeValue,
-        setCurrentProjectId
+        setCurrentProjectId,
+        setFileActions,
+        setDetailsOpen,
+        setSelectedProjectData
       );
     },
     [getFileStructure, dragAndDropFile]
@@ -79,20 +94,14 @@ export default function FileBrowser() {
 
   // Set the Chonky icon set
   setChonkyDefaults({ iconComponent: ChonkyIconFA });
-  const [files, setFiles] = useState(null);
   const [folderChain, setFolderChain] = useState(null);
-
-  const fileActions = useMemo(
-    () => [
+  const [fileActions, setFileActions] = useState(
+    [
       ChonkyActions.EnableListView,
       ChonkyActions.EnableGridView,
-      //ChonkyActions.CreateFolder, // Make sure this is included
-      ...customActions,
-      ChonkyActions.DownloadFiles,
-      ChonkyActions.DeleteFiles,
-    ],
-    []
-  );
+      ChonkyActions.OpenFileContextMenu,
+      ...customActions
+    ]);
 
   // Fetch the folder data and set the file and folder chain states
   useEffect(() => {
@@ -111,11 +120,77 @@ export default function FileBrowser() {
       folderChainTemp = folderChainTemp1;
     }
     setFolderChain(folderChainTemp);
-    setFiles(filesTemp);
-  }, [currentFolder, getFileStructure]);
+
+    // Make sure filesTemp is an array before slicing
+    if (Array.isArray(filesTemp)) {
+      setTotalFilesCount(filesTemp.length);
+      setFiles(filesTemp.slice(0, visibleCount));
+    } else {
+      setFiles([]); // Fallback to an empty array if filesTemp is not valid
+    }
+  }, [currentFolder, getFileStructure, visibleCount]);
+
+  // Reset visible count when changing folders
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [currentFolder]);
+
+  const loadMoreButton = document.getElementById("load-more-button");
+  loadMoreButton?.classList.add("hidden");
+
+  // After the FullFileBrowser is rendered:
+  useEffect(() => {
+    var scrollableEl;
+    document.querySelectorAll("div").forEach((div) => {
+      if ([...div.classList].some((cls) => cls.includes("listContainer"))) {
+        scrollableEl = div;
+      }
+    });
+
+    console.log("the scrollableEl is: ", scrollableEl);
+    const fileListWrapper = document.querySelector(".chonky-fileListWrapper");
+
+    if (scrollableEl) {
+      const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = scrollableEl;
+        if (scrollTop + clientHeight >= scrollHeight - 20) {
+
+          if (visibleCount < totalFilesCount) {
+            if (loadMoreButton) loadMoreButton.classList.remove("hidden");
+          }
+        } else {
+          if (loadMoreButton) loadMoreButton.classList.add("hidden");
+          if (fileListWrapper)
+            fileListWrapper.classList.remove("buttom-margin");
+        }
+      };
+      scrollableEl.addEventListener("scroll", handleScroll);
+
+      return () => {
+        scrollableEl.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, [visibleCount, files]);
+
+  useEffect(() => {
+    const handleClick = (event) => {
+      if (chonkyRef.current && chonkyRef.current.contains(event.target)) {
+        const isFileClicked = event.target.closest('[data-chonky-file-id]');
+        if (!isFileClicked) {
+          clearSelection();
+        }
+      }
+    };
+
+    document.addEventListener("click", handleClick);
+    return () => {
+      document.removeEventListener("click", handleClick);
+    };
+  }, []);
+
 
   return (
-    <div style={{ width: "100%", height: "400px" }}>
+    <div ref={chonkyRef} style={{ width: "100%", height: "500px" }}>
       {fileUploadLoading ? (
         <div
           className="loader-container"
@@ -125,9 +200,10 @@ export default function FileBrowser() {
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.7)",
             borderRadius: "10px",
+            zIndex: "1000",
           }}
         >
-          <Loader loader="white" />
+          <Loader loader="white" loaderText="Uploading File"/>
         </div>
       ) : (
         <></>
@@ -139,7 +215,14 @@ export default function FileBrowser() {
         fileActions={fileActions}
         onFileAction={handleActionWrapper}
         disableDefaultFileActions={true}
+        fileListAdditionalProps={{
+          style: { marginBottom: "28px !important" }, // Add extra space at bottom
+        }}
       />
     </div>
   );
 }
+
+FileBrowser.propTypes = {
+  setDetailsOpen: PropTypes.func.isRequired,
+};

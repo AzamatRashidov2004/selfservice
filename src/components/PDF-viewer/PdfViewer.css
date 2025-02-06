@@ -6,7 +6,8 @@
   margin-top: 50px !important;
   position: absolute !important;
   top: 0px !important;
-  right: 0px !important;
+  right: 50% !important;
+  transform: translateX(50%);
 }
 
 .overlay {
@@ -15,7 +16,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent grey */
+  background-color: rgba(0, 0, 0, 0.7);
   z-index: 9997;
   border-radius: 0 !important;
 }
@@ -23,11 +24,11 @@
 /* Highlighted div */
 .highlighted-div {
   position: relative;
-  z-index: 9999; /* A very high z-index to make sure it's above everything */
+  z-index: 9999;
   background-color: white;
   padding: 20px;
   width: 300px;
-  margin: 100px auto; /* Centered horizontally */
+  margin: 100px auto;
 }
 
 .pdf-viewer {
@@ -43,10 +44,14 @@
   height: 100%;
 }
 
+#pdf-container>main {
+  margin: 0 !important;
+}
+
 .loader-container-pdf {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 50vh; /* Adjust based on the size you want */
+  height: 50vh;
   position: relative !important;
 }
