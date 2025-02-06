@@ -4,6 +4,23 @@ type DropDownButtonProps = {
   setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
 };
 
+function normalizeInterval(interval: string | null): string {
+  switch (interval) {
+    case "Last Hour":
+      return "hour";
+    case "Last Day":
+      return "day";
+    case "Last Week":
+      return "week";
+    case "Last Month":
+      return "month";
+    case "All":
+      return "all";
+    default:
+      return "day";
+  }
+}
+
 export default function DropDownButton({
   setSelectedTimeInterval,
 }: DropDownButtonProps) {
@@ -11,10 +28,11 @@ export default function DropDownButton({
 
   useEffect(() => {
     // Load cached selection from sessionStorage
+
     const cachedOption = sessionStorage.getItem("selectedTimeInterval");
     if (cachedOption) {
       setSelectedOption(cachedOption); // Update local state
-      setSelectedTimeInterval(cachedOption.toLowerCase()); // Sync parent state
+      setSelectedTimeInterval(normalizeInterval(cachedOption)); // Sync parent state
     }
   }, [setSelectedTimeInterval]);
 
@@ -83,7 +101,7 @@ export default function DropDownButton({
         <li>
           <button
             className="dropdown-item"
-            onClick={() => handleSelect("Hour")}
+            onClick={() => handleSelect("hour")}
           >
             Last Hour
           </button>
