@@ -5,17 +5,12 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { PieChart, pieArcLabelClasses } from "@mui/x-charts/PieChart";
 import { ProjectStatsResponse } from "../../../api/maestro/getMaestro";
-import DropDownButton from "./DropDownButton";
 
 export type StatCardProps = {
   projectStats: null | ProjectStatsResponse;
-  setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
 };
 
-export default function StatCard({
-  projectStats,
-  setSelectedTimeInterval,
-}: StatCardProps) {
+export default function StatCard({ projectStats }: StatCardProps) {
   const size = {
     width: 300,
     height: 300,
@@ -53,8 +48,8 @@ export default function StatCard({
       <Card
         variant="outlined"
         sx={{
-          height: 290,
-          width: "45%",
+          height: 350,
+          width: "40%",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
@@ -74,18 +69,39 @@ export default function StatCard({
                 direction="column"
                 sx={{ justifyContent: "space-between", alignItems: "left" }}
               >
-                <DropDownButton
-                  setSelectedTimeInterval={setSelectedTimeInterval}
-                />
-                <Typography component="h2" variant="subtitle2" gutterBottom>
+                <Typography
+                  component="h2"
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  }}
+                >
                   Total Feedback:{" "}
                   {projectStats.stats.total_negative_feedback +
                     projectStats.stats.total_positive_feedback}
                 </Typography>
-                <Typography component="h2" variant="subtitle2" gutterBottom>
+                <Typography
+                  component="h2"
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  }}
+                >
                   Total Queries: {projectStats.stats.total_queries}
                 </Typography>
-                <Typography component="h2" variant="subtitle2" gutterBottom>
+                <Typography
+                  component="h2"
+                  variant="subtitle2"
+                  gutterBottom
+                  sx={{
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  }}
+                >
                   Total Sessions: {projectStats.stats.total_sessions}
                 </Typography>
               </Stack>
@@ -97,6 +113,7 @@ export default function StatCard({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                marginLeft: "20px",
               }}
             >
               <PieChart
@@ -111,6 +128,7 @@ export default function StatCard({
                 sx={{
                   [`& .${pieArcLabelClasses.root}`]: {
                     fontWeight: "bold",
+                    fontSize: "20px",
                   },
                   "& .MuiChartsLegend-root": {
                     visibility: "hidden !important",

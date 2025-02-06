@@ -1,9 +1,8 @@
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Stack from "@mui/material/Stack";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ProjectStatsResponse } from "../../../api/maestro/getMaestro";
 import Loader from "../../Loader/Loader";
 
@@ -14,6 +13,7 @@ export type StatCardProps = {
   graphFeedbackInfo: ProjectStatsResponse | null;
   selectedTimeInterval: string;
   loading: boolean;
+  onTimeIntervalChange?: React.Dispatch<React.SetStateAction<string>>;
 };
 
 interface Stat {
@@ -204,101 +204,106 @@ export default function StatCard({
     <Card
       variant="outlined"
       sx={{
-        height: "290px",
+        height: "350px", // Increased overall height to better accommodate both sections
         width: "50%",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
       }}
     >
-      <CardContent>
-        <Stack
-          direction="row"
+      <CardContent
+        sx={{
+          padding: 1,
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          width: "100%",
+        }}
+      >
+        {/* Graph Container: Pushed to bottom */}
+        <Box
           sx={{
-            justifyContent: "space-between",
+            display: "flex",
             alignItems: "center",
+            justifyContent: "center",
             width: "100%",
             height: "100%",
           }}
         >
-          <Box
-            sx={{
-              width: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {loading ? (
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <Loader />
-              </div>
-            ) : (
-              <BarChart
-                xAxis={[
-                  {
-                    scaleType: "band",
-                    data: xLabels,
-                    // Removed 'tick' property since it is not recognized by the current type.
+          {loading ? (
+            <Box
+              sx={{
+                width: "600px",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Loader />
+            </Box>
+          ) : (
+            <BarChart
+              xAxis={[
+                {
+                  scaleType: "band",
+                  data: xLabels,
+                },
+              ]}
+              yAxis={[{ min: 0, max: yAxisMax }]}
+              series={[
+                {
+                  data: dataSets.negative,
+                  color: "#F44336",
+                  stack: "total",
+                  valueFormatter: (_v, { dataIndex }) => {
+                    if (
+                      !graphFeedbackInfo ||
+                      !Array.isArray(graphFeedbackInfo.stats)
+                    )
+                      return "";
+                    const offset =
+                      selectedTimeInterval === "all" &&
+                      graphFeedbackInfo.stats.length === 13
+                        ? 1
+                        : 0;
+                    const stat = graphFeedbackInfo.stats[dataIndex + offset] as
+                      | Stat
+                      | undefined;
+                    return stat && stat.total_negative_feedback !== undefined
+                      ? String(stat.total_negative_feedback)
+                      : "0";
                   },
-                ]}
-                yAxis={[{ min: 0, max: yAxisMax }]}
-                series={[
-                  {
-                    label: "Negative feedback",
-                    data: dataSets.negative,
-                    color: "#F44336",
-                    stack: "total",
-                    valueFormatter: (_v, { dataIndex }) => {
-                      if (
-                        !graphFeedbackInfo ||
-                        !Array.isArray(graphFeedbackInfo.stats)
-                      )
-                        return "";
-                      const offset =
-                        selectedTimeInterval === "all" &&
-                        graphFeedbackInfo.stats.length === 13
-                          ? 1
-                          : 0;
-                      const stat = graphFeedbackInfo.stats[
-                        dataIndex + offset
-                      ] as Stat | undefined;
-                      return stat && stat.total_negative_feedback !== undefined
-                        ? String(stat.total_negative_feedback)
-                        : "0";
-                    },
+                },
+                {
+                  data: dataSets.positive,
+                  color: "#74ef4b",
+                  stack: "total",
+                  valueFormatter: (_v, { dataIndex }) => {
+                    if (
+                      !graphFeedbackInfo ||
+                      !Array.isArray(graphFeedbackInfo.stats)
+                    )
+                      return "";
+                    const offset =
+                      selectedTimeInterval === "all" &&
+                      graphFeedbackInfo.stats.length === 13
+                        ? 1
+                        : 0;
+                    const stat = graphFeedbackInfo.stats[dataIndex + offset] as
+                      | Stat
+                      | undefined;
+                    return stat && stat.total_positive_feedback !== undefined
+                      ? String(stat.total_positive_feedback)
+                      : "0";
                   },
-                  {
-                    label: "Positive feedback",
-                    data: dataSets.positive,
-                    color: "#74ef4b",
-                    stack: "total",
-                    valueFormatter: (_v, { dataIndex }) => {
-                      if (
-                        !graphFeedbackInfo ||
-                        !Array.isArray(graphFeedbackInfo.stats)
-                      )
-                        return "";
-                      const offset =
-                        selectedTimeInterval === "all" &&
-                        graphFeedbackInfo.stats.length === 13
-                          ? 1
-                          : 0;
-                      const stat = graphFeedbackInfo.stats[
-                        dataIndex + offset
-                      ] as Stat | undefined;
-                      return stat && stat.total_positive_feedback !== undefined
-                        ? String(stat.total_positive_feedback)
-                        : "0";
-                    },
-                  },
-                ]}
-                width={600}
-                height={300}
-              />
-            )}
-          </Box>
-        </Stack>
+                },
+              ]}
+              // Remove fixed sizes so the chart scales to the container.
+              width={600}
+              height={350}
+            />
+          )}
+        </Box>
       </CardContent>
     </Card>
   );

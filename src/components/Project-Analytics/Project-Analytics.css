@@ -32,7 +32,6 @@
 .stat-chart-wrapper {
   flex-basis: 31%;
   margin: unset !important;
-  padding: 20px;
 }
 
 .analytics-dashboard-row {
@@ -54,7 +53,6 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
 }
 
 .analytics-dashboard-nav {
