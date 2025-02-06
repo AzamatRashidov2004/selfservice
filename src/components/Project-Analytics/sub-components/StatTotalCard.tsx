@@ -204,7 +204,7 @@ export default function StatCard({
     <Card
       variant="outlined"
       sx={{
-        height: "350px", // Increased overall height to better accommodate both sections
+        height: "300px", // Increased overall height to better accommodate both sections
         width: "50%",
         display: "flex",
         flexDirection: "column",

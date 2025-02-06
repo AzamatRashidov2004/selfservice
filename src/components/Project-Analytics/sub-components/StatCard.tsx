@@ -48,7 +48,7 @@ export default function StatCard({ projectStats }: StatCardProps) {
       <Card
         variant="outlined"
         sx={{
-          height: 350,
+          height: 300,
           width: "40%",
           display: "flex",
           flexDirection: "column",
