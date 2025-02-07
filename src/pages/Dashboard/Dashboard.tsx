@@ -226,8 +226,8 @@ const Dashboard: React.FC = () => {
                 </button>
               </div>
               <div className="scrollable-content">
-                {/* @ts-expect-error: The component is js so it doesnt find types */}
                 <FileTree
+                  // @ts-expect-error: The component is js so it doesnt find types
                   setDetailsOpen={setDetailsOpen}
                   setSelectedProjectData={setSelectedProjectData}
                 />
@@ -253,8 +253,8 @@ const Dashboard: React.FC = () => {
                   />
                 ) : (
                   <>
-                    {/* @ts-expect-error: The component is js so it doesnt find types */}
                     <FileBrowser
+                      // @ts-expect-error: The component is js so it doesnt find types
                       setDetailsOpen={setDetailsOpen}
                       setSelectedProjectData={setSelectedProjectData}
                     />
