@@ -13,7 +13,7 @@ import {
   fetchProjectStatsTimeRange,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
-import { Box, SxProps, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { TimeControlButtons } from "./sub-components/TimeControlButtons";
 
 type ProjectDetails = {
   setOpenDetails: () => void;
@@ -95,50 +95,6 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     fetchData();
   }, [selectedProjectData, selectedTimeInterval]);
 
-  const toggleGroupStyles: SxProps = {
-    // Outer container’s background & border radius for a pill shape.
-    borderRadius: "24px",
-    p: "2px",
-    display: "flex",
-    justifyContent: "flex-start",
-    width: "100%",
-    marginBottom: "10px",
-
-    // Remove the default borders between grouped toggles.
-    "& .MuiToggleButtonGroup-grouped": {
-      border: 0,
-      borderRadius: "24px",
-      textTransform: "none",
-      color: "#555", // Unselected text color
-      "&.Mui-selected": {
-        // Selected state styles
-        color: "#fff",
-        backgroundColor: "#1a73e8",
-        "&:hover": {
-          backgroundColor: "#1669c1",
-        },
-      },
-      "&:hover": {
-        // Hover for unselected
-        backgroundColor: "#e0e0e0",
-      },
-      // Remove extra border between buttons
-      "&:not(:first-of-type)": {
-        borderLeft: 0,
-        marginLeft: "4px",
-      },
-    },
-  };
-
-  const handleIntervalChange = (
-    _event: React.MouseEvent<HTMLElement>,
-    newInterval: string | null
-  ) => {
-    if (newInterval !== null && setSelectedTimeInterval) {
-      setSelectedTimeInterval(newInterval);
-    }
-  };
-
   return (
     <div className="analytics-dashboard-wrapper">
       <div className="analytics-dashboard-nav">
@@ -157,53 +113,14 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           <Loader />
         ) : (
           <>
-            {/* Header: Time Interval Buttons */}
-            <Box sx={{ zIndex: "10001" }}>
-              <ToggleButtonGroup
-                value={selectedTimeInterval}
-                exclusive
-                onChange={handleIntervalChange}
-                sx={toggleGroupStyles}
-              >
-                <ToggleButton
-                  value="hour"
-                  sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
-                >
-                  1h
-                </ToggleButton>
-                <ToggleButton
-                  value="day"
-                  sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
-                >
-                  1d
-                </ToggleButton>
-                <ToggleButton
-                  value="week"
-                  sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
-                >
-                  1w
-                </ToggleButton>
-                <ToggleButton
-                  value="month"
-                  sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
-                >
-                  1m
-                </ToggleButton>
-                <ToggleButton
-                  value="all"
-                  sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
-                >
-                  1y
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
             <div className="total-graph-parent">
               <StatTotalCard
                 graphFeedbackInfo={graphFeedbackInfo}
                 selectedTimeInterval={selectedTimeInterval}
                 loading={feedbackGraphLoading}
+                setSelectedTimeInterval={setSelectedTimeInterval}
               />
-              <StatCard projectStats={projectStats} />
+              {/*<StatCard projectStats={projectStats} />*/}
             </div>
             {sessionInfo ? (
               <div className="analytics-dashboard-row">
