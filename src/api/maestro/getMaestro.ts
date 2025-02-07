@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:8020";
+import { maestroApiUrl } from "../apiEnv";
+
+const BASE_URL = maestroApiUrl;
 
 // Types for the return values
 export interface SessionEvent {
