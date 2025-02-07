@@ -23,14 +23,14 @@ export const TimeControlButtons = ({
     borderRadius: "24px",
     p: "2px",
     display: "flex",
-    justifyContent: "flex-start",
+    justifyContent: "center",
     width: "100%",
-    marginLeft: "30px",
     // Remove the default borders between grouped toggles.
     "& .MuiToggleButtonGroup-grouped": {
       border: 0,
       borderRadius: "24px",
       textTransform: "none",
+      marginLeft: "-120px",
       color: "#555", // Unselected text color
       "&.Mui-selected": {
         // Selected state styles
@@ -70,31 +70,31 @@ export const TimeControlButtons = ({
       >
         <ToggleButton
           value="hour"
-          sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
+          sx={{ textTransform: "none", borderRadius: 0, px: 3 }}
         >
           1H
         </ToggleButton>
         <ToggleButton
           value="day"
-          sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
+          sx={{ textTransform: "none", borderRadius: 0, px: 3 }}
         >
           1D
         </ToggleButton>
         <ToggleButton
           value="week"
-          sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
+          sx={{ textTransform: "none", borderRadius: 0, px: 3 }}
         >
           1W
         </ToggleButton>
         <ToggleButton
           value="month"
-          sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
+          sx={{ textTransform: "none", borderRadius: 0, px: 3 }}
         >
           1M
         </ToggleButton>
         <ToggleButton
           value="all"
-          sx={{ textTransform: "none", borderRadius: 0, px: 2 }}
+          sx={{ textTransform: "none", borderRadius: 0, px: 3 }}
         >
           1Y
         </ToggleButton>

@@ -221,20 +221,21 @@ export default function StatCard({
           width: "100%",
         }}
       >
-        <TimeControlButtons
-          setSelectedTimeInterval={setSelectedTimeInterval}
-          selectedTimeInterval={selectedTimeInterval}
-        />
         {/* Graph Container: Pushed to bottom */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            flexDirection: "column",
             width: "100%",
-            height: "80%",
+            height: "100%",
           }}
         >
+          <TimeControlButtons
+            setSelectedTimeInterval={setSelectedTimeInterval}
+            selectedTimeInterval={selectedTimeInterval}
+          />
           {loading ? (
             <Box
               sx={{
