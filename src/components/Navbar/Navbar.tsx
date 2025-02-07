@@ -24,9 +24,6 @@ const Navbar: React.FC = () => {
 
           {/* Right-aligned buttons */}
           <div className="d-flex ms-auto">
-            <Link className="btn btn-link custom-link me-2" to="/contact">
-              Contact
-            </Link>
             {authenticated ? (
               <>
                 <Link
@@ -37,6 +34,9 @@ const Navbar: React.FC = () => {
                 </Link>
                 <Link className="btn btn-link custom-link me-2" to="/dashboard">
                   Dashboard
+                </Link>
+                <Link className="btn btn-link custom-link me-2" to="/contact">
+                  Contact
                 </Link>
                 <button
                   className="btn btn-primary"
@@ -55,6 +55,9 @@ const Navbar: React.FC = () => {
                 >
                   Login
                 </button>
+                <Link className="btn btn-link custom-link me-2" to="/contact">
+                  Contact
+                </Link>
                 <Link className="btn btn-primary" to="/try-now">
                   Try Now
                 </Link>
