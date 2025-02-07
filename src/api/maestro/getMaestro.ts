@@ -1,4 +1,4 @@
-const BASE_URL = "https://maestro-develop.flowstorm.ai";
+const BASE_URL = "http://localhost:8020";
 
 // Types for the return values
 export interface SessionEvent {
@@ -98,6 +98,36 @@ export async function fetchProjectStats(
   timeRange: string = "day"
 ): Promise<ProjectStatsResponse> {
   const url = `${BASE_URL}/project-stats-summary?project_id=${encodeURIComponent(
+    projectId
+  )}&time_range=${encodeURIComponent(timeRange)}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch project stats summary: ${response.statusText}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching project stats summary:", error);
+    throw error;
+  }
+}
+
+// Fetch project stats summary for specific time range
+export async function fetchProjectStatsTimeRange(
+  projectId: string,
+  timeRange: string = "day"
+): Promise<ProjectStatsResponse> {
+  const url = `${BASE_URL}/project-stats-timerange-summary?project_id=${encodeURIComponent(
     projectId
   )}&time_range=${encodeURIComponent(timeRange)}`;
 

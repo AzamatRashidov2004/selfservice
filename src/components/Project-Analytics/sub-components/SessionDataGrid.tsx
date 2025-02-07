@@ -1,66 +1,69 @@
 import { DataGrid } from "@mui/x-data-grid";
 import { GridRowsProp, GridColDef } from "@mui/x-data-grid";
-import { fetchSessionEvents, SessionEventsResponse } from "../../../api/maestro/getMaestro";
+import {
+  fetchSessionEvents,
+  SessionEventsResponse,
+} from "../../../api/maestro/getMaestro";
 import { useEffect, useState } from "react";
 import { formatTimestamp } from "../../../utility/Date_Util";
 import ReactMarkdown from "react-markdown";
 
 function createRows(sessionData: SessionEventsResponse | null) {
-    if (!sessionData) return [];
-  
-    const rows: Array<{
-      id: number;
-      query: string | null;
-      answer: string | null;
-      feedback: number | string;
-      timestamp: string;
-    }> = [];
-  
-    let currentQuery: string | null = null;
-    let queryTimestamp: string | null = null;
-    let currentAnswer: string | null = null;
-    let currentFeedback: number | string = "-";
-  
-    sessionData.data.forEach((event) => {
-      if (event.query) {
-        // If there's an active query, finalize it before starting a new one
-        if (currentQuery) {
-          rows.push({
-            id: rows.length + 1,
-            query: currentQuery,
-            answer: currentAnswer,
-            feedback: currentFeedback,
-            timestamp: queryTimestamp ? formatTimestamp(queryTimestamp) : "-",
-          });
-        }
-  
-        // Start a new query
-        currentQuery = event.query;
-        queryTimestamp = event.timestamp;
-        currentAnswer = null;
-        currentFeedback = "-";
-      } else if (event.answer) {
-        // Store the answer for the current query
-        currentAnswer = event.answer;
-      } else if (event.feedback !== undefined) {
-        // Store the feedback for the current query
-        currentFeedback = event.feedback === 1 ? "✔️" : "❌";
+  if (!sessionData) return [];
+
+  const rows: Array<{
+    id: number;
+    query: string | null;
+    answer: string | null;
+    feedback: number | string;
+    timestamp: string;
+  }> = [];
+
+  let currentQuery: string | null = null;
+  let queryTimestamp: string | null = null;
+  let currentAnswer: string | null = null;
+  let currentFeedback: number | string = "-";
+
+  sessionData.data.forEach((event) => {
+    if (event.query) {
+      // If there's an active query, finalize it before starting a new one
+      if (currentQuery) {
+        rows.push({
+          id: rows.length + 1,
+          query: currentQuery,
+          answer: currentAnswer,
+          feedback: currentFeedback,
+          timestamp: queryTimestamp ? formatTimestamp(queryTimestamp) : "-",
+        });
       }
-    });
-  
-    // Finalize any remaining query
-    if (currentQuery) {
-      rows.push({
-        id: rows.length + 1,
-        query: currentQuery,
-        answer: currentAnswer,
-        feedback: currentFeedback,
-        timestamp: queryTimestamp ? formatTimestamp(queryTimestamp) : "-",
-      });
+
+      // Start a new query
+      currentQuery = event.query;
+      queryTimestamp = event.timestamp;
+      currentAnswer = null;
+      currentFeedback = "-";
+    } else if (event.answer) {
+      // Store the answer for the current query
+      currentAnswer = event.answer;
+    } else if (event.feedback !== undefined) {
+      // Store the feedback for the current query
+      currentFeedback = event.feedback === 1 ? "✔️" : "❌";
     }
-  
-    return rows;
+  });
+
+  // Finalize any remaining query
+  if (currentQuery) {
+    rows.push({
+      id: rows.length + 1,
+      query: currentQuery,
+      answer: currentAnswer,
+      feedback: currentFeedback,
+      timestamp: queryTimestamp ? formatTimestamp(queryTimestamp) : "-",
+    });
   }
+
+  return rows;
+}
 
 const columns: GridColDef[] = [
   {
@@ -109,33 +112,35 @@ const columns: GridColDef[] = [
 ];
 // SessionEventsResponse
 type DataGridParams = {
-    session_id: string;
-    close: () => void;
+  session_id: string;
+  close: () => void;
 };
 
 const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
+  const [sessionData, setSessionData] = useState<null | SessionEventsResponse>(
+    null
+  );
 
-    const [sessionData, setSessionData] = useState<null | SessionEventsResponse>(null);
+  useEffect(() => {
+    async function fetchData() {
+      fetchSessionEvents(session_id).then((response) => {
+        console.log(response);
+        setSessionData(response);
+      });
+    }
 
-    useEffect(() => {
-        async function fetchData() {
-            fetchSessionEvents(session_id).then(response => {
-                console.log(response);
-                setSessionData(response);
-            })
-        }
-
-        fetchData();
-    }, [session_id])
+    fetchData();
+  }, [session_id]);
 
   const rows: GridRowsProp = createRows(sessionData);
   return (
     <div className="session-grid-wrapper">
-    <div className="session-grid-back">
-        <button className="btn btn-outline-primary" onClick={close}>All Sessions</button>
-    </div>
-    {
-        sessionData ? 
+      <div className="session-grid-back">
+        <button className="btn btn-outline-primary" onClick={close}>
+          All Sessions
+        </button>
+      </div>
+      {sessionData ? (
         <DataGrid
           rows={rows}
           columns={columns}
@@ -175,9 +180,10 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
               },
             },
           }}
-        /> : 
+        />
+      ) : (
         <></>
-    }
+      )}
     </div>
   );
 };
