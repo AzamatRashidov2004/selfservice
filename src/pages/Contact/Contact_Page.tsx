@@ -15,10 +15,16 @@ const Contact_Page: React.FC = () => {
   return (
     <div className="container-fluid mt-5">
       <div className="row">
-        <div className="col-12 py-3">
-          <div className="bg-primary text-white text-center py-4">
-            <h2>Contact</h2>
-          </div>
+        <div
+          className="p-4 rounded mb-4 bg-primary"
+          style={{
+            height: "156px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <h1 className="text-center">Contact</h1>
         </div>
       </div>
       <div className="row">
