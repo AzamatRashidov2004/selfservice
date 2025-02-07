@@ -38,7 +38,10 @@ const Dashboard: React.FC = () => {
   const accordionRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [isDetailsOpen, setDetailsOpen] = useState<boolean>(false);
-  const [selectedProjectData, setSelectedProjectData] = useState<null | {projectId: string, title: string}>(null);
+  const [selectedProjectData, setSelectedProjectData] = useState<null | {
+    projectId: string;
+    title: string;
+  }>(null);
 
   const { authenticated, keycloak } = useAuth();
   const navigate = useNavigate();
@@ -133,7 +136,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-
   const loadButtonRef = useRef<HTMLButtonElement>(null);
   const handleLoadClick = () => {
     loadButtonRef?.current?.classList.add("hidden");
@@ -216,13 +218,19 @@ const Dashboard: React.FC = () => {
           >
             <div className="file-tree-container" id="file-tree-root">
               <div className="file-tree-new-button">
-                <button onClick={handleNewProjectClick} className="btn btn-outline-success">
+                <button
+                  onClick={handleNewProjectClick}
+                  className="btn btn-outline-success"
+                >
                   New Project
                 </button>
               </div>
               <div className="scrollable-content">
                 {/* @ts-expect-error: The component is js so it doesnt find types */}
-                <FileTree  setDetailsOpen={setDetailsOpen} setSelectedProjectData={setSelectedProjectData}/>
+                <FileTree
+                  setDetailsOpen={setDetailsOpen}
+                  setSelectedProjectData={setSelectedProjectData}
+                />
               </div>
             </div>
 
@@ -236,12 +244,20 @@ const Dashboard: React.FC = () => {
                 onResize={handleResize}
                 style={{ minWidth: "500px" }}
               >
-                {isDetailsOpen
-                  ? <ProjectAnalytics selectedProjectData={selectedProjectData} setOpenDetails={() => { setDetailsOpen(false) }} />
-                  :
+                {isDetailsOpen ? (
+                  <ProjectAnalytics
+                    selectedProjectData={selectedProjectData}
+                    setOpenDetails={() => {
+                      setDetailsOpen(false);
+                    }}
+                  />
+                ) : (
                   <>
                     {/* @ts-expect-error: The component is js so it doesnt find types */}
-                    <FileBrowser setDetailsOpen={setDetailsOpen} setSelectedProjectData={setSelectedProjectData} />
+                    <FileBrowser
+                      setDetailsOpen={setDetailsOpen}
+                      setSelectedProjectData={setSelectedProjectData}
+                    />
                     <button
                       className="load-button"
                       onClick={handleLoadClick}
@@ -251,7 +267,7 @@ const Dashboard: React.FC = () => {
                       Load more...
                     </button>
                   </>
-                }
+                )}
               </ResizableBox>
             </div>
           </div>

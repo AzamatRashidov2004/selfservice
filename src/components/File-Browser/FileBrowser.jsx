@@ -1,15 +1,10 @@
 import { setChonkyDefaults } from "chonky";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import { ChonkyIconFA } from "chonky-icon-fontawesome";
 import { FullFileBrowser, ChonkyActions } from "chonky";
 import Loader from "../Loader/Loader";
-import "./FileBrowser.css"
-import {
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-} from "react";
+import "./FileBrowser.css";
+import { useEffect, useState, useCallback, useRef } from "react";
 import folderSearch from "./sub-components/folderSearch";
 import handleAction from "./sub-components/actionHandler";
 import { customActions } from "./sub-components/customActions";
@@ -18,9 +13,10 @@ import { useAuth } from "../../context/authContext";
 import "./FileBrowser.css";
 import { clearSelection } from "../../utility/chonkyActionCalls";
 
-
-
-export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) {
+export default function FileBrowser({
+  setDetailsOpen,
+  setSelectedProjectData,
+}) {
   const {
     getFileStructure,
     dragAndDropFile,
@@ -95,13 +91,12 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) 
   // Set the Chonky icon set
   setChonkyDefaults({ iconComponent: ChonkyIconFA });
   const [folderChain, setFolderChain] = useState(null);
-  const [fileActions, setFileActions] = useState(
-    [
-      ChonkyActions.EnableListView,
-      ChonkyActions.EnableGridView,
-      ChonkyActions.OpenFileContextMenu,
-      ...customActions
-    ]);
+  const [fileActions, setFileActions] = useState([
+    ChonkyActions.EnableListView,
+    ChonkyActions.EnableGridView,
+    ChonkyActions.OpenFileContextMenu,
+    ...customActions,
+  ]);
 
   // Fetch the folder data and set the file and folder chain states
   useEffect(() => {
@@ -154,7 +149,6 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) 
       const handleScroll = () => {
         const { scrollTop, scrollHeight, clientHeight } = scrollableEl;
         if (scrollTop + clientHeight >= scrollHeight - 20) {
-
           if (visibleCount < totalFilesCount) {
             if (loadMoreButton) loadMoreButton.classList.remove("hidden");
           }
@@ -175,7 +169,7 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) 
   useEffect(() => {
     const handleClick = (event) => {
       if (chonkyRef.current && chonkyRef.current.contains(event.target)) {
-        const isFileClicked = event.target.closest('[data-chonky-file-id]');
+        const isFileClicked = event.target.closest("[data-chonky-file-id]");
         if (!isFileClicked) {
           clearSelection();
         }
@@ -188,9 +182,8 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) 
     };
   }, []);
 
-
   return (
-    <div ref={chonkyRef} style={{ width: "100%", height: "500px" }}>
+    <div ref={chonkyRef} style={{ width: "100%", height: "600px" }}>
       {fileUploadLoading ? (
         <div
           className="loader-container"
@@ -203,7 +196,7 @@ export default function FileBrowser({ setDetailsOpen, setSelectedProjectData }) 
             zIndex: "1000",
           }}
         >
-          <Loader loader="white" loaderText="Uploading File"/>
+          <Loader loader="white" loaderText="Uploading File" />
         </div>
       ) : (
         <></>

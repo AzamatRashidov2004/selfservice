@@ -5,6 +5,7 @@ import { BarChart } from "@mui/x-charts/BarChart";
 import React, { useEffect, useState } from "react";
 import { ProjectStatsResponse } from "../../../api/maestro/getMaestro";
 import Loader from "../../Loader/Loader";
+import { TimeControlButtons } from "./TimeControlButtons";
 
 /**
  * Types
@@ -13,7 +14,7 @@ export type StatCardProps = {
   graphFeedbackInfo: ProjectStatsResponse | null;
   selectedTimeInterval: string;
   loading: boolean;
-  onTimeIntervalChange?: React.Dispatch<React.SetStateAction<string>>;
+  setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
 };
 
 interface Stat {
@@ -163,6 +164,7 @@ export default function StatCard({
   graphFeedbackInfo,
   selectedTimeInterval,
   loading,
+  setSelectedTimeInterval,
 }: StatCardProps) {
   const [xLabels, setXLabels] = useState<string[]>([]);
   const [dataSets, setDataSets] = useState<FeedbackDataSets>({
@@ -204,8 +206,8 @@ export default function StatCard({
     <Card
       variant="outlined"
       sx={{
-        height: "300px", // Increased overall height to better accommodate both sections
-        width: "50%",
+        height: "400px", // Increased overall height to better accommodate both sections
+        width: "65%",
         display: "flex",
         flexDirection: "column",
       }}
@@ -219,6 +221,10 @@ export default function StatCard({
           width: "100%",
         }}
       >
+        <TimeControlButtons
+          setSelectedTimeInterval={setSelectedTimeInterval}
+          selectedTimeInterval={selectedTimeInterval}
+        />
         {/* Graph Container: Pushed to bottom */}
         <Box
           sx={{
@@ -226,7 +232,7 @@ export default function StatCard({
             alignItems: "center",
             justifyContent: "center",
             width: "100%",
-            height: "100%",
+            height: "80%",
           }}
         >
           {loading ? (
