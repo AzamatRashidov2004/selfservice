@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import StatCard from "./sub-components/StatCard";
 import "./Project-Analytics.css";
 import ProjectDataGrid from "./sub-components/ProjectDataGrid";
 
@@ -13,7 +12,6 @@ import {
   fetchProjectStatsTimeRange,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
-import { TimeControlButtons } from "./sub-components/TimeControlButtons";
 
 type ProjectDetails = {
   setOpenDetails: () => void;
