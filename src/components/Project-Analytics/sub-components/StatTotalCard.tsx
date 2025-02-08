@@ -3,7 +3,10 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { BarChart } from "@mui/x-charts/BarChart";
 import React, { useEffect, useState } from "react";
-import { ProjectStatsResponse } from "../../../api/maestro/getMaestro";
+import {
+  ProjectSessionResponse,
+  ProjectStatsSession,
+} from "../../../api/maestro/getMaestro";
 import Loader from "../../Loader/Loader";
 import { TimeControlButtons } from "./TimeControlButtons";
 
@@ -11,17 +14,33 @@ import { TimeControlButtons } from "./TimeControlButtons";
  * Types
  */
 export type StatCardProps = {
-  graphFeedbackInfo: ProjectStatsResponse | null;
+  graphFeedbackInfo: ProjectSessionResponse | null;
   selectedTimeInterval: string;
   loading: boolean;
   setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
 };
 
+/**
+ * This is the aggregated stat format used for the chart.
+ */
 interface Stat {
   total_queries: number;
-  total_positive_feedback: number | undefined;
-  total_negative_feedback: number | undefined;
+  total_positive_feedback: number;
+  total_negative_feedback: number;
   total_sessions: number;
+}
+
+/**
+ * This type represents the raw session data (converted so that start_timestamp is a Date).
+ */
+interface SessionStat {
+  session_id: string;
+  start_timestamp: Date;
+  query_count: number;
+  feedback_count: number;
+  positive_feedback: number;
+  negative_feedback: number;
+  feedback_percentage: number;
 }
 
 interface FeedbackDataSets {
@@ -48,8 +67,7 @@ const dayLabels = [
 ];
 
 /**
- * Generate week labels in ascending order.
- * The first label corresponds to 6 days ago and the last label is today.
+ * Generate week labels (7 days). The first label is 6 days ago and the last is today.
  */
 function getWeekLabels(): string[] {
   const labels: string[] = [];
@@ -64,10 +82,8 @@ function getWeekLabels(): string[] {
 }
 
 /**
- * Generate month labels in ascending order over a 30‑day period,
- * split into 4 segments. The label format is improved for readability.
- *
- * Example: "28 Jan - 3 Feb"
+ * Generate month labels over a 30‑day period split into 4 segments.
+ * (Example: "28 Jan - 3 Feb")
  */
 function getMonthLabels(): string[] {
   const numSegments = 4;
@@ -96,18 +112,22 @@ function getMonthLabels(): string[] {
 }
 
 /**
- * Generate year labels (for the "all" interval) over the past 12 months.
- * We start 11 months ago so that the labels appear in ascending order.
- *
- * For example, if today is February, this returns:
+ * Generate year labels (12 months). For example, if today is February, this returns:
  * ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"]
  */
+
 function getYearLabels(): string[] {
   const labels: string[] = [];
   const currentDate = new Date();
-  const startDate = new Date(
+  const currentMonthStart = new Date(
     currentDate.getFullYear(),
-    currentDate.getMonth() - 11,
+    currentDate.getMonth(),
+    1
+  );
+  // Subtract 11 months so that the labels start at the same month as calendarStartTime.
+  const startDate = new Date(
+    currentMonthStart.getFullYear(),
+    currentMonthStart.getMonth() - 11,
     1
   );
   for (let i = 0; i < 12; i++) {
@@ -119,7 +139,7 @@ function getYearLabels(): string[] {
 }
 
 /**
- * Choose labels based on the selected time interval.
+ * Choose X-axis labels based on the selected time interval.
  */
 function getXLabels(interval: string): string[] {
   switch (interval) {
@@ -139,8 +159,7 @@ function getXLabels(interval: string): string[] {
 }
 
 /**
- * Create data arrays using raw feedback counts.
- * This ensures that the bar height reflects the total number of feedback.
+ * Create the data arrays for the chart based on the aggregated stats.
  */
 function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
   const negativeArr: number[] = [];
@@ -152,12 +171,169 @@ function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
       positiveArr.push(0);
       continue;
     }
-    const neg = item.total_negative_feedback || 0;
-    const pos = item.total_positive_feedback || 0;
-    negativeArr.push(neg);
-    positiveArr.push(pos);
+    negativeArr.push(item.total_negative_feedback);
+    positiveArr.push(item.total_positive_feedback);
   }
   return { negative: negativeArr, positive: positiveArr };
+}
+
+/**
+ * Returns a [startTime, endTime] pair for the selected interval.
+ * (For "hour", "day", "week", and "month", this simple approximation is used.)
+ * For "all", we will override the bucket logic below.
+ */
+function getTimeRange(range_str: string): [Date, Date] {
+  const endTime = new Date();
+  let startTime: Date;
+  if (range_str === "hour") {
+    startTime = new Date(endTime.getTime() - 60 * 60 * 1000); // last hour
+  } else if (range_str === "day") {
+    startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000); // last 24 hours
+  } else if (range_str === "week") {
+    startTime = new Date(endTime.getTime() - 7 * 24 * 60 * 60 * 1000); // last 7 days
+  } else if (range_str === "month") {
+    startTime = new Date(endTime.getTime() - 30 * 24 * 60 * 60 * 1000); // last 30 days
+  } else if (range_str === "all") {
+    // For "all", we won’t use this equal-division time range in our aggregation.
+    // (We will instead use calendar boundaries in the aggregation branch below.)
+    startTime = new Date(endTime.getTime() - 365 * 24 * 60 * 60 * 1000); // fallback
+  } else {
+    throw new Error("Invalid time range");
+  }
+  return [startTime, endTime];
+}
+
+/**
+ * Aggregate the sessions into buckets based on the selected time interval.
+ *
+ * - For "hour" or "day": buckets are 2-hour intervals.
+ * - For "week": buckets are 1-day intervals.
+ * - For "month": buckets are divided into 4 equal segments.
+ * - For "all": use calendar month boundaries.
+ */
+function aggregateSessions(
+  sessions: ProjectStatsSession[],
+  selectedTimeInterval: string
+): Stat[] {
+  // Convert each session to a SessionStat (with start_timestamp as a Date)
+  const sessionStats: SessionStat[] = sessions.map((item) => ({
+    ...item,
+    start_timestamp: new Date(item.start_timestamp),
+  }));
+  if (selectedTimeInterval === "all") {
+    // Use calendar month boundaries.
+    const now = new Date();
+    const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    // Subtract 11 months instead of 12 so that the current month is included.
+    const calendarStartTime = new Date(
+      currentMonthStart.getFullYear(),
+      currentMonthStart.getMonth() - 11,
+      1
+    );
+    const bucketCount = 12; // This will cover 12 months: from (currentMonth - 11) to currentMonth.
+    const buckets: { start: Date; end: Date; stat: Stat }[] = [];
+    for (let i = 0; i < bucketCount; i++) {
+      const bucketStart = new Date(
+        calendarStartTime.getFullYear(),
+        calendarStartTime.getMonth() + i,
+        1
+      );
+      const bucketEnd = new Date(
+        calendarStartTime.getFullYear(),
+        calendarStartTime.getMonth() + i + 1,
+        1
+      );
+      buckets.push({
+        start: bucketStart,
+        end: bucketEnd,
+        stat: {
+          total_queries: 0,
+          total_positive_feedback: 0,
+          total_negative_feedback: 0,
+          total_sessions: 0,
+        },
+      });
+    }
+    // Aggregate sessions into the appropriate month bucket.
+    sessionStats.forEach((session) => {
+      const ts = session.start_timestamp;
+      const index =
+        (ts.getFullYear() - calendarStartTime.getFullYear()) * 12 +
+        (ts.getMonth() - calendarStartTime.getMonth());
+      if (index >= 0 && index < buckets.length) {
+        buckets[index].stat.total_queries += session.query_count;
+        buckets[index].stat.total_positive_feedback +=
+          session.positive_feedback;
+        buckets[index].stat.total_negative_feedback +=
+          session.negative_feedback;
+        buckets[index].stat.total_sessions += 1;
+      }
+    });
+    return buckets.map((b) => b.stat);
+  } else {
+    // For other intervals, use the simple equal-division approach.
+    const [startTime, endTime] = getTimeRange(selectedTimeInterval);
+    let bucketDuration: number = 0; // in milliseconds
+    let bucketCount: number = 0;
+
+    if (selectedTimeInterval === "hour" || selectedTimeInterval === "day") {
+      // 2-hour buckets
+      bucketDuration = 2 * 60 * 60 * 1000;
+    } else if (selectedTimeInterval === "week") {
+      // 1-day buckets
+      bucketDuration = 24 * 60 * 60 * 1000;
+    } else if (selectedTimeInterval === "month") {
+      bucketCount = 4;
+      bucketDuration = (endTime.getTime() - startTime.getTime()) / bucketCount;
+    } else {
+      throw new Error("Invalid selectedTimeInterval");
+    }
+    // For "hour", "day", or "week", determine bucketCount from the total duration.
+    if (
+      selectedTimeInterval === "hour" ||
+      selectedTimeInterval === "day" ||
+      selectedTimeInterval === "week"
+    ) {
+      bucketCount = Math.ceil(
+        (endTime.getTime() - startTime.getTime()) / bucketDuration
+      );
+    }
+    // Initialize empty buckets.
+    const buckets: { start: Date; end: Date; stat: Stat }[] = [];
+    for (let i = 0; i < bucketCount; i++) {
+      const bucketStart = new Date(startTime.getTime() + i * bucketDuration);
+      const bucketEnd = new Date(
+        startTime.getTime() + (i + 1) * bucketDuration
+      );
+      buckets.push({
+        start: bucketStart,
+        end: bucketEnd,
+        stat: {
+          total_queries: 0,
+          total_positive_feedback: 0,
+          total_negative_feedback: 0,
+          total_sessions: 0,
+        },
+      });
+    }
+    // Aggregate each session into the appropriate bucket.
+    sessionStats.forEach((session) => {
+      const ts = session.start_timestamp;
+      if (ts < startTime || ts >= endTime) return;
+      const index = Math.floor(
+        (ts.getTime() - startTime.getTime()) / bucketDuration
+      );
+      if (index >= 0 && index < buckets.length) {
+        buckets[index].stat.total_queries += session.query_count;
+        buckets[index].stat.total_positive_feedback +=
+          session.positive_feedback;
+        buckets[index].stat.total_negative_feedback +=
+          session.negative_feedback;
+        buckets[index].stat.total_sessions += 1;
+      }
+    });
+    return buckets.map((b) => b.stat);
+  }
 }
 
 export default function StatCard({
@@ -166,6 +342,12 @@ export default function StatCard({
   loading,
   setSelectedTimeInterval,
 }: StatCardProps) {
+  // Get the array of sessions (if available)
+  let sessionStats: ProjectStatsSession[] = [];
+  if (graphFeedbackInfo) {
+    sessionStats = graphFeedbackInfo.sessions;
+  }
+
   const [xLabels, setXLabels] = useState<string[]>([]);
   const [dataSets, setDataSets] = useState<FeedbackDataSets>({
     negative: [],
@@ -178,35 +360,31 @@ export default function StatCard({
     const labelSet = getXLabels(selectedTimeInterval);
     setXLabels(labelSet);
 
-    if (graphFeedbackInfo && Array.isArray(graphFeedbackInfo.stats)) {
-      // Cast stats to our defined Stat[] type.
-      let statsData = graphFeedbackInfo.stats as Stat[];
-      // For the "all" interval, if 13 data points are returned, ignore the first.
-      if (selectedTimeInterval === "all" && statsData.length === 13) {
-        statsData = statsData.slice(1);
-      }
-      // Compute the maximum total feedback across all segments.
-      const totals = statsData.map(
-        (stat) =>
-          (stat.total_negative_feedback || 0) +
-          (stat.total_positive_feedback || 0)
-      );
-      const computedMax = Math.max(...totals, 1);
-      setYAxisMax(computedMax);
+    // Aggregate the sessionStats into buckets based on the selected time interval.
+    const aggregatedStats = aggregateSessions(
+      sessionStats,
+      selectedTimeInterval
+    );
 
-      const newDataSets = createDataSets(statsData, labelSet.length);
-      setDataSets(newDataSets);
-    } else {
-      setDataSets({ negative: [], positive: [] });
-      setYAxisMax(100);
-    }
-  }, [graphFeedbackInfo, selectedTimeInterval]);
+    // Compute the maximum total feedback across all buckets.
+    const totals = aggregatedStats.map(
+      (stat) =>
+        (stat.total_negative_feedback || 0) +
+        (stat.total_positive_feedback || 0)
+    );
+    const computedMax = Math.max(...totals, 1);
+    setYAxisMax(computedMax);
+
+    // Create chart data sets using the aggregated stats.
+    const newDataSets = createDataSets(aggregatedStats, labelSet.length);
+    setDataSets(newDataSets);
+  }, [graphFeedbackInfo, selectedTimeInterval, sessionStats]);
 
   return (
     <Card
       variant="outlined"
       sx={{
-        height: "400px", // Increased overall height to better accommodate both sections
+        height: "400px",
         width: "65%",
         display: "flex",
         flexDirection: "column",
@@ -221,7 +399,6 @@ export default function StatCard({
           width: "100%",
         }}
       >
-        {/* Graph Container: Pushed to bottom */}
         <Box
           sx={{
             display: "flex",
@@ -262,50 +439,17 @@ export default function StatCard({
                   data: dataSets.negative,
                   color: "#F44336",
                   stack: "total",
-                  valueFormatter: (_v, { dataIndex }) => {
-                    if (
-                      !graphFeedbackInfo ||
-                      !Array.isArray(graphFeedbackInfo.stats)
-                    )
-                      return "";
-                    const offset =
-                      selectedTimeInterval === "all" &&
-                      graphFeedbackInfo.stats.length === 13
-                        ? 1
-                        : 0;
-                    const stat = graphFeedbackInfo.stats[dataIndex + offset] as
-                      | Stat
-                      | undefined;
-                    return stat && stat.total_negative_feedback !== undefined
-                      ? String(stat.total_negative_feedback)
-                      : "0";
-                  },
+                  valueFormatter: (_v, { dataIndex }) =>
+                    String(dataSets.negative[dataIndex] || 0),
                 },
                 {
                   data: dataSets.positive,
                   color: "#74ef4b",
                   stack: "total",
-                  valueFormatter: (_v, { dataIndex }) => {
-                    if (
-                      !graphFeedbackInfo ||
-                      !Array.isArray(graphFeedbackInfo.stats)
-                    )
-                      return "";
-                    const offset =
-                      selectedTimeInterval === "all" &&
-                      graphFeedbackInfo.stats.length === 13
-                        ? 1
-                        : 0;
-                    const stat = graphFeedbackInfo.stats[dataIndex + offset] as
-                      | Stat
-                      | undefined;
-                    return stat && stat.total_positive_feedback !== undefined
-                      ? String(stat.total_positive_feedback)
-                      : "0";
-                  },
+                  valueFormatter: (_v, { dataIndex }) =>
+                    String(dataSets.positive[dataIndex] || 0),
                 },
               ]}
-              // Remove fixed sizes so the chart scales to the container.
               width={600}
               height={350}
             />

@@ -33,7 +33,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
   );
 
   const [graphFeedbackInfo, setGraphFeedbackInfo] =
-    useState<null | ProjectStatsResponse>(null);
+    useState<null | ProjectSessionResponse>(null);
 
   const [feedbackGraphLoading, setFeedbackGraphLoading] =
     useState<boolean>(true);
@@ -42,6 +42,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     async function fetchData() {
       if (!selectedProjectData) return;
 
+      setFeedbackGraphLoading(true);
       fetchProjectSessions(
         selectedProjectData.projectId,
         selectedTimeInterval
@@ -54,10 +55,15 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           status: response.status,
           sessions: filteredSessions,
         });
+        setGraphFeedbackInfo({
+          status: response.status,
+          sessions: filteredSessions,
+        });
+        setFeedbackGraphLoading(false);
       });
 
-      setFeedbackGraphLoading(true);
-      if (selectedTimeInterval == "hour") {
+      //setFeedbackGraphLoading(true);
+      /*if (selectedTimeInterval == "hour") {
         fetchProjectStatsTimeRange(selectedProjectData.projectId, "day").then(
           (response) => {
             setGraphFeedbackInfo(response);
@@ -65,13 +71,13 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
               setFeedbackGraphLoading(false);
             }
           }
-        );
-        fetchProjectStats(selectedProjectData.projectId, "day").then(
-          (response) => {
-            setProjectState(response);
-          }
-        );
-      } else {
+        );*/
+      fetchProjectStats(selectedProjectData.projectId, "day").then(
+        (response) => {
+          setProjectState(response);
+        }
+      );
+      /*} else {
         fetchProjectStatsTimeRange(
           selectedProjectData.projectId,
           selectedTimeInterval
@@ -80,14 +86,14 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           if (response != null) {
             setFeedbackGraphLoading(false);
           }
-        });
-        fetchProjectStats(
-          selectedProjectData.projectId,
-          selectedTimeInterval
-        ).then((response) => {
-          setProjectState(response);
-        });
-      }
+        });*/
+      fetchProjectStats(
+        selectedProjectData.projectId,
+        selectedTimeInterval
+      ).then((response) => {
+        setProjectState(response);
+      });
+      //}
     }
 
     fetchData();
