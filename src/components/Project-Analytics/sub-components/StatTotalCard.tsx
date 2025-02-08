@@ -21,7 +21,7 @@ export type StatCardProps = {
 };
 
 /**
- * This is the aggregated stat format used for the chart.
+ * Aggregated stat format for the chart.
  */
 interface Stat {
   total_queries: number;
@@ -31,7 +31,7 @@ interface Stat {
 }
 
 /**
- * This type represents the raw session data (converted so that start_timestamp is a Date).
+ * Session data with start_timestamp as a Date.
  */
 interface SessionStat {
   session_id: string;
@@ -83,7 +83,6 @@ function getWeekLabels(): string[] {
 
 /**
  * Generate month labels over a 30‑day period split into 4 segments.
- * (Example: "28 Jan - 3 Feb")
  */
 function getMonthLabels(): string[] {
   const numSegments = 4;
@@ -112,19 +111,17 @@ function getMonthLabels(): string[] {
 }
 
 /**
- * Generate year labels (12 months). For example, if today is February, this returns:
- * ["Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb"]
+ * Generate year labels (12 months).
  */
-
 function getYearLabels(): string[] {
   const labels: string[] = [];
   const currentDate = new Date();
+  // For alignment with aggregation, subtract 11 months from the first day of the current month.
   const currentMonthStart = new Date(
     currentDate.getFullYear(),
     currentDate.getMonth(),
     1
   );
-  // Subtract 11 months so that the labels start at the same month as calendarStartTime.
   const startDate = new Date(
     currentMonthStart.getFullYear(),
     currentMonthStart.getMonth() - 11,
@@ -178,25 +175,41 @@ function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
 }
 
 /**
- * Returns a [startTime, endTime] pair for the selected interval.
- * (For "hour", "day", "week", and "month", this simple approximation is used.)
- * For "all", we will override the bucket logic below.
+ * Get the overall time range.
+ *
+ * For "day": Use today's calendar day (from midnight to midnight).
+ * For "week": Use the last 7 calendar days (aligned to midnight boundaries).
+ * For "hour": (Uses relative time – you may adjust if needed.)
+ * For "month": Uses last 30 days (approximation) – you could also use the current month.
+ * For "all": Not used in the equal‑division branch.
  */
 function getTimeRange(range_str: string): [Date, Date] {
-  const endTime = new Date();
   let startTime: Date;
+  let endTime: Date;
+  const now = new Date();
   if (range_str === "hour") {
-    startTime = new Date(endTime.getTime() - 60 * 60 * 1000); // last hour
+    startTime = new Date(now.getTime() - 60 * 60 * 1000);
+    endTime = now;
   } else if (range_str === "day") {
-    startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000); // last 24 hours
+    // Use today's calendar day: from midnight to midnight.
+    startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000);
   } else if (range_str === "week") {
-    startTime = new Date(endTime.getTime() - 7 * 24 * 60 * 60 * 1000); // last 7 days
+    // Use the last 7 calendar days: start at midnight 6 days ago, end at tomorrow's midnight.
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    startTime = new Date(todayStart.getTime() - 6 * 24 * 60 * 60 * 1000);
+    endTime = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
   } else if (range_str === "month") {
-    startTime = new Date(endTime.getTime() - 30 * 24 * 60 * 60 * 1000); // last 30 days
+    // For month, you may choose to keep the approximation:
+    startTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    endTime = now;
   } else if (range_str === "all") {
-    // For "all", we won’t use this equal-division time range in our aggregation.
-    // (We will instead use calendar boundaries in the aggregation branch below.)
-    startTime = new Date(endTime.getTime() - 365 * 24 * 60 * 60 * 1000); // fallback
+    startTime = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+    endTime = now;
   } else {
     throw new Error("Invalid time range");
   }
@@ -206,10 +219,10 @@ function getTimeRange(range_str: string): [Date, Date] {
 /**
  * Aggregate the sessions into buckets based on the selected time interval.
  *
- * - For "hour" or "day": buckets are 2-hour intervals.
- * - For "week": buckets are 1-day intervals.
- * - For "month": buckets are divided into 4 equal segments.
- * - For "all": use calendar month boundaries.
+ * - For "hour" or "day": Buckets are 2-hour intervals (using today's calendar day boundaries).
+ * - For "week": Buckets are full calendar days (from midnight to midnight).
+ * - For "month": Buckets are divided into 4 equal segments (approximation).
+ * - For "all": Buckets are based on calendar month boundaries.
  */
 function aggregateSessions(
   sessions: ProjectStatsSession[],
@@ -220,17 +233,19 @@ function aggregateSessions(
     ...item,
     start_timestamp: new Date(item.start_timestamp),
   }));
+
   if (selectedTimeInterval === "all") {
     // Use calendar month boundaries.
     const now = new Date();
+    // Use the first day of the current month.
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    // Subtract 11 months instead of 12 so that the current month is included.
+    // Subtract 11 months so that buckets cover the last 12 months including the current month.
     const calendarStartTime = new Date(
       currentMonthStart.getFullYear(),
       currentMonthStart.getMonth() - 11,
       1
     );
-    const bucketCount = 12; // This will cover 12 months: from (currentMonth - 11) to currentMonth.
+    const bucketCount = 12;
     const buckets: { start: Date; end: Date; stat: Stat }[] = [];
     for (let i = 0; i < bucketCount; i++) {
       const bucketStart = new Date(
@@ -254,7 +269,7 @@ function aggregateSessions(
         },
       });
     }
-    // Aggregate sessions into the appropriate month bucket.
+    // Aggregate each session into its calendar month bucket.
     sessionStats.forEach((session) => {
       const ts = session.start_timestamp;
       const index =
@@ -271,33 +286,27 @@ function aggregateSessions(
     });
     return buckets.map((b) => b.stat);
   } else {
-    // For other intervals, use the simple equal-division approach.
     const [startTime, endTime] = getTimeRange(selectedTimeInterval);
     let bucketDuration: number = 0; // in milliseconds
     let bucketCount: number = 0;
 
     if (selectedTimeInterval === "hour" || selectedTimeInterval === "day") {
-      // 2-hour buckets
+      // 2-hour buckets over the calendar day.
       bucketDuration = 2 * 60 * 60 * 1000;
+      // Because getTimeRange("day") now returns today's calendar day,
+      // bucketCount will be exactly 24/2 = 12.
+      bucketCount = 12;
     } else if (selectedTimeInterval === "week") {
-      // 1-day buckets
+      // Buckets are whole days; with our getTimeRange("week") we get 7 calendar days.
       bucketDuration = 24 * 60 * 60 * 1000;
+      bucketCount = 7;
     } else if (selectedTimeInterval === "month") {
       bucketCount = 4;
       bucketDuration = (endTime.getTime() - startTime.getTime()) / bucketCount;
     } else {
       throw new Error("Invalid selectedTimeInterval");
     }
-    // For "hour", "day", or "week", determine bucketCount from the total duration.
-    if (
-      selectedTimeInterval === "hour" ||
-      selectedTimeInterval === "day" ||
-      selectedTimeInterval === "week"
-    ) {
-      bucketCount = Math.ceil(
-        (endTime.getTime() - startTime.getTime()) / bucketDuration
-      );
-    }
+
     // Initialize empty buckets.
     const buckets: { start: Date; end: Date; stat: Stat }[] = [];
     for (let i = 0; i < bucketCount; i++) {
