@@ -9,7 +9,6 @@ import {
   ProjectSessionResponse,
   fetchProjectSessions,
   fetchProjectStats,
-  fetchProjectStatsTimeRange,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
 
