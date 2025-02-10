@@ -47,41 +47,6 @@ export async function createKronosProject(
   }
 }
 
-export async function uploadPdfToKronosProject(
-  projectID: string,
-  file: File,
-  token: string
-): Promise<string | null> {
-  try {
-    const formData = new FormData();
-
-    formData.append("file", file); // Turn the file into binary string
-
-    const projectResponse: Response = await fetch(
-      `${apiUrl}/projects/${projectID}/knowledge_base/pdf`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer + ${token}`,
-          "x-api-key": apiKey,
-        },
-        body: formData, // Add the file
-      }
-    );
-
-    if (!projectResponse.ok) {
-      console.error("Error uploading PDF:", projectResponse.statusText);
-      return null;
-    }
-
-    const result = await projectResponse.json();
-
-    return result._id;
-  } catch (e: unknown) {
-    return handleError({ error: e, origin: "uploadPdfToKronosProject" });
-  }
-}
-
 export async function updatePdfConfig(
   name: string,
   description: string,
@@ -186,7 +151,22 @@ async function uploadBatch(
     const url = new URL(
       `${apiUrl}/projects/${projectID}/knowledge_base/file/bulk`
     );
+
+    if (sourcePath.trim().length > 0){
+      const folders = sourcePath.replace(/\/$/, "").split("/");
+      const program_name = folders[0];
+
+      if (program_name){
+        const customMetadata = {
+          program_name: program_name
+        };
+
+        url.searchParams.append("custom_metadata", JSON.stringify(customMetadata));
+      }
+    }
+
     url.searchParams.append("source_path", sourcePath);
+
 
     const projectResponse: Response = await fetch(url.toString(), {
       method: "POST",
