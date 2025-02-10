@@ -171,3 +171,18 @@ export async function createInitialKronosProject(
 
   return true;
 }
+
+export function extractProgramName(sourcePath: string){
+  const folders = sourcePath.replace(/\/$/, "").split("/");
+  const program_name = folders[0];
+
+  if (program_name){
+    const customMetadata = {
+      program_name: program_name
+    };
+
+    return JSON.stringify(customMetadata)
+  }
+
+  return null;
+}

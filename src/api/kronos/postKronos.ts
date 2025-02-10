@@ -8,6 +8,7 @@ import {
   KronosProjectType,
   kronosKnowledgeBaseType,
 } from "../../utility/types";
+import { extractProgramName } from "../../utility/Api_Utils";
 
 export async function createKronosProject(
   projectName = "",
@@ -153,15 +154,10 @@ async function uploadBatch(
     );
 
     if (sourcePath.trim().length > 0){
-      const folders = sourcePath.replace(/\/$/, "").split("/");
-      const program_name = folders[0];
+      const program_name = extractProgramName(sourcePath)
 
       if (program_name){
-        const customMetadata = {
-          program_name: program_name
-        };
-
-        url.searchParams.append("custom_metadata", JSON.stringify(customMetadata));
+        url.searchParams.append("custom_metadata", program_name);
       }
     }
 
@@ -192,25 +188,33 @@ async function uploadBatch(
 export async function updatePathBulk(
   projectID: string,
   knowledge_bases: { _id: string; project_id: string; source_file: string }[],
-  token: string
+  token: string,
 ): Promise<boolean> {
   try {
-    const projectResponse: Response = await fetch(
-      `${apiUrl}/projects/${projectID}/knowledge_base/bulk`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer + ${token}`,
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify(knowledge_bases),
+    const url = new URL(`${apiUrl}/projects/${projectID}/knowledge_base/bulk`);
+    
+    const firstSource = knowledge_bases[0].source_file;
+    if (firstSource.trim().length > 0){
+      const program_name = extractProgramName(firstSource);
+
+      if (program_name){
+        url.searchParams.append('custom_metadata', program_name);
       }
-    );
+    }
+    
+    const projectResponse: Response = await fetch(url.toString(), {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify(knowledge_bases),
+    });
 
     if (!projectResponse.ok) {
       console.error(
-        "Error while trying to update knowledge base path" +
+        "Error while trying to update knowledge base path: " +
         projectResponse.statusText
       );
       return false;
@@ -227,28 +231,33 @@ export async function updatePathSingle(
   projectID: string,
   kb_id: string,
   newPath: string,
-  token: string
+  token: string,
 ): Promise<boolean> {
   try {
-    const projectResponse: Response = await fetch(
-      `${apiUrl}/projects/${projectID}/knowledge_base/${kb_id}/`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer + ${token}`,
-          "x-api-key": apiKey,
-        },
-        body: JSON.stringify({
-          _id: kb_id,
-          project_id: projectID,
-          source_file: newPath,
-        }),
+    const url = new URL(`${apiUrl}/projects/${projectID}/knowledge_base/${kb_id}/`);
+    if (newPath.trim().length > 0){
+      const program_name = extractProgramName(newPath);
+      if (program_name){
+        url.searchParams.append('custom_metadata', program_name);
       }
-    );
+    }
+    
+    const projectResponse: Response = await fetch(url.toString(), {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        _id: kb_id,
+        project_id: projectID,
+        source_file: newPath,
+      }),
+    });
 
     if (!projectResponse.ok) {
       console.error(
-        "Error while trying to update knowledge base path" +
+        "Error while trying to update knowledge base path: " +
         projectResponse.statusText
       );
       return false;
