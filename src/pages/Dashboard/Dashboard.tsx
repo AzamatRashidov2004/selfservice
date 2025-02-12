@@ -173,6 +173,74 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  useEffect(() => {
+    const waitForElements = setInterval(() => {
+      const chonkyNavbar = document.getElementsByClassName(
+        "chonky-navbarWrapper"
+      )[0];
+      const chonkyToolBar = document.getElementsByClassName(
+        "chonky-toolbarWrapper"
+      )[0];
+      const fileTreeNavbar = document.getElementsByClassName(
+        "file-tree-new-button"
+      )[0];
+      const chonkyRoot =
+        document.getElementsByClassName("chonky-chonkyRoot")[0];
+      const btnListView = document.querySelector(
+        '[title="Switch to List view"]'
+      );
+      const btnGridView = document.querySelector(
+        '[title="Switch to Grid view"]'
+      );
+
+      if (
+        chonkyRoot &&
+        chonkyNavbar &&
+        chonkyToolBar &&
+        btnGridView &&
+        btnListView
+      ) {
+        clearInterval(waitForElements); // Stop checking once elements are found
+
+        btnListView.classList.add("newNavbarButton");
+        btnGridView.classList.add("newNavbarButton");
+
+        const newRow = document.createElement("div");
+        newRow.classList.add("new-chonky-navbar");
+
+        // Remove before appending
+        chonkyRoot.removeChild(chonkyNavbar);
+        chonkyRoot.removeChild(chonkyToolBar);
+
+        newRow.appendChild(chonkyNavbar);
+        newRow.appendChild(chonkyToolBar);
+
+        chonkyRoot.prepend(newRow);
+
+        chonkyNavbar.classList.add("custom-chonky-navbar");
+
+        if (fileTreeNavbar) {
+          fileTreeNavbar.classList.add("custom-file-tree-navbar");
+        }
+      }
+    }, 500);
+
+    return () => clearInterval(waitForElements);
+  }, []);
+
+  const analyticsWindowRef = useRef<HTMLDivElement>(null);
+  const fileBrowserRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isDetailsOpen) {
+      analyticsWindowRef?.current?.classList.remove("hidden");
+      fileBrowserRef?.current?.classList.add("hidden");
+    } else {
+      fileBrowserRef?.current?.classList.remove("hidden");
+      analyticsWindowRef?.current?.classList.add("hidden");
+    }
+  }, [isDetailsOpen]);
+
   const handleMouseEnter = () => {
     const body = document.body;
     const scrollbarWidth =
@@ -244,30 +312,29 @@ const Dashboard: React.FC = () => {
                 onResize={handleResize}
                 style={{ minWidth: "500px" }}
               >
-                {isDetailsOpen ? (
+                <div ref={analyticsWindowRef} className="hidden">
                   <ProjectAnalytics
                     selectedProjectData={selectedProjectData}
                     setOpenDetails={() => {
                       setDetailsOpen(false);
                     }}
                   />
-                ) : (
-                  <>
-                    <FileBrowser
-                      // @ts-expect-error: The component is js so it doesnt find types
-                      setDetailsOpen={setDetailsOpen}
-                      setSelectedProjectData={setSelectedProjectData}
-                    />
-                    <button
-                      className="load-button"
-                      onClick={handleLoadClick}
-                      ref={loadButtonRef}
-                      id="load-more-button"
-                    >
-                      Load more...
-                    </button>
-                  </>
-                )}
+                </div>
+                <div ref={fileBrowserRef} className="">
+                  <FileBrowser
+                    // @ts-expect-error: The component is js so it doesnt find types
+                    setDetailsOpen={setDetailsOpen}
+                    setSelectedProjectData={setSelectedProjectData}
+                  />
+                  <button
+                    className="load-button"
+                    onClick={handleLoadClick}
+                    ref={loadButtonRef}
+                    id="load-more-button"
+                  >
+                    Load more...
+                  </button>
+                </div>
               </ResizableBox>
             </div>
           </div>

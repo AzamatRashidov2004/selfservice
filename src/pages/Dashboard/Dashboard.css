@@ -26,6 +26,8 @@
 
 .file-browser-wrapper {
   display: flex;
+  position: relative;
+  top: -10px !important;
   width: 100%;
   height: 600px !important;
   /* Adjust based on your header height */
@@ -47,6 +49,7 @@
   overflow-y: hidden;
   /* Enable vertical scrolling */
   overflow-x: hidden !important;
+  border-top-left-radius: 10px;
 }
 
 #root,
@@ -63,6 +66,7 @@ body {
 }
 
 .scrollable-content {
+  margin-top: 7px !important;
   max-height: calc(100% - 84px);
   /* Limit the height for scrolling */
   overflow-y: auto;
@@ -126,4 +130,86 @@ body {
 
 .unscrollable {
   overflow: hidden !important;
+}
+
+.chonky-navbarContainer {
+  & > button {
+    color: white !important;
+    &:disabled {
+      color: #b0b0b0 !important;
+    }
+    & * svg {
+      width: 25px !important;
+      height: 25px !important;
+    }
+  }
+}
+
+.custom-chonky-navbar {
+  height: 100% !important;
+  padding: 0px !important;
+}
+
+.custom-file-tree-navbar {
+  height: 156px !important;
+  background-color: #1a72f9;
+  margin: 0px !important;
+  margin-right: -10px !important;
+  border-top-left-radius: 10px;
+}
+
+.new-chonky-navbar {
+  width: 100%;
+  height: 156px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #1a72f9;
+  padding: 0px !important;
+  border-top-right-radius: 10px !important;
+}
+
+/*.new-chonky-navbar * {
+}*/
+
+.chonky-navbarBreadcrumbs {
+  & * span {
+    font-size: 30px !important;
+    color: white;
+    text-decoration: underline !important;
+  }
+  & * svg {
+    width: 35px !important;
+    height: 30px !important;
+  }
+}
+
+.chonky-toolbarRight {
+  & > button {
+    background-color: white;
+  }
+}
+
+.chonky-toolbarWrapper {
+  margin-top: 60px !important;
+  margin-right: 5px !important;
+}
+
+.analytics-dashboard-nav {
+  background-color: #1a72f9;
+  margin: 0px !important;
+  height: 156px !important;
+  color: white;
+  & > button {
+    font-size: 50px !important;
+  }
+  border-top-right-radius: 10px;
+}
+
+.analytics-dashboard-nav * {
+  font-size: 25px !important;
+}
+
+.chonky-iconWithText {
+  color: white;
 }
