@@ -40,10 +40,14 @@
   justify-content: start;
   margin: 0 10px 0 10px;
   align-items: center;
-  border-bottom: solid 1px #e0e0e0;
+  border: solid 2px #e0e0e0 !important;
+  border-right: 0px;
 
-  &>button {
-    font-size: 18px !important;
+  & > button {
+    color: white !important;
+    border-color: white !important;
+    border-width: 1px !important;
+    font-size: 22px !important;
     margin-left: 8px;
     position: relative;
     text-wrap: nowrap;

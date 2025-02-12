@@ -18,6 +18,7 @@
 .analytics-dashboard-wrapper {
   border: 1px solid #e0e0e0;
   height: 600px;
+  border-top-right-radius: 10px !important;
 
   & * {
     font-size: 13px;
@@ -64,6 +65,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  & > button {
+    color: white !important;
+    font-size: 20px !important;
+    border-color: white;
+  }
 }
 
 .analytics-id-wrapper {
