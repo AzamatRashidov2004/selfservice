@@ -40,7 +40,8 @@
   justify-content: start;
   margin: 0 10px 0 10px;
   align-items: center;
-  border-bottom: solid 1px #e0e0e0;
+  border: solid 2px #e0e0e0 !important;
+  border-right: 0px;
 
   & > button {
     color: white !important;
