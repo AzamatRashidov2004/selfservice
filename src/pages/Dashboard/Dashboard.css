@@ -203,6 +203,8 @@ body {
 .analytics-dashboard-nav {
   background-color: #1a72f9;
   margin: 0px !important;
+  border: solid 2px #e0e0e0 !important;
+  border-left: 0px !important;
   height: 156px !important;
   color: white;
   & > button {
