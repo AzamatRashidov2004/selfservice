@@ -35,27 +35,27 @@
 }
 
 .file-tree-new-button {
-  height: 84px;
   display: flex;
   justify-content: start;
-  margin: 0 10px 0 10px;
+  margin: 0;
   align-items: center;
   border: solid 2px #e0e0e0 !important;
   border-right: 0px;
-
   & > button {
+    padding: 7px !important;
     color: white !important;
     border-color: white !important;
     border-width: 1px !important;
+    display: inline-block; /* Ensures the button doesn't stretch */
     font-size: 22px !important;
-    margin-left: 8px;
+    margin-left: 17px !important;
     position: relative;
     text-wrap: nowrap;
     width: min-content;
     max-width: 50%;
-    height: 50%;
+    height: 30%;
     z-index: 2;
-    border-radius: 10px;
+    border-radius: 5px;
     max-width: 150px;
   }
 }

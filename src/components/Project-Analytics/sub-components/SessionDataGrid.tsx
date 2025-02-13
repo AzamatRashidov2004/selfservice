@@ -144,6 +144,19 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
         <DataGrid
           rows={rows}
           columns={columns}
+          sx={{
+            // Add vertical lines between columns
+            "& .MuiDataGrid-columnHeader:not(:last-child)": {
+              borderRight: "1px solid rgba(224, 224, 224, 1)",
+            },
+            "& .MuiDataGrid-cell:not(:last-child)": {
+              borderRight: "1px solid rgba(224, 224, 224, 1)",
+            },
+            // Optional: Add line to the right of the last column
+            "& .MuiDataGrid-columnHeaders": {
+              borderBottom: "1px solid rgba(224, 224, 224, 1)",
+            },
+          }}
           getRowHeight={() => "auto"}
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
