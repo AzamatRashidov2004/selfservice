@@ -27,7 +27,8 @@
 .file-browser-wrapper {
   display: flex;
   position: relative;
-  top: -10px !important;
+  top: -25px !important;
+  right: -2px !important;
   width: 100%;
   height: 600px !important;
   /* Adjust based on your header height */
@@ -67,7 +68,7 @@ body {
 
 .scrollable-content {
   margin-top: 7px !important;
-  max-height: calc(100% - 84px);
+  max-height: calc(100% - 163px);
   /* Limit the height for scrolling */
   overflow-y: auto;
   /* Enable vertical scrolling */
@@ -133,6 +134,7 @@ body {
 }
 
 .chonky-navbarContainer {
+  margin-left: 6px;
   & > button {
     color: white !important;
     &:disabled {
@@ -192,12 +194,15 @@ body {
 .chonky-toolbarRight {
   & > button {
     background-color: white;
+    &:hover {
+      background-color: #ebebeb;
+    }
   }
 }
 
 .chonky-toolbarWrapper {
   margin-top: 60px !important;
-  margin-right: 5px !important;
+  margin-right: 12px !important;
 }
 
 .analytics-dashboard-nav {

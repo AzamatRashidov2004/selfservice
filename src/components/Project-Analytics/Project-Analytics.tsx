@@ -101,7 +101,12 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
   return (
     <div className="analytics-dashboard-wrapper">
       <div className="analytics-dashboard-nav">
-        <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <h3>{selectedProjectData ? selectedProjectData.title : ""}</h3>
           <span className="analytics-id-wrapper">
             id: {selectedProjectData ? selectedProjectData.projectId : ""}
