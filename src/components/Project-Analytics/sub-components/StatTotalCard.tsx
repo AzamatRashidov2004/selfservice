@@ -9,6 +9,7 @@ import {
 } from "../../../api/maestro/getMaestro";
 import Loader from "../../Loader/Loader";
 import { TimeControlButtons } from "./TimeControlButtons";
+import Typography from "@mui/material/Typography";
 
 /**
  * Types
@@ -357,6 +358,11 @@ export default function StatCard({
     sessionStats = graphFeedbackInfo.sessions;
   }
 
+  const [totalAnswers, setTotalAnswers] = useState<number>(0);
+  //const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [totalFeedback, setTotalFeedback] = useState<number>(0);
+  const [totalSessions, setTotalSesssions] = useState<number>(0);
+
   const [xLabels, setXLabels] = useState<string[]>([]);
   const [dataSets, setDataSets] = useState<FeedbackDataSets>({
     negative: [],
@@ -375,12 +381,29 @@ export default function StatCard({
       selectedTimeInterval
     );
 
+    // Calculate totals from aggregated stats
+    let totalAnswers = 0;
+    let totalSessions = 0;
+    let totalFeedback = 0;
+
+    aggregatedStats.forEach((stat) => {
+      totalAnswers += stat.total_queries;
+      totalSessions += stat.total_sessions;
+      totalFeedback +=
+        stat.total_positive_feedback + stat.total_negative_feedback;
+    });
+
+    setTotalAnswers(totalAnswers);
+    setTotalSesssions(totalSessions);
+    setTotalFeedback(totalFeedback);
+
     // Compute the maximum total feedback across all buckets.
     const totals = aggregatedStats.map(
       (stat) =>
         (stat.total_negative_feedback || 0) +
         (stat.total_positive_feedback || 0)
     );
+
     const computedMax = Math.max(...totals, 1);
     setYAxisMax(computedMax);
 
@@ -404,17 +427,76 @@ export default function StatCard({
           padding: 1,
           height: "100%",
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           width: "100%",
         }}
       >
+        {/* Left side metrics - more compact and centered */}
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center", // Centers content vertically
+            alignItems: "flex-start", // Aligns content to the left
+            width: "35%",
+            pr: 4,
+            pl: 2, // Added left padding
+            pt: 6,
+          }}
+        >
+          <Box sx={{ mb: 2 }}>
+            {" "}
+            {/* Metric container with bottom margin */}
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalAnswers}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Answers
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            {" "}
+            {/* Metric container with bottom margin */}
+            <Typography variant="h5" fontWeight="bold" component="span">
+              1
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Unique users
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            {" "}
+            {/* Metric container with bottom margin */}
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalFeedback}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Total feedback
+            </Typography>
+          </Box>
+
+          <Box>
+            {" "}
+            {/* Last metric container without bottom margin */}
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalSessions}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Total sessions
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* Right side chart */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "column",
-            width: "100%",
+            width: "65%", // Adjusted to match the 35% for metrics
             height: "100%",
           }}
         >
@@ -425,7 +507,7 @@ export default function StatCard({
           {loading ? (
             <Box
               sx={{
-                width: "600px",
+                width: "550px", // Slightly reduced to accommodate the metrics section
                 height: "100%",
                 display: "flex",
                 alignItems: "center",
@@ -459,7 +541,7 @@ export default function StatCard({
                     String(dataSets.positive[dataIndex] || 0),
                 },
               ]}
-              width={600}
+              width={550} // Slightly reduced to accommodate the metrics section
               height={350}
             />
           )}
