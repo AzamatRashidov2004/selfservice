@@ -76,7 +76,7 @@ function getWeekLabels(): string[] {
   for (let i = 6; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(now.getDate() - i);
-    const dayName = date.toLocaleDateString(undefined, { weekday: "long" });
+    const dayName = date.toLocaleDateString(undefined, { weekday: "short" });
     labels.push(dayName);
   }
   return labels;
