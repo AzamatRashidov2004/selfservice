@@ -89,7 +89,7 @@ const ProjectDataGrid: React.FC<{ sessionData: ProjectSessionResponse }> = ({
     {
       field: "timestamp",
       headerName: "Timestamp",
-      headerAlign: "right",
+      headerAlign: "left",
       align: "right",
       flex: 1,
       minWidth: 100,
@@ -132,6 +132,7 @@ const ProjectDataGrid: React.FC<{ sessionData: ProjectSessionResponse }> = ({
     {
       field: "conversions",
       headerName: "Feedback Ratio",
+      headerAlign: "right",
       flex: 1,
       minWidth: 150,
       renderCell: renderSparklineCell,
