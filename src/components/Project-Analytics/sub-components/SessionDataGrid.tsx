@@ -67,6 +67,14 @@ function createRows(sessionData: SessionEventsResponse | null) {
 
 const columns: GridColDef[] = [
   {
+    field: "timestamp",
+    headerName: "Timestamp",
+    headerAlign: "left",
+    align: "left",
+    flex: 1,
+    minWidth: 100,
+  },
+  {
     field: "query",
     headerName: "Query",
     headerAlign: "left",
@@ -101,14 +109,6 @@ const columns: GridColDef[] = [
     flex: 1,
     minWidth: 100,
   },
-  {
-    field: "timestamp",
-    headerName: "Timestamp",
-    headerAlign: "left",
-    align: "left",
-    flex: 1,
-    minWidth: 100,
-  },
 ];
 // SessionEventsResponse
 type DataGridParams = {
@@ -135,11 +135,6 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
   const rows: GridRowsProp = createRows(sessionData);
   return (
     <div className="session-grid-wrapper">
-      <div className="session-grid-back">
-        <button className="btn btn-outline-primary" onClick={close}>
-          All Sessions
-        </button>
-      </div>
       {sessionData ? (
         <DataGrid
           rows={rows}
