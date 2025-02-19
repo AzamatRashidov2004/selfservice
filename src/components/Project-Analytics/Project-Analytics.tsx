@@ -76,6 +76,8 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     fetchData();
   }, [selectedProjectData, selectedTimeInterval]);
 
+  useEffect(() => {}, []);
+
   return (
     <div className="analytics-dashboard-wrapper">
       <div className="analytics-dashboard-nav">

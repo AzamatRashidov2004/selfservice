@@ -87,7 +87,6 @@
   height: 100%;
   justify-content: start;
   align-items: space-between;
-  max-height: 451px;
   overflow-y: auto;
 }
 

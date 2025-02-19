@@ -258,6 +258,41 @@ const Dashboard: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const target = document.getElementsByClassName(
+      "parent-analytics"
+    )[0] as HTMLDivElement;
+    const target2 = document.getElementsByClassName(
+      "analytics-dashboard-wrapper"
+    )[0] as HTMLDivElement;
+    const target3 = document.getElementsByClassName(
+      "analytics-dashboard-content"
+    )[0] as HTMLDivElement;
+
+    const updateHeight = () => {
+      if (target && target2 && target3) {
+        // Calculate the height based on the viewport height
+        const heightInPixels = window.innerHeight - window.innerHeight * 0.101; // Subtract 1px if needed
+
+        // Set the height of the target element
+        target.style.height = `${heightInPixels}px`;
+        target3.style.maxHeight = `${heightInPixels - 156}px`;
+        //target3.style.height = `${heightInPixels * 0.88}px`;
+      }
+    };
+
+    // Initial height calculation
+    updateHeight();
+
+    // Add resize event listener to update height on screen size change
+    window.addEventListener("resize", updateHeight);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
+
   const analyticsWindowRef = useRef<HTMLDivElement>(null);
   const fileBrowserRef = useRef<HTMLDivElement>(null);
 
@@ -342,7 +377,13 @@ const Dashboard: React.FC = () => {
                 onResize={handleResize}
                 style={{ minWidth: "500px" }}
               >
-                <div ref={analyticsWindowRef} className="hidden">
+                <div
+                  ref={analyticsWindowRef}
+                  className="hidden parent-analytics"
+                  style={{
+                    height: "100% !important",
+                  }}
+                >
                   <ProjectAnalytics
                     selectedProjectData={selectedProjectData}
                     setOpenDetails={() => {
