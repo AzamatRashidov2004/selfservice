@@ -14,6 +14,8 @@ function createRows(sessionData: ProjectSessionResponse) {
       session_id: session.session_id,
       queries: session.query_count,
       feedback: session.feedback_count,
+      negative: session.negative_feedback, // added field
+      positive: session.positive_feedback, // added field
       timestamp: formatTimestamp(session.start_timestamp),
       conversions: [session.negative_feedback, session.positive_feedback],
     };
@@ -64,11 +66,31 @@ const columns: GridColDef[] = [
   },
   {
     field: "feedback",
-    headerName: "Feedback",
+    headerName: "Total Feedback",
     headerAlign: "right",
     align: "right",
     flex: 1,
     minWidth: 100,
+  },
+  // New column for Negative Feedback
+  {
+    field: "negative",
+    headerName: "Negative feedback",
+    headerAlign: "right",
+    align: "right",
+    flex: 1,
+    minWidth: 100,
+    type: "number",
+  },
+  // New column for Positive Feedback
+  {
+    field: "positive",
+    headerName: "Positive feedback",
+    headerAlign: "right",
+    align: "right",
+    flex: 1,
+    minWidth: 100,
+    type: "number",
   },
   {
     field: "timestamp",
