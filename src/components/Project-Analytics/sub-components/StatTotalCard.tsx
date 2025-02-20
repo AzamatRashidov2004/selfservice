@@ -462,7 +462,7 @@ export default function StatCard({
               1
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Unique users
+              Users
             </Typography>
           </Box>
 
@@ -473,7 +473,7 @@ export default function StatCard({
               {totalFeedback}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Total feedback
+              Feedback
             </Typography>
           </Box>
 
@@ -484,7 +484,7 @@ export default function StatCard({
               {totalSessions}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Total sessions
+              Sessions
             </Typography>
           </Box>
         </Box>
