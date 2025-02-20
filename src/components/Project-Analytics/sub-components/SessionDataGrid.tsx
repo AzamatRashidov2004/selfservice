@@ -285,8 +285,8 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
             top: detailPanelTop,
             left: 0,
             right: 0,
-            background: "#ff0033",
-            borderTop: "1px solid #ccc",
+            background: "#FFCDD2",
+            borderTop: "2px solid #ff0033",
             padding: "16px",
             zIndex: 10,
           }}
