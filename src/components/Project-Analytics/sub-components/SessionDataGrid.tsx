@@ -1,10 +1,13 @@
-import { DataGrid, GridRowsProp, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import Button from "@mui/material/Button";
+
 import {
   fetchSessionEvents,
   fetchSessionEventsErrors,
   SessionEventsResponse,
   SessionEventsResponseErrors,
 } from "../../../api/maestro/getMaestro";
+
 import { useEffect, useState, useRef } from "react";
 import { convertTimestamp, formatTimestamp } from "../../../utility/Date_Util";
 import ReactMarkdown from "react-markdown";
@@ -178,6 +181,7 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
   );
   const [sessionError, setSessionError] =
     useState<SessionEventsResponseErrors | null>(null);
+  const [showErrors, setShowErrors] = useState(true);
   const [combinedRows, setCombinedRows] = useState<CombinedRow[]>([]);
 
   // Error row expansion state (only errors are expandable)
@@ -211,6 +215,10 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
     setCombinedRows(allRows);
   }, [sessionData, sessionError]);
 
+  const filteredRows = showErrors
+    ? combinedRows
+    : combinedRows.filter((row) => !row.isError);
+
   // Compute detail panel position for an expanded error row.
   useEffect(() => {
     if (localExpandedRowId && gridRef.current) {
@@ -228,9 +236,28 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
 
   return (
     <div style={{ position: "relative", width: "100%" }} ref={gridRef}>
+      <label
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          cursor: "pointer",
+          justifySelf: "flex-end",
+          marginTop: "5px",
+          marginBottom: "5px",
+          fontWeight: "bold",
+        }}
+      >
+        {"Errors"}
+        <input
+          type="checkbox"
+          checked={showErrors}
+          onChange={() => setShowErrors(!showErrors)}
+        />
+      </label>
       <DataGrid
         autoHeight
-        rows={combinedRows}
+        rows={filteredRows}
         columns={columns}
         sx={{
           "& .MuiDataGrid-row": {
