@@ -9,6 +9,8 @@ import {
   ProjectSessionResponse,
   fetchProjectSessions,
   fetchProjectStats,
+  fetchProjectSessionsErrors,
+  ProjectSessionErrorsResponse,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
 
@@ -31,6 +33,9 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     null
   );
 
+  const [sessionInfoErrors, setSessionInfoErrors] =
+    useState<null | ProjectSessionErrorsResponse>(null);
+
   const [graphFeedbackInfo, setGraphFeedbackInfo] =
     useState<null | ProjectSessionResponse>(null);
 
@@ -42,6 +47,11 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
       if (!selectedProjectData) return;
 
       setFeedbackGraphLoading(true);
+      fetchProjectSessionsErrors(selectedProjectData.projectId).then(
+        (response) => {
+          setSessionInfoErrors(response);
+        }
+      );
       fetchProjectSessions(
         selectedProjectData.projectId,
         selectedTimeInterval
@@ -111,7 +121,10 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
             </div>
             {sessionInfo ? (
               <div className="analytics-dashboard-row">
-                <ProjectDataGrid sessionData={sessionInfo} />
+                <ProjectDataGrid
+                  sessionData={sessionInfo}
+                  sessionDataErrors={sessionInfoErrors}
+                />
               </div>
             ) : (
               <></>

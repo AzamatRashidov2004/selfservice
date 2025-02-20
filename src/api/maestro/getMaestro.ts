@@ -1,6 +1,6 @@
 import { maestroApiUrl } from "../apiEnv";
 
-const BASE_URL = maestroApiUrl;
+const BASE_URL = "http://localhost:8020";
 
 // Types for the return values
 export interface SessionEvent {
@@ -36,9 +36,18 @@ export interface ProjectStatsSession {
   feedback_percentage: number;
 }
 
+export interface ProjectStatsSessionErrors {
+  session_id: string;
+  occurrences: number;
+}
+
 export interface ProjectSessionResponse {
   status: string;
   sessions: ProjectStatsSession[];
+}
+
+export interface ProjectSessionErrorsResponse {
+  data: ProjectStatsSessionErrors[];
 }
 
 export interface ProjectStatsResponse {
@@ -131,6 +140,35 @@ export async function fetchProjectSessions(
     return await response.json();
   } catch (error) {
     console.error("Error fetching project stats:", error);
+    throw error;
+  }
+}
+
+// Fetch project stats errors
+export async function fetchProjectSessionsErrors(
+  projectId: string
+): Promise<ProjectSessionErrorsResponse> {
+  const url = `${BASE_URL}/project-stats-errors?project_id=${encodeURIComponent(
+    projectId
+  )}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch project stats errors: ${response.statusText}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching project stats errors:", error);
     throw error;
   }
 }

@@ -1,6 +1,9 @@
 import { DataGrid, GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { ProjectSessionResponse } from "../../../api/maestro/getMaestro";
+import {
+  ProjectSessionErrorsResponse,
+  ProjectSessionResponse,
+} from "../../../api/maestro/getMaestro";
 import { useState, useRef, useEffect } from "react";
 import { formatTimestamp } from "../../../utility/Date_Util";
 import SessionsDataGrid from "./SessionDataGrid";
@@ -9,17 +12,29 @@ import ArrowRightIcon from "@mui/icons-material/ArrowRight";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 // Convert session data into grid rows
-function createRows(sessionData: ProjectSessionResponse) {
-  return sessionData.sessions.map((session, index) => ({
-    id: index + 1,
-    session_id: session.session_id,
-    queries: session.query_count,
-    feedback: session.feedback_count,
-    negative: session.negative_feedback,
-    positive: session.positive_feedback,
-    timestamp: formatTimestamp(session.start_timestamp),
-    conversions: [session.negative_feedback, session.positive_feedback],
-  }));
+function createRows(
+  sessionData: ProjectSessionResponse,
+  sessionDataErrors: ProjectSessionErrorsResponse | null = null
+) {
+  return sessionData.sessions.map((session, index) => {
+    let matchingError = null;
+    if (sessionDataErrors) {
+      matchingError = sessionDataErrors.data.find(
+        (error) => error.session_id === session.session_id
+      );
+    }
+    return {
+      id: index + 1,
+      session_id: session.session_id,
+      queries: session.query_count,
+      feedback: session.feedback_count,
+      negative: session.negative_feedback,
+      positive: session.positive_feedback,
+      timestamp: formatTimestamp(session.start_timestamp),
+      conversions: [session.negative_feedback, session.positive_feedback],
+      errors: matchingError ? matchingError.occurrences : 0, // Assign occurrences if found
+    };
+  });
 }
 
 // Render the sparkline (feedback ratio) cell
@@ -52,10 +67,12 @@ function renderSparklineCell(params) {
   );
 }
 
-const ProjectDataGrid: React.FC<{ sessionData: ProjectSessionResponse }> = ({
-  sessionData,
-}) => {
-  const rows: GridRowsProp = createRows(sessionData);
+const ProjectDataGrid: React.FC<{
+  sessionData: ProjectSessionResponse;
+  sessionDataErrors?: ProjectSessionErrorsResponse | null;
+}> = ({ sessionData, sessionDataErrors }) => {
+  console.log("AAX", sessionDataErrors);
+  const rows: GridRowsProp = createRows(sessionData, sessionDataErrors);
   // Store the ID of the expanded row (if any)
   const [expandedRowId, setExpandedRowId] = useState<number | null>(null);
   // Store the top offset (in pixels) where the detail panel should appear
@@ -92,7 +109,7 @@ const ProjectDataGrid: React.FC<{ sessionData: ProjectSessionResponse }> = ({
       headerAlign: "left",
       align: "right",
       flex: 1,
-      minWidth: 100,
+      minWidth: 150,
     },
     { field: "session_id", headerName: "Session ID", flex: 1.5, minWidth: 200 },
     {
@@ -121,13 +138,24 @@ const ProjectDataGrid: React.FC<{ sessionData: ProjectSessionResponse }> = ({
       type: "number",
     },
     {
-      field: "positive",
-      headerName: "Positive feedback",
+      //field: "positive",
+      field: "errors",
+      headerName: "Errors",
       headerAlign: "right",
       align: "right",
       flex: 1,
-      minWidth: 100,
+      minWidth: 50,
       type: "number",
+      renderCell: (params) => (
+        <span
+          style={{
+            color: params.value !== 0 ? "red" : "inherit",
+            fontWeight: params.value !== 0 ? "bold" : "normal",
+          }}
+        >
+          {params.value}
+        </span>
+      ),
     },
     {
       field: "conversions",
