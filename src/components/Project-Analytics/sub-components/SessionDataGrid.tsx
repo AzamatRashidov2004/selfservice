@@ -6,7 +6,7 @@ import {
   SessionEventsResponseErrors,
 } from "../../../api/maestro/getMaestro";
 import { useEffect, useState, useRef } from "react";
-import { formatTimestamp } from "../../../utility/Date_Util";
+import { convertTimestamp, formatTimestamp } from "../../../utility/Date_Util";
 import ReactMarkdown from "react-markdown";
 import IconButton from "@mui/material/IconButton";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
@@ -84,7 +84,7 @@ function createErrorRows(
   return errorData.data.map((error, index) => ({
     id: 10000 + index + 1, // use high id numbers to avoid conflict
     isError: true,
-    timestamp: formatTimestamp(error.timestamp),
+    timestamp: formatTimestamp(convertTimestamp(error.timestamp)),
     query: error.type, // display error type in the "query" column
     answer: "", // empty for errors
     feedback: "", // empty for errors

@@ -94,8 +94,6 @@ export async function fetchSessionEventsErrors(
       },
     });
 
-    console.log("XXX", response);
-
     if (!response.ok) {
       throw new Error(
         `Failed to fetch session events errors: ${response.statusText}`
