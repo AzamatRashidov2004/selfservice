@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import {
   ProjectSessionResponse,
   ProjectStatsSession,
+  TotalProjectUsers,
 } from "../../../api/maestro/getMaestro";
 import Loader from "../../Loader/Loader";
 import { TimeControlButtons } from "./TimeControlButtons";
@@ -19,6 +20,7 @@ export type StatCardProps = {
   selectedTimeInterval: string;
   loading: boolean;
   setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
+  totalProjectUsers: TotalProjectUsers | null;
 };
 
 /**
@@ -351,6 +353,7 @@ export default function StatCard({
   selectedTimeInterval,
   loading,
   setSelectedTimeInterval,
+  totalProjectUsers,
 }: StatCardProps) {
   // Get the array of sessions (if available)
   let sessionStats: ProjectStatsSession[] = [];
@@ -359,7 +362,7 @@ export default function StatCard({
   }
 
   const [totalAnswers, setTotalAnswers] = useState<number>(0);
-  //const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
   const [totalFeedback, setTotalFeedback] = useState<number>(0);
   const [totalSessions, setTotalSesssions] = useState<number>(0);
 
@@ -396,6 +399,7 @@ export default function StatCard({
     setTotalAnswers(totalAnswers);
     setTotalSesssions(totalSessions);
     setTotalFeedback(totalFeedback);
+    setTotalUsers(totalProjectUsers != null ? totalProjectUsers.data : 0);
 
     // Compute the maximum total feedback across all buckets.
     const totals = aggregatedStats.map(
@@ -410,7 +414,16 @@ export default function StatCard({
     // Create chart data sets using the aggregated stats.
     const newDataSets = createDataSets(aggregatedStats, labelSet.length);
     setDataSets(newDataSets);
-  }, [graphFeedbackInfo, selectedTimeInterval, sessionStats]);
+  }, [
+    graphFeedbackInfo,
+    selectedTimeInterval,
+    sessionStats,
+    totalProjectUsers,
+  ]);
+
+  useEffect(() => {
+    console.log("AAAAAA", totalProjectUsers?.data);
+  }, [totalProjectUsers]);
 
   return (
     <Card
@@ -441,12 +454,10 @@ export default function StatCard({
             width: "35%",
             pr: 4,
             pl: 2, // Added left padding
-            pt: 6,
+            pt: 1,
           }}
         >
-          <Box sx={{ mb: 2 }}>
-            {" "}
-            {/* Metric container with bottom margin */}
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
               {totalAnswers}
             </Typography>
@@ -455,20 +466,16 @@ export default function StatCard({
             </Typography>
           </Box>
 
-          <Box sx={{ mb: 2 }}>
-            {" "}
-            {/* Metric container with bottom margin */}
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
-              1
+              {totalUsers}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Users
             </Typography>
           </Box>
 
-          <Box sx={{ mb: 2 }}>
-            {" "}
-            {/* Metric container with bottom margin */}
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
               {totalFeedback}
             </Typography>
@@ -478,8 +485,6 @@ export default function StatCard({
           </Box>
 
           <Box>
-            {" "}
-            {/* Last metric container without bottom margin */}
             <Typography variant="h5" fontWeight="bold" component="span">
               {totalSessions}
             </Typography>

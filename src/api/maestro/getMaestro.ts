@@ -1,8 +1,13 @@
 import { maestroApiUrl } from "../apiEnv";
 
-const BASE_URL = "http://localhost:8020";
+const BASE_URL = maestroApiUrl;
 
 // Types for the return values
+
+export interface TotalProjectUsers {
+  data: number;
+}
+
 export interface SessionEvent {
   timestamp: string;
   query?: string;
@@ -149,6 +154,35 @@ export async function fetchProjectSessionsErrors(
   projectId: string
 ): Promise<ProjectSessionErrorsResponse> {
   const url = `${BASE_URL}/project-stats-errors?project_id=${encodeURIComponent(
+    projectId
+  )}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch project stats errors: ${response.statusText}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching project stats errors:", error);
+    throw error;
+  }
+}
+
+// Fetch project stats errors
+export async function fetchTotalUsers(
+  projectId: string
+): Promise<TotalProjectUsers> {
+  const url = `${BASE_URL}/project-total-users?project_id=${encodeURIComponent(
     projectId
   )}`;
 

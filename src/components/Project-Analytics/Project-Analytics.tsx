@@ -11,6 +11,8 @@ import {
   fetchProjectStats,
   fetchProjectSessionsErrors,
   ProjectSessionErrorsResponse,
+  fetchTotalUsers,
+  TotalProjectUsers,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
 
@@ -33,6 +35,9 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     null
   );
 
+  const [totalProjectUsers, setTotalProjectUsers] =
+    useState<TotalProjectUsers | null>(null);
+
   const [sessionInfoErrors, setSessionInfoErrors] =
     useState<null | ProjectSessionErrorsResponse>(null);
 
@@ -47,6 +52,14 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
       if (!selectedProjectData) return;
 
       setFeedbackGraphLoading(true);
+      fetchTotalUsers(selectedProjectData.projectId)
+        .then((response) => {
+          console.log("YYY", response);
+          setTotalProjectUsers(response);
+        })
+        .catch((error) => {
+          console.error("Error fetching total users:", error);
+        });
       fetchProjectSessionsErrors(selectedProjectData.projectId).then(
         (response) => {
           setSessionInfoErrors(response);
@@ -86,7 +99,9 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     fetchData();
   }, [selectedProjectData, selectedTimeInterval]);
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    console.log("XAXAXAXAX", totalProjectUsers);
+  }, [totalProjectUsers, selectedTimeInterval]);
 
   return (
     <div className="analytics-dashboard-wrapper">
@@ -117,6 +132,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
                 selectedTimeInterval={selectedTimeInterval}
                 loading={feedbackGraphLoading}
                 setSelectedTimeInterval={setSelectedTimeInterval}
+                totalProjectUsers={totalProjectUsers}
               />
             </div>
             {sessionInfo ? (
