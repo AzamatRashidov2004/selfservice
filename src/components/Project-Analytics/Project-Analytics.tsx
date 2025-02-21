@@ -9,6 +9,10 @@ import {
   ProjectSessionResponse,
   fetchProjectSessions,
   fetchProjectStats,
+  fetchProjectSessionsErrors,
+  ProjectSessionErrorsResponse,
+  fetchTotalUsers,
+  TotalProjectUsers,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
 
@@ -31,6 +35,12 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     null
   );
 
+  const [totalProjectUsers, setTotalProjectUsers] =
+    useState<TotalProjectUsers | null>(null);
+
+  const [sessionInfoErrors, setSessionInfoErrors] =
+    useState<null | ProjectSessionErrorsResponse>(null);
+
   const [graphFeedbackInfo, setGraphFeedbackInfo] =
     useState<null | ProjectSessionResponse>(null);
 
@@ -42,6 +52,19 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
       if (!selectedProjectData) return;
 
       setFeedbackGraphLoading(true);
+      fetchTotalUsers(selectedProjectData.projectId)
+        .then((response) => {
+          console.log("YYY", response);
+          setTotalProjectUsers(response);
+        })
+        .catch((error) => {
+          console.error("Error fetching total users:", error);
+        });
+      fetchProjectSessionsErrors(selectedProjectData.projectId).then(
+        (response) => {
+          setSessionInfoErrors(response);
+        }
+      );
       fetchProjectSessions(
         selectedProjectData.projectId,
         selectedTimeInterval
@@ -60,43 +83,25 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
         });
         setFeedbackGraphLoading(false);
       });
-
-      //setFeedbackGraphLoading(true);
-      /*if (selectedTimeInterval == "hour") {
-        fetchProjectStatsTimeRange(selectedProjectData.projectId, "day").then(
-          (response) => {
-            setGraphFeedbackInfo(response);
-            if (response != null) {
-              setFeedbackGraphLoading(false);
-            }
-          }
-        );*/
       fetchProjectStats(selectedProjectData.projectId, "day").then(
         (response) => {
           setProjectState(response);
         }
       );
-      /*} else {
-        fetchProjectStatsTimeRange(
-          selectedProjectData.projectId,
-          selectedTimeInterval
-        ).then((response) => {
-          setGraphFeedbackInfo(response);
-          if (response != null) {
-            setFeedbackGraphLoading(false);
-          }
-        });*/
       fetchProjectStats(
         selectedProjectData.projectId,
         selectedTimeInterval
       ).then((response) => {
         setProjectState(response);
       });
-      //}
     }
 
     fetchData();
   }, [selectedProjectData, selectedTimeInterval]);
+
+  useEffect(() => {
+    console.log("XAXAXAXAX", totalProjectUsers);
+  }, [totalProjectUsers, selectedTimeInterval]);
 
   return (
     <div className="analytics-dashboard-wrapper">
@@ -127,12 +132,15 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
                 selectedTimeInterval={selectedTimeInterval}
                 loading={feedbackGraphLoading}
                 setSelectedTimeInterval={setSelectedTimeInterval}
+                totalProjectUsers={totalProjectUsers}
               />
-              {/*<StatCard projectStats={projectStats} />*/}
             </div>
             {sessionInfo ? (
               <div className="analytics-dashboard-row">
-                <ProjectDataGrid sessionData={sessionInfo} />
+                <ProjectDataGrid
+                  sessionData={sessionInfo}
+                  sessionDataErrors={sessionInfoErrors}
+                />
               </div>
             ) : (
               <></>

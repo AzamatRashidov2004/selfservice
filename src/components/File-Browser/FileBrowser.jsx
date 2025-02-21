@@ -183,7 +183,11 @@ export default function FileBrowser({
   }, []);
 
   return (
-    <div ref={chonkyRef} style={{ width: "100%", height: "600px" }}>
+    <div
+      ref={chonkyRef}
+      style={{ width: "100%", height: "100% !important" }}
+      className="chonkyWrapperChild"
+    >
       {fileUploadLoading ? (
         <div
           className="loader-container"

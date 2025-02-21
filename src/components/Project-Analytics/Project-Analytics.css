@@ -17,7 +17,7 @@
 
 .analytics-dashboard-wrapper {
   border: 1px solid #e0e0e0;
-  height: 600px;
+  height: 100% !important;
   border-top-right-radius: 10px !important;
 
   & * {
@@ -87,7 +87,6 @@
   height: 100%;
   justify-content: start;
   align-items: space-between;
-  max-height: 451px;
   overflow-y: auto;
 }
 

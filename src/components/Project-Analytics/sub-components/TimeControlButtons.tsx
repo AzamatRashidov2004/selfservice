@@ -31,7 +31,8 @@ export const TimeControlButtons = ({
       borderRadius: "24px",
       textTransform: "none",
       marginLeft: "-120px",
-      color: "#555", // Unselected text color
+      color: "black", // Brighter unselected text color
+      fontWeight: "bold",
       "&.Mui-selected": {
         // Selected state styles
         color: "#fff",
@@ -60,6 +61,7 @@ export const TimeControlButtons = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        marginBottom: "-50px",
       }}
     >
       <ToggleButtonGroup
