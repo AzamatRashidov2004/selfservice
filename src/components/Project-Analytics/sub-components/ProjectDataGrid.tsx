@@ -242,7 +242,6 @@ const ProjectDataGrid: React.FC<{
             session_id={
               rows.find((r) => r.id === expandedRowId)?.session_id || ""
             }
-            close={() => setExpandedRowId(null)}
           />
         </div>
       )}

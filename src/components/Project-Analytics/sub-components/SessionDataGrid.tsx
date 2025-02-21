@@ -1,5 +1,4 @@
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import Button from "@mui/material/Button";
 
 import {
   fetchSessionEvents,
@@ -172,10 +171,9 @@ let setExpandedRowId: (id: number | null) => void;
 
 type DataGridParams = {
   session_id: string;
-  close: () => void;
 };
 
-const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
+const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
   const [sessionData, setSessionData] = useState<SessionEventsResponse | null>(
     null
   );
