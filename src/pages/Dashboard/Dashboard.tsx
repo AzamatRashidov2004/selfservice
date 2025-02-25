@@ -193,6 +193,14 @@ const Dashboard: React.FC = () => {
         '[title="Switch to Grid view"]'
       );
 
+      const allIcons = document.querySelectorAll(
+        ".newNavbarButton svg, .custom-chonky-toolbar button svg"
+      );
+      allIcons.forEach((icon) => {
+        icon.setAttribute("width", "20");
+        icon.setAttribute("height", "20");
+      });
+
       if (
         chonkyRoot &&
         chonkyNavbar &&
@@ -204,6 +212,7 @@ const Dashboard: React.FC = () => {
 
         btnListView.classList.add("newNavbarButton");
         btnGridView.classList.add("newNavbarButton");
+        chonkyToolBar.classList.add("custom-chonky-toolbar");
 
         const newRow = document.createElement("div");
         newRow.classList.add("new-chonky-navbar");
