@@ -7,9 +7,7 @@ import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
 import { SettingsType } from "../../utility/types.ts";
 import getDate from "../../utility/Date_Util";
 import "./New_Project.css";
-import {
-  createInitialKronosProject,
-} from "../../utility/Api_Utils";
+import { createInitialKronosProject } from "../../utility/Api_Utils";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext.tsx";
 
