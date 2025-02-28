@@ -193,15 +193,12 @@ export async function updatePathBulk(
   try {
     const url = new URL(`${apiUrl}/projects/${projectID}/knowledge_base/bulk`);
     
+    let program_name = null;
     const firstSource = knowledge_bases[0].source_file;
-    if (firstSource.trim().length > 0){
-      const program_name = extractProgramName(firstSource);
-
-      if (program_name){
-        url.searchParams.append('custom_metadata', program_name);
-      }
+    if (firstSource.trim().length > 0) {
+      program_name = extractProgramName(firstSource);
     }
-    
+
     const projectResponse: Response = await fetch(url.toString(), {
       method: "PUT",
       headers: {
@@ -209,12 +206,17 @@ export async function updatePathBulk(
         Authorization: `Bearer ${token}`,
         "x-api-key": apiKey,
       },
-      body: JSON.stringify(knowledge_bases),
+      body: JSON.stringify({
+        knowledge_bases,
+        custom_metadata: {
+          program_name: program_name,  // Include program_name or null if not available
+        },
+      }),
     });
 
     if (!projectResponse.ok) {
       console.error(
-        "Error while trying to update knowledge base path: " +
+        "Error while trying to update knowledge base paths: " +
         projectResponse.statusText
       );
       return false;
@@ -235,24 +237,31 @@ export async function updatePathSingle(
 ): Promise<boolean> {
   try {
     const url = new URL(`${apiUrl}/projects/${projectID}/knowledge_base/${kb_id}/`);
-    if (newPath.trim().length > 0){
-      const program_name = extractProgramName(newPath);
-      if (program_name){
-        url.searchParams.append('custom_metadata', program_name);
-      }
+
+    let program_name = null;
+    if (newPath.trim().length > 0) {
+      program_name = extractProgramName(newPath);
     }
-    
+
+    // Prepare the data as expected in the request
+    const requestBody = {
+      _id: kb_id,
+      project_id: projectID,
+      source_file: newPath,
+      custom_metadata: { program_name: program_name },  // Wrap program_name in an object
+    };
+
+    // Log the request body to inspect it before sending
+    console.log('Request Payload:', JSON.stringify(requestBody));
+
     const projectResponse: Response = await fetch(url.toString(), {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
         "x-api-key": apiKey,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        _id: kb_id,
-        project_id: projectID,
-        source_file: newPath,
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!projectResponse.ok) {

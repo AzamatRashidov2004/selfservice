@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Stepper from "../../components/Stepper/Stepper";
-import FileUploadSection from "../../components/File-Upload-Section/File_Upload"; // Adjust the import path as necessary
+import FileUploadSection from "../../components/File-Upload-Section/File_Upload";
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
 import { createNotificationEvent } from "../../utility/Modal_Util";
 import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
@@ -17,6 +17,7 @@ const New_Project: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [files, setFiles] = useState<FileList | null>(null);
+  const [processedFiles, setProcessedFiles] = useState<File[]>([]);
   const [isAnalytical, setIsAnalytical] = useState<boolean>(false);
   const [notationFile, setNotationFile] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -35,39 +36,85 @@ const New_Project: React.FC = () => {
     if (!authenticated) {
       navigate("/");
     }
-  });
+  }, [authenticated, navigate]);
 
-  // API upload file here
-  const fileUploadNextButtonClick = async () => {
+  // **Process files to remove the root folder (only for folder uploads)**
+  const processFiles = (files: FileList) => {
+    if (!files.length) return;
+
+    let rootFolder: string | null = null;
+    const processed: File[] = [];
+
+    Array.from(files).forEach((file) => {
+      if (file.webkitRelativePath) {
+        // Identify root folder only for the first file
+        if (!rootFolder) {
+          rootFolder = file.webkitRelativePath.split("/")[0]; // Extract "MyFolder"
+        }
+
+        // Remove the root folder if it exists in the file path
+        const newPath = rootFolder ? file.webkitRelativePath.replace(`${rootFolder}/`, "") : file.webkitRelativePath;
+
+        processed.push(
+          new File([file], newPath, {
+            type: file.type,
+            lastModified: file.lastModified,
+          })
+        );
+      } else {
+        // If it's a regular file upload (not a folder), just push it as is
+        processed.push(file);
+      }
+    });
+
+    setProcessedFiles(processed);
+  };
+
+  // **Convert File[] back into FileList**
+  const convertToFileList = (files: File[]): FileList => {
+    const dataTransfer = new DataTransfer();
+    files.forEach((file) => dataTransfer.items.add(file));
+    return dataTransfer.files;
+  };
+
+  // Handle file upload and advance step
+  const fileUploadNextButtonClick = () => {
     if (!files) return;
     if (step !== 0) return;
     if (files && isAnalytical && !notationFile) return;
 
+    processFiles(files);
     setStep(step + 1);
   };
 
+  // Handle project details step
   const projectDetailsNextButtonClick = () => {
     if (projectName && description) {
       setStep(step + 1);
     }
   };
 
+  // Save project settings and upload files (folder structure without root folder)
   const saveSettings = async (settings: SettingsType) => {
     settings.attributes = {
       description,
       intro_image: introImage,
-      language: language,
+      language,
       intro_message: introMessage,
       last_update: getDate(),
       project_name: projectName,
     };
 
-    if (!files) return;
+    if (processedFiles.length === 0) return;
+
+    // Convert processedFiles (File[]) to FileList
+    const processedFileList = convertToFileList(processedFiles);
+
     const response = await createInitialKronosProject(
       settings,
       projectName,
       description,
-      files,
+      processedFileList, // ✅ Pass the correct FileList object
       keycloak.token,
       setLoading
     );
@@ -79,7 +126,7 @@ const New_Project: React.FC = () => {
         "danger",
         4000
       );
-      return null;
+      return;
     }
 
     createNotificationEvent(
@@ -99,7 +146,6 @@ const New_Project: React.FC = () => {
 
       {step === 0 ? (
         <FileUploadSection
-          step={step}
           setFile={setFiles}
           setNotationFile={setNotationFile}
           setIsAnalytical={setIsAnalytical}

@@ -172,17 +172,15 @@ export async function createInitialKronosProject(
   return true;
 }
 
-export function extractProgramName(sourcePath: string){
+export function extractProgramName(sourcePath: string) {
   const folders = sourcePath.replace(/\/$/, "").split("/");
-  const program_name = folders[0];
-
-  if (program_name){
-    const customMetadata = {
-      program_name: program_name
-    };
-
-    return JSON.stringify(customMetadata)
+  
+  // Check if there are no slashes (i.e., only one part in the path)
+  if (folders.length <= 1) {
+    return null;
   }
-
-  return null;
+  
+  const program_name = folders[0];
+  return program_name || null;
 }
+
