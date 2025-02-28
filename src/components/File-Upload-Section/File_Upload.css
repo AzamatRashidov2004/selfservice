@@ -1,11 +1,20 @@
 .file-upload-wrapper {
   padding: 0 var(--customize-section-padding);
   text-align: start;
-  margin-top: 20vh !important;
+  margin-top: 5vh !important;
 }
 
 .file-upload-title {
   margin-bottom: 1rem; /* Adjust as needed */
+}
+
+.file-upload-form{
+  width: 100%;
+}
+
+.folder-structure{
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .tabs-new-project {

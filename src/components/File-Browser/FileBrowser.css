@@ -6,10 +6,15 @@
 .chonky-baseButton {
   &[title="Details"],
   &[title="New Folder"],
-  &[title="Upload"],
+  &[title="Upload Folder"],
+  &[title="Upload File"],
   &[title="Clear selection"] {
     display: none !important;
   }
+}
+
+.MuiButton-label > div{
+  height: 20px;
 }
 
 .chonky-chonkyRoot {

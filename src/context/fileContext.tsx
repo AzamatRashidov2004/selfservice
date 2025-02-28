@@ -21,6 +21,7 @@ interface FileData {
     fileType: string;
     fileSize?: string; // Optional for folders
   };
+  source_file?: string;
   description?: string;
 }
 

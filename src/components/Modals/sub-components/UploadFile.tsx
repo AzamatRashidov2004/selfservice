@@ -1,26 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Tabs, Tab } from "@mui/material";
 
 interface UploadFileModalProps {
   show: boolean;
   handleClose: () => void;
   handleUpload: (files: File[]) => void;
+  mode: "folder" | "file";  // New prop to set initial mode
 }
 
 const UploadFile: React.FC<UploadFileModalProps> = ({
   show,
   handleClose,
   handleUpload,
+  mode,
 }) => {
-  const [uploadMode, setUploadMode] = useState<"folder" | "file">("folder"); // Default: Folder Upload
+  const [uploadMode, setUploadMode] = useState<"folder" | "file">(mode); // Initialize from prop
+
+  useEffect(() => {
+    setUploadMode(mode); // Update state when prop changes
+  }, [mode]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null); // Store input reference
-
-  // Handle tab switch (Folder vs File Upload)
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setUploadMode(newValue === 0 ? "folder" : "file");
-    setSelectedFiles([]); // Reset files on tab change
-  };
 
   // Process files and remove the root folder
   const processFiles = (files: FileList) => {
@@ -102,18 +101,6 @@ const UploadFile: React.FC<UploadFileModalProps> = ({
               <button type="button" className="btn-close btn-close-white" aria-label="Close" onClick={handleCloseModal}></button>
             </div>
             <div className="modal-body">
-              {/* MUI Tabs for Folder/File Upload */}
-              <Tabs
-                value={uploadMode === "folder" ? 0 : 1}
-                onChange={handleTabChange}
-                centered
-                className="tabs-new-project"
-                sx={{ boxShadow: "inset 0px 4px 6px rgba(0, 0, 0, 0.1)", borderRadius: "8px" }}
-              >
-                <Tab label="Folder Upload" />
-                <Tab label="File Upload" />
-              </Tabs>
-
               {/* Drag and Drop Zone */}
               <div
                 className="drop-zone border border-primary rounded p-5 mb-3 text-center bg-light"
@@ -126,15 +113,16 @@ const UploadFile: React.FC<UploadFileModalProps> = ({
                 }}
               >
                 <input
-                  ref={fileInputRef} // Use useRef to store input reference
+                  ref={fileInputRef}
                   type="file"
                   className="form-control-file"
                   style={{ display: "none" }}
                   multiple
-                  webkitdirectory={uploadMode === "folder" ? "true" : undefined}
-                  directory={uploadMode === "folder" ? "true" : undefined}
                   accept=".pdf, .xlsx, .csv"
                   onChange={handleFileChange}
+                  {...(uploadMode === "folder"
+                    ? ({ webkitdirectory: "true", directory: "true" } as Record<string, string>)
+                    : {})}
                 />
                 <label style={{ cursor: "pointer", fontSize: "1.2rem", color: "#007bff" }}>
                   <i className="bi bi-upload"></i> Drag & drop or click to upload
