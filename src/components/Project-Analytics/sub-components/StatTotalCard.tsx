@@ -428,6 +428,7 @@ export default function StatCard({
   return (
     <Card
       variant="outlined"
+      id="graph-main-card"
       sx={{
         height: "400px",
         width: "75%",

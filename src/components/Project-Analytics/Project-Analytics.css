@@ -79,6 +79,10 @@
   position: relative;
 }
 
+#graph-main-card {
+  width: 75% !important;
+}
+
 .analytics-dashboard-content {
   padding: 10px 15px;
   display: flex;
