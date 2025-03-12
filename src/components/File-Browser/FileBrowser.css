@@ -1,33 +1,26 @@
 .chonky-fileListWrapper {
   margin-bottom: 20px !important;
-  padding: 8px;
+  margin-top: -62px !important;
 }
 
 .chonky-baseButton {
   &[title="Details"],
   &[title="New Folder"],
-  &[title="Upload Folder"],
-  &[title="Upload File"],
+  &[title="Upload"],
   &[title="Clear selection"] {
     display: none !important;
   }
-}
-
-.MuiButton-label > div{
-  height: 20px;
 }
 
 .chonky-chonkyRoot {
   flex-direction: row !important;
   flex-wrap: wrap !important;
   justify-content: space-between !important;
-  padding: 0px !important;
-  border-top-right-radius: 10px !important;
 }
 
 .chonky-fileListWrapper {
   flex-basis: 100%;
-  height: calc(100% - 155px) !important;
+  height: 493px !important;
 }
 
 .chonky-toolbarWrapper {
