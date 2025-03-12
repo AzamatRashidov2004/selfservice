@@ -71,16 +71,23 @@ import {
   };
 
 
-  export const setupUploadFileModalListener = (showUploadFile: (callback: (files: File[]) => void) => void) => {
-    const handleCustomEvent = (event: CustomEvent) => handleUploadFileCustomEvent(event, showUploadFile);
+  export const setupUploadFileModalListener = (
+    showUploadFile: (callback: (files: File[]) => void, uploadMode: "folder" | "file") => void
+  ) => {
+    const handleCustomEvent = (event: CustomEvent) => {
+      const { callback, uploadMode } = event.detail;
+      if (callback && uploadMode) {
+        showUploadFile(callback, uploadMode); // Pass uploadMode correctly
+      }
+    };
   
-    window.addEventListener('showUploadFile', handleCustomEvent as EventListener);
+    window.addEventListener("showUploadFile", handleCustomEvent as EventListener);
   
-    // Return cleanup function
     return () => {
-      window.removeEventListener('showUploadFile', handleCustomEvent as EventListener);
+      window.removeEventListener("showUploadFile", handleCustomEvent as EventListener);
     };
   };
+  
 
   export const setupCreateFolderListener = (showCreateFolder: (callback: (folderName: string) => void) => void) => {
     const handleCustomEvent = (event: CustomEvent) => handleCreateFolder(event, showCreateFolder);
