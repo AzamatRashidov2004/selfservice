@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState, useRef } from "react";
+import { MenuItem, Select, FormControl } from "@mui/material";
 import "./File_Upload.css";
 import getFileExstension from "../../utility/File_Exstension";
 
 interface FileUploadSectionProps {
-  step: number;
   setFile: React.Dispatch<React.SetStateAction<FileList | null>>;
   setNotationFile: React.Dispatch<React.SetStateAction<File | null>>;
   setIsAnalytical: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,69 +15,83 @@ interface FileUploadSectionProps {
 
 const FileUploadSection: React.FC<FileUploadSectionProps> = ({
   setFile,
-  setNotationFile,
   setIsAnalytical,
   file,
   isAnalytical,
   notationFile,
   handleNextButtonClick,
 }) => {
-  // Handle file selection
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files || null;
+  const [folderStructure, setFolderStructure] = useState<string>("");
+  const [uploadMode, setUploadMode] = useState<"folder" | "file">("folder"); // Default: Folder Upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fileCount, setFileCount] = useState<number>(0);
 
-    if (selectedFile) {
-      const fileExtension = getFileExstension(selectedFile[0].name);
-
-      // Check if the file is .xlsx or .csv AKA analytical app
-      if (fileExtension === 'xlsx' || fileExtension === 'csv') {
-        setIsAnalytical(true);
+  // Handle file/folder selection
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      setFile(files);
+      setFileCount(files.length);
+      if (uploadMode === "folder") {
+        const folderTree = await processFiles(files);
+        setFolderStructure(folderTree);
       }
-
-      setFile(selectedFile);
     }
   };
 
-  const handleNotationChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.[0] || null;
-
-    if (selectedFile) {
-      setNotationFile(selectedFile);
-    }
+  const processFiles = async (files: FileList) => {
+    const folderMap: Record<string, string[]> = {};
+    Array.from(files).forEach((file) => {
+      const pathParts = file.webkitRelativePath.split("/");
+      const folderPath = pathParts.slice(0, -1).join("/");
+      if (!folderMap[folderPath]) {
+        folderMap[folderPath] = [];
+      }
+      folderMap[folderPath].push(file.name);
+      const fileExtension = getFileExstension(file.name);
+      if (fileExtension === "xlsx" || fileExtension === "csv") {
+        setIsAnalytical(true);
+      }
+    });
+    return Object.entries(folderMap)
+      .map(([folder, files]) => `${folder}/\n  - ${files.join("\n  - ")}`)
+      .join("\n\n");
   };
 
   return (
     <section className="file-upload-wrapper mt-4">
-      <h2 className="file-upload-title">Upload File</h2>
-      <div className=" file-upload-section mb-3">
-        <label htmlFor="formFile" className="form-label">
-          Please choose the file for processing. <b>You cannot change the file</b> once it is uploaded.
-        </label>
+      <h2 className="file-upload-title">Upload {uploadMode === "folder" ? "Folder" : "File"}</h2>
+      <FormControl className="file-upload-form">
+        <Select value={uploadMode} onChange={(e) => setUploadMode(e.target.value as "folder" | "file")}>
+          <MenuItem value="folder">Folder Upload</MenuItem>
+          <MenuItem value="file">File Upload</MenuItem>
+        </Select>
+      </FormControl>
+      
+      <div className="file-upload-section mb-3" onClick={() => fileInputRef.current?.click()} style={{ cursor: "pointer", border: "2px dashed #ccc", padding: "20px", textAlign: "center" }}>
+        {
+          fileCount === 0 ?
+          <p>Click to upload {uploadMode === "folder" ? "a folder" : "files"}</p>
+          :
+          <span>Files selected {fileCount}</span>
+        }
+
         <input
-          className="form-control"
+          ref={fileInputRef}
           type="file"
-          id="formFile"
-          accept=".pdf, .xlsx, .csv"
+          className="form-control-file"
+          style={{ display: "none" }}
           multiple
+          accept=".pdf, .xlsx, .csv"
           onChange={handleFileChange}
+          {...(uploadMode === "folder" ? { webkitdirectory: "true", directory: "true" } : {})}
         />
       </div>
 
-      {isAnalytical && (
-        <div className="notation-upload">
-          <h2 className="file-upload-title">Upload Notation File</h2>
-          <div className="file-upload-section mb-3">
-            <label htmlFor="notationFile" className="form-label">
-            Please upload the anotation file.
-            </label>
-            <input
-              className="form-control"
-              type="file"
-              id="notationFile"
-              accept=".json"
-              onChange={handleNotationChange}
-            />
-          </div>
+      {folderStructure && (
+        <div className="folder-structure alert alert-info" role="alert">
+          <h3>{uploadMode === "folder" ? "Folder Structure" : "Selected Files"}</h3>
+          <pre>{folderStructure}</pre>
         </div>
       )}
 
