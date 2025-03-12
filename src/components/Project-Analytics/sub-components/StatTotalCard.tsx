@@ -6,11 +6,9 @@ import React, { useEffect, useState } from "react";
 import {
   ProjectSessionResponse,
   ProjectStatsSession,
-  TotalProjectUsers,
 } from "../../../api/maestro/getMaestro";
 import Loader from "../../Loader/Loader";
 import { TimeControlButtons } from "./TimeControlButtons";
-import Typography from "@mui/material/Typography";
 
 /**
  * Types
@@ -20,7 +18,6 @@ export type StatCardProps = {
   selectedTimeInterval: string;
   loading: boolean;
   setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
-  totalProjectUsers: TotalProjectUsers | null;
 };
 
 /**
@@ -78,7 +75,7 @@ function getWeekLabels(): string[] {
   for (let i = 6; i >= 0; i--) {
     const date = new Date(now);
     date.setDate(now.getDate() - i);
-    const dayName = date.toLocaleDateString(undefined, { weekday: "short" });
+    const dayName = date.toLocaleDateString(undefined, { weekday: "long" });
     labels.push(dayName);
   }
   return labels;
@@ -353,18 +350,12 @@ export default function StatCard({
   selectedTimeInterval,
   loading,
   setSelectedTimeInterval,
-  totalProjectUsers,
 }: StatCardProps) {
   // Get the array of sessions (if available)
   let sessionStats: ProjectStatsSession[] = [];
   if (graphFeedbackInfo) {
     sessionStats = graphFeedbackInfo.sessions;
   }
-
-  const [totalAnswers, setTotalAnswers] = useState<number>(0);
-  const [totalUsers, setTotalUsers] = useState<number>(0);
-  const [totalFeedback, setTotalFeedback] = useState<number>(0);
-  const [totalSessions, setTotalSesssions] = useState<number>(0);
 
   const [xLabels, setXLabels] = useState<string[]>([]);
   const [dataSets, setDataSets] = useState<FeedbackDataSets>({
@@ -384,46 +375,19 @@ export default function StatCard({
       selectedTimeInterval
     );
 
-    // Calculate totals from aggregated stats
-    let totalAnswers = 0;
-    let totalSessions = 0;
-    let totalFeedback = 0;
-
-    aggregatedStats.forEach((stat) => {
-      totalAnswers += stat.total_queries;
-      totalSessions += stat.total_sessions;
-      totalFeedback +=
-        stat.total_positive_feedback + stat.total_negative_feedback;
-    });
-
-    setTotalAnswers(totalAnswers);
-    setTotalSesssions(totalSessions);
-    setTotalFeedback(totalFeedback);
-    setTotalUsers(totalProjectUsers != null ? totalProjectUsers.data : 0);
-
     // Compute the maximum total feedback across all buckets.
     const totals = aggregatedStats.map(
       (stat) =>
         (stat.total_negative_feedback || 0) +
         (stat.total_positive_feedback || 0)
     );
-
     const computedMax = Math.max(...totals, 1);
     setYAxisMax(computedMax);
 
     // Create chart data sets using the aggregated stats.
     const newDataSets = createDataSets(aggregatedStats, labelSet.length);
     setDataSets(newDataSets);
-  }, [
-    graphFeedbackInfo,
-    selectedTimeInterval,
-    sessionStats,
-    totalProjectUsers,
-  ]);
-
-  useEffect(() => {
-    console.log("AAAAAA", totalProjectUsers?.data);
-  }, [totalProjectUsers]);
+  }, [graphFeedbackInfo, selectedTimeInterval, sessionStats]);
 
   return (
     <Card
@@ -440,68 +404,17 @@ export default function StatCard({
           padding: 1,
           height: "100%",
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column",
           width: "100%",
         }}
       >
-        {/* Left side metrics - more compact and centered */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center", // Centers content vertically
-            alignItems: "flex-start", // Aligns content to the left
-            width: "35%",
-            pr: 4,
-            pl: 2, // Added left padding
-            pt: 1,
-          }}
-        >
-          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {totalAnswers}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Answers
-            </Typography>
-          </Box>
-
-          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {totalUsers}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Users
-            </Typography>
-          </Box>
-
-          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {totalFeedback}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Feedback
-            </Typography>
-          </Box>
-
-          <Box>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {totalSessions}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Sessions
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Right side chart */}
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "column",
-            width: "65%", // Adjusted to match the 35% for metrics
+            width: "100%",
             height: "100%",
           }}
         >
@@ -512,7 +425,7 @@ export default function StatCard({
           {loading ? (
             <Box
               sx={{
-                width: "550px", // Slightly reduced to accommodate the metrics section
+                width: "600px",
                 height: "100%",
                 display: "flex",
                 alignItems: "center",
@@ -546,7 +459,7 @@ export default function StatCard({
                     String(dataSets.positive[dataIndex] || 0),
                 },
               ]}
-              width={550} // Slightly reduced to accommodate the metrics section
+              width={600}
               height={350}
             />
           )}

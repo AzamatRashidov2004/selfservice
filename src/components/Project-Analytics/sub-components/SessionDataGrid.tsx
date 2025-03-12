@@ -1,39 +1,24 @@
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-
+import { DataGrid } from "@mui/x-data-grid";
+import { GridRowsProp, GridColDef } from "@mui/x-data-grid";
 import {
   fetchSessionEvents,
-  fetchSessionEventsErrors,
   SessionEventsResponse,
-  SessionEventsResponseErrors,
 } from "../../../api/maestro/getMaestro";
-
-import { useEffect, useState, useRef } from "react";
-import { convertTimestamp, formatTimestamp } from "../../../utility/Date_Util";
+import { useEffect, useState } from "react";
+import { formatTimestamp } from "../../../utility/Date_Util";
 import ReactMarkdown from "react-markdown";
-import IconButton from "@mui/material/IconButton";
-import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
-// ----- Define a Combined Row Type -----
-type CombinedRow = {
-  id: number;
-  isError: boolean; // distinguishes error rows
-  timestamp: string; // formatted timestamp
-  query: string; // for session rows: the query; for error rows: the error type
-  answer: string | null; // session events only (empty for errors)
-  feedback: string | number; // session events only (empty for errors)
-  // For error rows, we include additional details:
-  level?: string;
-  stack?: string;
-  message?: string;
-};
-
-// ----- Create Session Event Rows -----
-function createSessionRows(
-  sessionData: SessionEventsResponse | null
-): CombinedRow[] {
+function createRows(sessionData: SessionEventsResponse | null) {
   if (!sessionData) return [];
-  const rows: CombinedRow[] = [];
+
+  const rows: Array<{
+    id: number;
+    query: string | null;
+    answer: string | null;
+    feedback: number | string;
+    timestamp: string;
+  }> = [];
+
   let currentQuery: string | null = null;
   let queryTimestamp: string | null = null;
   let currentAnswer: string | null = null;
@@ -41,25 +26,27 @@ function createSessionRows(
 
   sessionData.data.forEach((event) => {
     if (event.query) {
-      // Finalize the previous query if any
+      // If there's an active query, finalize it before starting a new one
       if (currentQuery) {
         rows.push({
           id: rows.length + 1,
-          isError: false,
           query: currentQuery,
           answer: currentAnswer,
           feedback: currentFeedback,
           timestamp: queryTimestamp ? formatTimestamp(queryTimestamp) : "-",
         });
       }
+
       // Start a new query
       currentQuery = event.query;
       queryTimestamp = event.timestamp;
       currentAnswer = null;
       currentFeedback = "-";
     } else if (event.answer) {
+      // Store the answer for the current query
       currentAnswer = event.answer;
     } else if (event.feedback !== undefined) {
+      // Store the feedback for the current query
       currentFeedback = event.feedback === 1 ? "✔️" : "❌";
     }
   });
@@ -68,74 +55,24 @@ function createSessionRows(
   if (currentQuery) {
     rows.push({
       id: rows.length + 1,
-      isError: false,
       query: currentQuery,
       answer: currentAnswer,
       feedback: currentFeedback,
       timestamp: queryTimestamp ? formatTimestamp(queryTimestamp) : "-",
     });
   }
+
   return rows;
 }
 
-// ----- Create Error Rows -----
-function createErrorRows(
-  errorData: SessionEventsResponseErrors | null
-): CombinedRow[] {
-  if (!errorData || !errorData.data) return [];
-  return errorData.data.map((error, index) => ({
-    id: 10000 + index + 1, // use high id numbers to avoid conflict
-    isError: true,
-    timestamp: formatTimestamp(convertTimestamp(error.timestamp)),
-    query: error.type, // display error type in the "query" column
-    answer: "", // empty for errors
-    feedback: "", // empty for errors
-    level: error.level,
-    stack: error.stack,
-    message: error.message,
-  }));
-}
-
-// ----- Combined DataGrid Columns -----
-// Only error rows should be expandable.
 const columns: GridColDef[] = [
   {
-    field: "expand",
-    headerName: "",
-    width: 60,
-    sortable: false,
-    filterable: false,
-    renderCell: (params) => {
-      if (!params.row.isError) return null; // non-error rows: no expand icon
-      const isExpanded = expandedRowId === params.row.id;
-      return (
-        <IconButton
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            setExpandedRowId(isExpanded ? null : params.row.id);
-          }}
-        >
-          {isExpanded ? <ArrowDropDownIcon /> : <ArrowRightIcon />}
-        </IconButton>
-      );
-    },
-  },
-  {
-    field: "timestamp",
-    headerName: "Timestamp",
-    headerAlign: "left",
-    align: "left",
-    flex: 1,
-    minWidth: 150,
-  },
-  {
     field: "query",
-    headerName: "Query / Error Type",
+    headerName: "Query",
     headerAlign: "left",
     align: "left",
     flex: 1,
-    minWidth: 200,
+    minWidth: 80,
   },
   {
     field: "answer",
@@ -143,15 +80,18 @@ const columns: GridColDef[] = [
     headerAlign: "left",
     align: "left",
     flex: 1,
-    minWidth: 400,
-    renderCell: (params) => {
-      if (params.row.isError) return ""; // leave empty for errors
-      return (
-        <div style={{ padding: "3px 0", minHeight: "36px" }}>
-          <ReactMarkdown>{params.value || ""}</ReactMarkdown>
-        </div>
-      );
-    },
+    minWidth: 600,
+    renderCell: (params) => (
+      <div
+        style={{
+          padding: "3px 0",
+          minHeight: "36px",
+        }}
+      >
+        {/* Render the Markdown */}
+        <ReactMarkdown>{params.value || ""}</ReactMarkdown>
+      </div>
+    ),
   },
   {
     field: "feedback",
@@ -160,195 +100,89 @@ const columns: GridColDef[] = [
     align: "left",
     flex: 1,
     minWidth: 100,
-    renderCell: (params) => (params.row.isError ? "" : params.value),
+  },
+  {
+    field: "timestamp",
+    headerName: "Timestamp",
+    headerAlign: "left",
+    align: "left",
+    flex: 1,
+    minWidth: 100,
   },
 ];
-
-// We'll use these variables to manage error row expansion.
-// (They will be set inside the component.)
-let expandedRowId: number | null = null;
-let setExpandedRowId: (id: number | null) => void;
-
+// SessionEventsResponse
 type DataGridParams = {
   session_id: string;
+  close: () => void;
 };
 
-const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
-  const [sessionData, setSessionData] = useState<SessionEventsResponse | null>(
+const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id, close }) => {
+  const [sessionData, setSessionData] = useState<null | SessionEventsResponse>(
     null
   );
-  const [sessionError, setSessionError] =
-    useState<SessionEventsResponseErrors | null>(null);
-  const [showErrors, setShowErrors] = useState(true);
-  const [combinedRows, setCombinedRows] = useState<CombinedRow[]>([]);
-
-  // Error row expansion state (only errors are expandable)
-  const [localExpandedRowId, _setLocalExpandedRowId] = useState<number | null>(
-    null
-  );
-  expandedRowId = localExpandedRowId;
-  setExpandedRowId = _setLocalExpandedRowId;
-
-  // For computing the detail panel vertical position.
-  const [detailPanelTop, setDetailPanelTop] = useState(0);
-  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchData() {
-      const eventsResponse = await fetchSessionEvents(session_id);
-      setSessionData(eventsResponse);
-      const errorsResponse = await fetchSessionEventsErrors(session_id);
-      setSessionError(errorsResponse);
+      fetchSessionEvents(session_id).then((response) => {
+        console.log(response);
+        setSessionData(response);
+      });
     }
+
     fetchData();
   }, [session_id]);
 
-  useEffect(() => {
-    const sessionRows = createSessionRows(sessionData);
-    const errorRows = createErrorRows(sessionError);
-    // Combine rows and sort by timestamp (assumes ISO-compatible format)
-    const allRows = [...sessionRows, ...errorRows].sort((a, b) =>
-      a.timestamp < b.timestamp ? -1 : 1
-    );
-    setCombinedRows(allRows);
-  }, [sessionData, sessionError]);
-
-  const filteredRows = showErrors
-    ? combinedRows
-    : combinedRows.filter((row) => !row.isError);
-
-  // Compute detail panel position for an expanded error row.
-  useEffect(() => {
-    if (localExpandedRowId && gridRef.current) {
-      const rowElement = gridRef.current.querySelector(
-        `[data-id="${localExpandedRowId}"]`
-      ) as HTMLElement;
-      if (rowElement) {
-        const gridTop = gridRef.current.getBoundingClientRect().top;
-        const rowTop = rowElement.getBoundingClientRect().top;
-        const rowHeight = rowElement.offsetHeight;
-        setDetailPanelTop(rowTop - gridTop + rowHeight);
-      }
-    }
-  }, [localExpandedRowId]);
-
+  const rows: GridRowsProp = createRows(sessionData);
   return (
-    <div style={{ position: "relative", width: "100%" }} ref={gridRef}>
-      <label
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          cursor: "pointer",
-          justifySelf: "flex-end",
-          marginTop: "5px",
-          marginBottom: "5px",
-          fontWeight: "bold",
-        }}
-      >
-        {"Errors"}
-        <input
-          type="checkbox"
-          checked={showErrors}
-          onChange={() => setShowErrors(!showErrors)}
-        />
-      </label>
-      <DataGrid
-        autoHeight
-        rows={filteredRows}
-        columns={columns}
-        sx={{
-          "& .MuiDataGrid-row": {
-            "&.error-row": {
-              backgroundColor: "#FFCDD2", // Light red for error rows
-            },
-          },
-          "& .MuiDataGrid-columnHeader:not(:last-child)": {
-            borderRight: "1px solid rgba(224, 224, 224, 1)",
-          },
-          "& .MuiDataGrid-cell:not(:last-child)": {
-            borderRight: "1px solid rgba(224, 224, 224, 1)",
-          },
-          "& .MuiDataGrid-columnHeaders": {
-            borderBottom: "1px solid rgba(224, 224, 224, 1)",
-          },
-        }}
-        getRowHeight={() => "auto"}
-        getRowClassName={(params) => (params.row.isError ? "error-row" : "")}
-        initialState={{
-          pagination: { paginationModel: { pageSize: 20 } },
-        }}
-        pageSizeOptions={[20]}
-        disableColumnResize
-        density="compact"
-        slotProps={{
-          filterPanel: {
-            filterFormProps: {
-              logicOperatorInputProps: { variant: "outlined", size: "small" },
-              columnInputProps: {
-                variant: "outlined",
-                size: "small",
-                sx: { mt: "auto" },
-              },
-              operatorInputProps: {
-                variant: "outlined",
-                size: "small",
-                sx: { mt: "auto" },
-              },
-              valueInputProps: {
-                InputComponentProps: { variant: "outlined", size: "small" },
-              },
-            },
-          },
-        }}
-      />
-      {/* Inline detail panel for expanded error rows */}
-      {localExpandedRowId && (
-        <div
-          style={{
-            position: "absolute",
-            top: detailPanelTop,
-            left: 0,
-            right: 0,
-            background: "#FFCDD2",
-            borderTop: "2px solid #ff0033",
-            padding: "16px",
-            zIndex: 10,
+    <div className="session-grid-wrapper">
+      <div className="session-grid-back">
+        <button className="btn btn-outline-primary" onClick={close}>
+          All Sessions
+        </button>
+      </div>
+      {sessionData ? (
+        <DataGrid
+          rows={rows}
+          columns={columns}
+          getRowHeight={() => "auto"}
+          getRowClassName={(params) =>
+            params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+          }
+          initialState={{
+            pagination: { paginationModel: { pageSize: 20 } },
           }}
-        >
-          {(() => {
-            const errorRow = combinedRows.find(
-              (r) => r.id === localExpandedRowId && r.isError
-            );
-            if (!errorRow) return null;
-            return (
-              <div
-                style={{
-                  fontSize: "0.9rem",
-                }}
-              >
-                <div>
-                  <strong>Timestamp:</strong> {errorRow.timestamp}
-                </div>
-                <div>
-                  <strong>Error Type:</strong> {errorRow.query}
-                </div>
-                <div>
-                  <strong>Level:</strong> {errorRow.level}
-                </div>
-                <div>
-                  <strong>Message:</strong> {errorRow.message}
-                </div>
-                <div>
-                  <strong>Stack:</strong>
-                  <pre style={{ whiteSpace: "pre-wrap", margin: 0 }}>
-                    {errorRow.stack}
-                  </pre>
-                </div>
-              </div>
-            );
-          })()}
-        </div>
+          pageSizeOptions={[20]}
+          disableColumnResize
+          density="compact"
+          slotProps={{
+            filterPanel: {
+              filterFormProps: {
+                logicOperatorInputProps: {
+                  variant: "outlined",
+                  size: "small",
+                },
+                columnInputProps: {
+                  variant: "outlined",
+                  size: "small",
+                  sx: { mt: "auto" },
+                },
+                operatorInputProps: {
+                  variant: "outlined",
+                  size: "small",
+                  sx: { mt: "auto" },
+                },
+                valueInputProps: {
+                  InputComponentProps: {
+                    variant: "outlined",
+                    size: "small",
+                  },
+                },
+              },
+            },
+          }}
+        />
+      ) : (
+        <></>
       )}
     </div>
   );

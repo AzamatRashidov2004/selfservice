@@ -21,7 +21,6 @@ interface FileData {
     fileType: string;
     fileSize?: string; // Optional for folders
   };
-  source_file?: string;
   description?: string;
 }
 
@@ -386,85 +385,30 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     project_id: string,
     kb_ids: kronosKnowledgeBaseType[]
   ) => {
-    const newFileStructure = [...filesData]; // Work on a copy of the file structure
-    const newFiles: FileData[] = [];
-    const newFolders: FileData[] = [];
-    let idCounter = Math.max(...filesData.map((f) => f.id), 0) + 1;
-  
-    files.forEach((file, index) => {
-      const fileType = file.type.split("/")[1] || "unknown"; // Extract file type safely
-      const parentPath = getPathFromProject(parentId); // Get parent directory path
-  
-      let fileName = file.name;
-      let filePath = parentPath; // Default to parent path
-      let fileParentId = parentId; // Default to provided parentId
-  
-      if (file.name.includes("/")) {
-        // Extract full path structure
-        const pathParts = file.name.split("/");
-        fileName = pathParts.pop()!; // Extract filename
-        let lastFolderId = parentId;
-  
-        pathParts.forEach((folder, folderIndex) => {
-          const currentParentId = folderIndex === 0 ? parentId : lastFolderId;
-  
-          // Check if folder already exists in both old & new file structures
-          const existingFolder =
-            newFileStructure.find(
-              (f) => f.parent === currentParentId && f.droppable && f.text === folder
-            ) ||
-            newFolders.find(
-              (f) => f.parent === currentParentId && f.droppable && f.text === folder
-            );
-  
-          if (!existingFolder) {
-            // If folder does not exist, create it
-            const newFolder: FileData = {
-              id: idCounter,
-              parent: currentParentId,
-              droppable: true,
-              text: folder,
-              data: { fileType: "folder" },
-              kronosKB_id: null,
-              kronosProjectId: project_id,
-            };
-  
-            newFolders.push(newFolder);
-            lastFolderId = idCounter;
-            idCounter++;
-          } else {
-            lastFolderId = existingFolder.id; // Use existing folder ID
-          }
-        });
-  
-        fileParentId = lastFolderId; // Set last found/created folder as the parent
-        filePath = parentPath + pathParts.join("/") + "/";
-      }
-  
-      // Create file object
-      const newFile: FileData = {
-        id: idCounter,
-        parent: fileParentId,
-        droppable: false,
-        text: fileName,
+    // Create new files based on the input files
+    const newFiles = files.map((file, index) => {
+      // Extract the base file type (e.g., "pdf" from "application/pdf")
+      const fileType = file.type.split("/")[1];
+      const path = getPathFromProject(parentId);
+
+      return {
+        id: Math.max(...filesData.map((f) => f.id)) + index + 1, // Assign new unique ID
+        parent: parentId, // Set parent to the given parentId
+        droppable: false, // Files are not droppable
+        text: file.name, // Use the file name for the text
         data: {
-          fileType: fileType,
-          fileSize: `${(file.size / (1024 * 1024)).toFixed(2)}MB`, // Convert size to MB
+          fileType: fileType, // Set the file type from the file object
+          fileSize: `${(file.size / (1024 * 1024)).toFixed(2)}MB`, // Convert file size to string and format
         },
-        kronosKB_id: kb_ids[index]._id,
+        kronosKB_id: kb_ids[index]._id, // TODO when adding files add here the
         kronosProjectId: project_id,
-        source_file: filePath + fileName, // ✅ Preserve structured path
+        source_file: path + file.name,
       };
-  
-      newFiles.push(newFile);
-      idCounter++;
     });
-  
-    // Update state with new files and folders
-    setFilesData((prevFilesData) => [...prevFilesData, ...newFolders, ...newFiles]);
+
+    // Update the state with the new files
+    setFilesData((prevFilesData) => [...prevFilesData, ...newFiles]);
   };
-  
-  
 
   const getPathFromProject = (nodeId: number): string => {
     const path: string[] = [];
