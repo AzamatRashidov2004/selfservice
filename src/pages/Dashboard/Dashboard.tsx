@@ -173,6 +173,148 @@ const Dashboard: React.FC = () => {
     }
   });
 
+  useEffect(() => {
+    const waitForElements = setInterval(() => {
+      const chonkyNavbar = document.getElementsByClassName(
+        "chonky-navbarWrapper"
+      )[0];
+      const chonkyToolBar = document.getElementsByClassName(
+        "chonky-toolbarWrapper"
+      )[0];
+      const fileTreeNavbar = document.getElementsByClassName(
+        "file-tree-new-button"
+      )[0];
+      const chonkyRoot =
+        document.getElementsByClassName("chonky-chonkyRoot")[0];
+      const btnListView = document.querySelector(
+        '[title="Switch to List view"]'
+      );
+      const btnGridView = document.querySelector(
+        '[title="Switch to Grid view"]'
+      );
+
+      const allIcons = document.querySelectorAll(
+        ".newNavbarButton svg, .custom-chonky-toolbar button svg"
+      );
+      allIcons.forEach((icon) => {
+        icon.setAttribute("width", "20");
+        icon.setAttribute("height", "20");
+      });
+
+      if (
+        chonkyRoot &&
+        chonkyNavbar &&
+        chonkyToolBar &&
+        btnGridView &&
+        btnListView
+      ) {
+        clearInterval(waitForElements); // Stop checking once elements are found
+
+        btnListView.classList.add("newNavbarButton");
+        btnGridView.classList.add("newNavbarButton");
+        chonkyToolBar.classList.add("custom-chonky-toolbar");
+
+        const newRow = document.createElement("div");
+        newRow.classList.add("new-chonky-navbar");
+
+        // Remove before appending
+        chonkyRoot.removeChild(chonkyNavbar);
+        chonkyRoot.removeChild(chonkyToolBar);
+
+        newRow.appendChild(chonkyNavbar);
+        newRow.appendChild(chonkyToolBar);
+
+        chonkyRoot.prepend(newRow);
+
+        chonkyNavbar.classList.add("custom-chonky-navbar");
+
+        if (fileTreeNavbar) {
+          fileTreeNavbar.classList.add("custom-file-tree-navbar");
+        }
+      }
+    }, 500);
+
+    return () => clearInterval(waitForElements);
+  }, []);
+
+  useEffect(() => {
+    const target = document.getElementsByClassName(
+      "chonkyWrapperChild"
+    )[0] as HTMLDivElement;
+    const target2 = document.getElementsByClassName(
+      "chonkyWrapper"
+    )[0] as HTMLDivElement;
+
+    const updateHeight = () => {
+      if (target && target2) {
+        // Calculate the height based on the viewport height
+        const heightInPixels = window.innerHeight - window.innerHeight * 0.1; // Subtract 1px if needed
+
+        // Set the height of the target element
+        target.style.height = `${heightInPixels}px`;
+      }
+    };
+
+    // Initial height calculation
+    updateHeight();
+
+    // Add resize event listener to update height on screen size change
+    window.addEventListener("resize", updateHeight);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
+
+  useEffect(() => {
+    const target = document.getElementsByClassName(
+      "parent-analytics"
+    )[0] as HTMLDivElement;
+    const target2 = document.getElementsByClassName(
+      "analytics-dashboard-wrapper"
+    )[0] as HTMLDivElement;
+    const target3 = document.getElementsByClassName(
+      "analytics-dashboard-content"
+    )[0] as HTMLDivElement;
+
+    const updateHeight = () => {
+      if (target && target2 && target3) {
+        // Calculate the height based on the viewport height
+        const heightInPixels = window.innerHeight - window.innerHeight * 0.101; // Subtract 1px if needed
+
+        // Set the height of the target element
+        target.style.height = `${heightInPixels}px`;
+        target3.style.maxHeight = `${heightInPixels - 156}px`;
+        //target3.style.height = `${heightInPixels * 0.88}px`;
+      }
+    };
+
+    // Initial height calculation
+    updateHeight();
+
+    // Add resize event listener to update height on screen size change
+    window.addEventListener("resize", updateHeight);
+
+    // Cleanup function to remove the event listener
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+    };
+  }, []);
+
+  const analyticsWindowRef = useRef<HTMLDivElement>(null);
+  const fileBrowserRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isDetailsOpen) {
+      analyticsWindowRef?.current?.classList.remove("hidden");
+      fileBrowserRef?.current?.classList.add("hidden");
+    } else {
+      fileBrowserRef?.current?.classList.remove("hidden");
+      analyticsWindowRef?.current?.classList.add("hidden");
+    }
+  }, [isDetailsOpen]);
+
   const handleMouseEnter = () => {
     const body = document.body;
     const scrollbarWidth =
@@ -244,30 +386,35 @@ const Dashboard: React.FC = () => {
                 onResize={handleResize}
                 style={{ minWidth: "500px" }}
               >
-                {isDetailsOpen ? (
+                <div
+                  ref={analyticsWindowRef}
+                  className="hidden parent-analytics"
+                  style={{
+                    height: "100% !important",
+                  }}
+                >
                   <ProjectAnalytics
                     selectedProjectData={selectedProjectData}
                     setOpenDetails={() => {
                       setDetailsOpen(false);
                     }}
                   />
-                ) : (
-                  <>
-                    <FileBrowser
-                      // @ts-expect-error: The component is js so it doesnt find types
-                      setDetailsOpen={setDetailsOpen}
-                      setSelectedProjectData={setSelectedProjectData}
-                    />
-                    <button
-                      className="load-button"
-                      onClick={handleLoadClick}
-                      ref={loadButtonRef}
-                      id="load-more-button"
-                    >
-                      Load more...
-                    </button>
-                  </>
-                )}
+                </div>
+                <div ref={fileBrowserRef} className="chonkyWrapper">
+                  <FileBrowser
+                    // @ts-expect-error: The component is js so it doesnt find types
+                    setDetailsOpen={setDetailsOpen}
+                    setSelectedProjectData={setSelectedProjectData}
+                  />
+                  <button
+                    className="load-button"
+                    onClick={handleLoadClick}
+                    ref={loadButtonRef}
+                    id="load-more-button"
+                  >
+                    Load more...
+                  </button>
+                </div>
               </ResizableBox>
             </div>
           </div>

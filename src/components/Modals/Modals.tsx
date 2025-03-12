@@ -21,7 +21,11 @@ import {
 const Modals: React.FC = () => {
   const [popup, setPopup] = useState<PopupState>(getDefaultPopupState());
   const [notification, setNotification] = useState<NotificationState>(getDefaultNotificationState());
-  const [uploadFileModal, setUploadFileModal] = useState({callback: (files: File[]) => {console.log(files)}, isVisible: false});
+  const [uploadFileModal, setUploadFileModal] = useState({
+    callback: (files: File[]) => { console.log(files); },
+    isVisible: false,
+    uploadMode: "folder", // Default mode
+  });
   const [createFolderModal, setCreateFolderModal] = useState({isVisible: false, callback: (folderName: string) => {console.log(folderName)}});
 
   // Memoize the showPopup function
@@ -35,10 +39,9 @@ const Modals: React.FC = () => {
   }, []);
 
   // Memoize the showPopup function
-  const showUploadFile = useCallback((callback: (files: File[]) => void) => {
-    setUploadFileModal({callback: callback, isVisible: true});
+  const showUploadFile = useCallback((callback: (files: File[]) => void, uploadMode: "folder" | "file") => {
+    setUploadFileModal({ callback, isVisible: true, uploadMode });
   }, []);
-
    // Memoize the showPopup function
    const showCreateFolder = useCallback((callback: (folderName: string) => void) => {
     setCreateFolderModal({callback: callback, isVisible: true});
@@ -87,10 +90,9 @@ const Modals: React.FC = () => {
       {/* Upload File Modal */}
       <UploadFile
         show={uploadFileModal.isVisible}
-        handleClose={() => setUploadFileModal({...uploadFileModal, isVisible: false})}
-        handleUpload={(files) => {
-          uploadFileModal.callback(files); // File callback
-        }}
+        handleClose={() => setUploadFileModal({ ...uploadFileModal, isVisible: false })}
+        handleUpload={(files) => uploadFileModal.callback(files)}
+        mode={(uploadFileModal.uploadMode as "folder" | "file")} // Pass uploadMode correctly
       />
 
       <CreateFolder
