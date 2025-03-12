@@ -194,11 +194,10 @@ async function handleAction(
   }
 
   // Handle Create File custom action
-  if (data.id === 'upload') {
+  if (data.id === 'upload_file' || data.id === 'upload_folder') {
     if (!keycloak || !keycloak.token) return;
     let targetID = parseInt(currentFolder);
 
-    // If upload is called on a folder, it should upload files inside it
     if (
       data.state.selectedFiles.length === 1 &&
       data.state.selectedFiles[0].isDir
@@ -212,7 +211,11 @@ async function handleAction(
 
     let path = getPathFromProject(parseInt(targetID));
     const project = getProjectForNode(parseInt(targetID));
-    if (path.lengt > 0) path = path.slice(0, -1);
+    if (path.length > 0) path = path.slice(0, -1);
+
+    // Determine upload mode based on data.id
+    const uploadMode = data.id === 'upload_folder' ? 'folder' : 'file';
+
     createUploadFileModalEvent(async (files) => {
       try {
         const result = await uploadMultiplePdfs(
@@ -240,7 +243,7 @@ async function handleAction(
           4000
         );
       }
-    });
+    }, uploadMode); // Pass the correct upload mode
   }
 
   if (data.id === 'download_files') {
