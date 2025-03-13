@@ -74,7 +74,7 @@ async function getAllProjectsAndProjectData(
         embedding_model: "", // Example embedding model
         language: "", // Example language
         total_pages: 0, // Example page count
-        source_file: `dev/data.fsm`, // Example source file name
+        source_file: `dev/config.fsm`, // Example source file name
         source_type: "fsm", // Example source type
         created_at: new Date().toISOString(), // Current timestamp
         model_version: 3, // Example model version
