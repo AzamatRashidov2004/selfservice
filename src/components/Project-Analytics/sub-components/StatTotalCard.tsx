@@ -432,6 +432,7 @@ export default function StatCard({
         height: "400px",
         width: "65%",
         display: "flex",
+        id: "graph-main-card",
         flexDirection: "column",
       }}
     >
