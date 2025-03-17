@@ -20,6 +20,9 @@ import {
   getFSMFromProject,
 } from '../../../api/kronos/getKronos';
 import {
+  updateFSMFile
+} from '../../../api/kronos/postKronos';
+import {
   addItemToCache,
   isItemInCache,
   getItemFromCache,
@@ -321,10 +324,44 @@ async function handleAction(
           var fsmData;
           if (isItemInCache(project_id + '.fsm')) {
             fsmData = getItemFromCache(project_id + '.fsm');
+
           } else {
             fsmData = await getFSMFromProject(project_id, keycloak.token);
+            // add new editor_active and editor_initial_file fields so i can use them in chatbot
+            if (fsmData !== '') {
+                // Parse the FSM JSON data
+                let fsmObject;
+                try {
+                  fsmObject = JSON.parse(fsmData);
+                } catch (e) {
+                  throw new Error('Invalid FSM JSON.');
+                }
+        
+                // Add new fields if they don't exist
+                if (fsmObject.editor_active === undefined) {
+                  console.log("Here");
+                  fsmObject.editor_active = true;
+                }
+                if (fsmObject.editor_initial_file === undefined) {
+                  console.log("Here");
+                  fsmObject.editor_initial_file = "";
+                }
+                // Convert back to formatted JSON string
+                fsmData = JSON.stringify(fsmObject, null, 2);
+                console.log("The updated data is : ", fsmData);
+                try {
+                  await updateFSMFile(
+                    project_id,
+                    fsmData ? fsmData : "",
+                    keycloak.token ? keycloak.token : ""
+                  );
+                } catch (e) {
+                  throw new Error(e);
+                }
+            }
             addItemToCache(project_id + '.fsm', fsmData);
           }
+
           if (fsmData !== '') {
             setCodeVisible(true);
             setCodeValue(fsmData);
