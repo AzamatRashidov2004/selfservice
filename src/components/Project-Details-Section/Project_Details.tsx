@@ -5,8 +5,7 @@ interface ProjectDescriptionSectionProps {
   setProjectName: React.Dispatch<React.SetStateAction<string>>;
   description: string;
   setDescription: React.Dispatch<React.SetStateAction<string>>;
-  language: string;
-  setLanguage: React.Dispatch<React.SetStateAction<string>>;
+  setLanguage: React.Dispatch<React.SetStateAction<"cs-CZ" | "en-US">>;
   introMessage: string;
   setIntroMessage: React.Dispatch<React.SetStateAction<string>>;
   introImage: string;
@@ -19,7 +18,6 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
   setProjectName,
   description,
   setDescription,
-  language,
   setLanguage,
   introMessage,
   setIntroMessage,
@@ -61,12 +59,10 @@ const ProjectDetails: React.FC<ProjectDescriptionSectionProps> = ({
         <select
           id="language"
           className="form-select"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
+          onChange={(e) => setLanguage(e.target.value as "cs-CZ" | "en-US")}
         >
-          <option value="English">English</option>
-          <option value="Deutsch">Deutsch</option>
-          <option value="Czech">Czech</option>
+          <option value="en-US">English</option>
+          <option value="cs-CZ">Czech</option>
         </select>
       </div>
       <div className="mb-3">

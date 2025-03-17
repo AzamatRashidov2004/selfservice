@@ -137,16 +137,23 @@ export async function createInitialKronosProject(
   settings: SettingsType,
   projectName: string,
   description: string,
+  language: "en-US" | "cs-CZ",
   files: FileList,
   token: string | undefined,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  introMessage?: string, 
+  introImage?: string
 ): Promise<boolean> {
   if (!token) return false;
+  
   const kronosProject = await createKronosProject(
     projectName,
     description,
+    language,
     settings,
-    token
+    token,
+    introMessage,
+    introImage
   );
 
   if (!kronosProject) return false;

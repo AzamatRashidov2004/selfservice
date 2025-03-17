@@ -23,7 +23,7 @@ const New_Project: React.FC = () => {
   // States for Project Details
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
-  const [language, setLanguage] = useState("English");
+  const [language, setLanguage] = useState<"cs-CZ" | "en-US">("en-US");
   const [introMessage, setIntroMessage] = useState("");
   const [introImage, setIntroImage] = useState("");
 
@@ -112,9 +112,12 @@ const New_Project: React.FC = () => {
       settings,
       projectName,
       description,
-      processedFileList, // ✅ Pass the correct FileList object
+      language,
+      processedFileList,
       keycloak.token,
-      setLoading
+      setLoading,
+      introMessage,
+      introImage
     );
 
     if (!response) {
@@ -160,7 +163,6 @@ const New_Project: React.FC = () => {
           setProjectName={setProjectName}
           description={description}
           setDescription={setDescription}
-          language={language}
           setLanguage={setLanguage}
           introMessage={introMessage}
           setIntroMessage={setIntroMessage}

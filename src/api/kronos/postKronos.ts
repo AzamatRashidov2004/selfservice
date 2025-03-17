@@ -13,25 +13,33 @@ import { extractProgramName } from "../../utility/Api_Utils";
 export async function createKronosProject(
   projectName = "",
   description = "",
+  language: "en-US" | "cs-CZ",
   chatbot_config: SettingsType,
-  token: string
+  token: string,
+  init_message?: string,
+  init_image_url?: string
 ): Promise<KronosProjectType | null> {
   try {
-    // Create new kronos project
-    const projectResponse: Response = await fetch(`${apiUrl}/projects/`, {
+    // Create query parameters while ensuring no empty or whitespace-only values are appended
+    const queryParams = new URLSearchParams();
+    if (init_message && init_message.trim() !== "") queryParams.append("init_message", init_message);
+    if (init_image_url && init_image_url.trim() !== "") queryParams.append("init_image_url", init_image_url);
+
+    // Construct request URL with query parameters only if they exist
+    const requestUrl = `${apiUrl}/projects/${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+
+    const projectResponse: Response = await fetch(requestUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer + ${token}`,
+        Authorization: `Bearer ${token}`,
         "x-api-key": apiKey,
       },
-      body: JSON.stringify({ name: projectName, description, chatbot_config }),
+      body: JSON.stringify({ name: projectName, description, chatbot_config, language }),
     });
 
     if (!projectResponse.ok) {
-      console.error(
-        "Failed to create Kronos project " + projectResponse.statusText
-      );
+      console.error("Failed to create Kronos project " + projectResponse.statusText);
       return null;
     }
 
