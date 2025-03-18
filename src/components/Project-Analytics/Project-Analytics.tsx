@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Project-Analytics.css";
 import ProjectDataGrid from "./sub-components/ProjectDataGrid";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import StatTotalCard from "./sub-components/StatTotalCard";
 
@@ -118,7 +119,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           </span>
         </div>
         <button className="btn btn-outline-primary" onClick={setOpenDetails}>
-          File Browser
+          <ArrowBackIcon />
         </button>
       </div>
       <div className="analytics-dashboard-content">
