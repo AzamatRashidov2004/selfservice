@@ -260,6 +260,8 @@ const ProjectDataGrid: React.FC<{
             background: "#fff",
             boxShadow: "0px 2px 4px rgba(0,0,0,0.2)",
             zIndex: 10,
+            border: "2px solid rgba(0, 0, 0, 0.49)",
+            padding: "5px",
           }}
         >
           <SessionsDataGrid
