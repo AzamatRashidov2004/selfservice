@@ -15,18 +15,13 @@ export async function createKronosProject(
   description = "",
   language: "en-US" | "cs-CZ",
   chatbot_config: SettingsType,
-  token: string,
-  init_message?: string,
-  init_image_url?: string
+  token: string
 ): Promise<KronosProjectType | null> {
   try {
-    // Create query parameters while ensuring no empty or whitespace-only values are appended
-    const queryParams = new URLSearchParams();
-    if (init_message && init_message.trim() !== "") queryParams.append("init_message", init_message);
-    if (init_image_url && init_image_url.trim() !== "") queryParams.append("init_image_url", init_image_url);
+    // Create query parameters while ensuring no empty or whitespace-only values are appended\
 
     // Construct request URL with query parameters only if they exist
-    const requestUrl = `${apiUrl}/projects/${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+    const requestUrl = `${apiUrl}/projects/`;
 
     const projectResponse: Response = await fetch(requestUrl, {
       method: "POST",
@@ -55,6 +50,52 @@ export async function createKronosProject(
     return handleError({ error: e, origin: "createKronosProject" });
   }
 }
+
+export async function initResource(
+  projectId: string,
+  token: string,
+  imageUrl?: string,
+  message?: string
+): Promise<string | null> {
+  try {
+    const payload = {
+      image_url: imageUrl ?? null,
+      image_url_state_id: 1,
+      message: message ?? null,
+      message_state_id: 2,
+    };
+
+    const requestUrl = `${apiUrl}/resources/dialogue_fsm/init?project_id=${encodeURIComponent(projectId)}`;
+
+    const response: Response = await fetch(requestUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "x-api-key": apiKey,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.error("Failed to initialize resource: " + response.statusText);
+      return null;
+    }
+
+    const filePath: string = await response.text();
+
+    if (!filePath) {
+      console.error("Initialization response is empty");
+      return null;
+    }
+
+    return filePath;
+  } catch (e: unknown) {
+    return handleError({ error: e, origin: "initResource" });
+  }
+}
+
+
 
 export async function updatePdfConfig(
   name: string,

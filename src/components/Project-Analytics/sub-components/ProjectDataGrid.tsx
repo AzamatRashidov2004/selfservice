@@ -111,7 +111,31 @@ const ProjectDataGrid: React.FC<{
       flex: 1,
       minWidth: 150,
     },
-    { field: "session_id", headerName: "Session ID", flex: 1.5, minWidth: 200 },
+    {
+      field: "session_id",
+      headerName: "Session ID",
+      flex: 1.5,
+      minWidth: 200,
+      renderCell: (params) => {
+        const isExpanded = expandedRowId === params.row.id;
+    
+        return (
+          <span
+            style={{
+              textDecoration: "underline",
+              cursor: "pointer",
+              color: "blue",
+            }}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row selection
+              setExpandedRowId(isExpanded ? null : params.row.id);
+            }}
+          >
+            {params.value}
+          </span>
+        );
+      },
+    },
     {
       field: "queries",
       headerName: "Queries",

@@ -6,6 +6,7 @@ import {
   createKronosProject,
   uploadMultiplePdfs,
   updatePathSingle,
+  initResource,
 } from "../api/kronos/postKronos.ts";
 import {
   fetchProjectsDataReturn,
@@ -151,9 +152,7 @@ export async function createInitialKronosProject(
     description,
     language,
     settings,
-    token,
-    introMessage,
-    introImage
+    token
   );
 
   if (!kronosProject) return false;
@@ -166,6 +165,14 @@ export async function createInitialKronosProject(
     token,
     setLoading
   );
+
+  try{
+    if ((introImage && introImage.trim() !== "") || (introMessage && introMessage.trim() !== "")){
+      await initResource(kronosProject._id, token, introImage, introMessage);
+    }
+  }catch{
+    console.error("Failed while initialising the fsm")
+  }
 
   if (!filesUpload) {
     // Delete the created project if file upload fails
