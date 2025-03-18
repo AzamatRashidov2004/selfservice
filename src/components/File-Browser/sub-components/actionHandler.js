@@ -29,6 +29,7 @@ import {
 } from '../../../utility/Session_Storage';
 
 import { getCustomActions } from './customActions';
+import { isProduction, maestroApiUrl } from '../../../api/apiEnv';
 
 async function handleAction(
   data,
@@ -46,7 +47,8 @@ async function handleAction(
   setCurrentProjectId,
   setFileActions,
   setDetailsOpen,
-  setSelectedProjectData
+  setSelectedProjectData,
+  current_project_id,
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log('ACTION', data);
@@ -247,6 +249,14 @@ async function handleAction(
         );
       }
     }, uploadMode); // Pass the correct upload mode
+  }
+
+  if (data.id === "launch") {
+    const selectedFile = data.state.selectedFilesForAction[0];
+    console.log("AZAMAT: ", selectedFile);
+    const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
+    const project_id = nodeInfo.kronosProjectId;
+    window.open(maestroApiUrl + `/app?project_id=${project_id}`)
   }
 
   if (data.id === 'download_files') {

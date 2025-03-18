@@ -1,6 +1,8 @@
 import { defineFileAction, ChonkyIconName } from 'chonky';
 import { ChonkyActions } from 'chonky';
 import customActionNames from '../../../utility/customActionNames';
+import RocketIcon from '@mui/icons-material/Rocket';
+
 
 const uploadFileAction = (showContext) => {
   return defineFileAction({
@@ -24,6 +26,16 @@ const uploadFolderAction = (showContext) => {
       toolbar: true, // Show it in the toolbar
       contextMenu: showContext, // Also show it in the context menu
       icon: ChonkyIconName.upload,
+    },
+  });
+};
+
+const launchProjectAction = (showContext) => {
+  return defineFileAction({
+    id: 'launch',
+    button: {
+      name: customActionNames.launch,
+      contextMenu: showContext, // Also show it in the context menu
     },
   });
 };
@@ -105,6 +117,7 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
   }
 
   if (isEmpty || (hasDir && isSingle)) {
+    customActions.push(launchProjectAction(true));
     customActions.push(createFolderAction(true));
     customActions.push(uploadFileAction(true));
     customActions.push(uploadFolderAction(true));

@@ -47,6 +47,7 @@ export default function FileBrowser({
     setCodeValue,
     setCodeLanguage,
     codeValue,
+    current_project_id,
     setCurrentProjectId,
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
@@ -82,7 +83,8 @@ export default function FileBrowser({
         setCurrentProjectId,
         setFileActions,
         setDetailsOpen,
-        setSelectedProjectData
+        setSelectedProjectData,
+        current_project_id,
       );
     },
     [getFileStructure, dragAndDropFile]
