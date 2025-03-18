@@ -179,7 +179,7 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
   );
   const [sessionError, setSessionError] =
     useState<SessionEventsResponseErrors | null>(null);
-  const [showErrors, setShowErrors] = useState(true);
+  const [showErrors, setShowErrors] = useState(false);
   const [combinedRows, setCombinedRows] = useState<CombinedRow[]>([]);
 
   // Error row expansion state (only errors are expandable)
