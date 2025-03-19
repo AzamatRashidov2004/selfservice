@@ -372,6 +372,7 @@ export default function StatCard({
   // Data by time range
   const [totalAnswers, setTotalAnswers] = useState<number>(0);
   const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [totalNegativeFeedback, setTotalNegativeFeedback] = useState<number>(0);
   const [totalFeedback, setTotalFeedback] = useState<number>(0);
   const [totalSessions, setTotalSesssions] = useState<number>(0);
 
@@ -380,6 +381,7 @@ export default function StatCard({
   const [yearAnswers, setYearAnswers] = useState<number>(0);
   const [yearUsers, setYearUsers] = useState<number>(0);
   const [yearFeedback, setYearFeedback] = useState<number>(0);
+  const [yearNegativeFeedback, setYearNegativeFeedback] = useState<number>(0);
   const [yearSessions, setYearSessions] = useState<number>(0);
 
   const [xLabels, setXLabels] = useState<string[]>([]);
@@ -411,29 +413,34 @@ export default function StatCard({
     let allTimeSessions = 0;
     let allTimeFeedback = 0;
     
+    let allTimeNegativeFeedback = 0;
 
     aggregatedStatsAll.forEach((stat) => {
       allTimeAnswers += stat.total_queries;
       allTimeSessions += stat.total_sessions;
       allTimeFeedback +=
         stat.total_positive_feedback + stat.total_negative_feedback;
+      allTimeNegativeFeedback += stat.total_negative_feedback;
     });
 
     setYearAnswers(allTimeAnswers);
     setYearSessions(allTimeSessions);
     setYearFeedback(allTimeFeedback);
+    setYearNegativeFeedback(allTimeNegativeFeedback);
     setYearUsers(allTimeProjectUsers?.data ? allTimeProjectUsers?.data : 0);
 
     // Calculate totals from aggregated stats
     let totalAnswers = 0;
     let totalSessions = 0;
     let totalFeedback = 0;
+    let totalNegativeFeedback = 0;
 
     aggregatedStats.forEach((stat) => {
       totalAnswers += stat.total_queries;
       totalSessions += stat.total_sessions;
       totalFeedback +=
         stat.total_positive_feedback + stat.total_negative_feedback;
+      totalNegativeFeedback += stat.total_negative_feedback;
     });
 
 
@@ -441,6 +448,7 @@ export default function StatCard({
     setTotalAnswers(totalAnswers);
     setTotalSesssions(totalSessions);
     setTotalFeedback(totalFeedback);
+    setTotalNegativeFeedback(totalNegativeFeedback);
     setTotalUsers(totalProjectUsers != null ? totalProjectUsers.data : 0);
 
     // Compute the maximum total feedback across all buckets.
@@ -461,26 +469,16 @@ export default function StatCard({
     selectedTimeInterval,
     sessionStats,
     totalProjectUsers,
+    allTimeStats,
+    allTimeProjectUsers?.data,
   ]);
-
-  useEffect(() => {
-
-    //console.log("THE TOTAL GRAPH DATA IS : ", totalGraphData);
-
-    // For all time data ( 1 year )
-    
-  },[totalGraphData, totalUsers]);
-
-  useEffect(() => {
-    console.log("AAAAAA", totalProjectUsers?.data);
-  }, [totalProjectUsers]);
 
   return (
     <Card
       variant="outlined"
       sx={{
-        height: "400px",
-        width: "95%",
+        height: "500px",
+        width: "100%",
         display: "flex",
         id: "graph-main-card",
         flexDirection: "column",
@@ -495,28 +493,19 @@ export default function StatCard({
           width: "100%",
         }}
       >
-        {/* Left side metrics - more compact and centered */}
+
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center", // Centers content vertically
-            alignItems: "flex-start", // Aligns content to the left
-            width: "35%",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            width: "50%",
             pr: 4,
-            pl: 2, // Added left padding
+            pl: 2,
             pt: 1,
           }}
         >
-          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {yearAnswers}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Total Answers
-            </Typography>
-          </Box>
-
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
               {yearUsers}
@@ -525,17 +514,7 @@ export default function StatCard({
               Total Users
             </Typography>
           </Box>
-
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {yearFeedback}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Total Feedback
-            </Typography>
-          </Box>
-
-          <Box>
             <Typography variant="h5" fontWeight="bold" component="span">
               {yearSessions}
             </Typography>
@@ -543,9 +522,62 @@ export default function StatCard({
               Total Sessions
             </Typography>
           </Box>
-        </Box>
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {yearAnswers}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Total Answers
+            </Typography>
+          </Box>
+          
+          {/* Feedback box with hover details */}
+          <Box 
+            sx={{ 
+              position: "relative",
+              mb: 1, 
+              pb: 2, 
+              borderBottom: "1px solid #ccc",
+            }}
+          >
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {yearFeedback}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Total Feedback
+            </Typography>
+            <Box sx={{pt: 1}}>
+              <Box sx={{display: "flex", flexDirection: "row"}}>
+                <Box sx={{pr: 1}}>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="success" component="span">
+                    P:{" "}
+                  </Typography>
+                    {yearFeedback - yearNegativeFeedback}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="error" component="span">
+                    N:{" "}
+                  </Typography>
+                    {yearNegativeFeedback}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box>
+                <Typography variant="body2" fontWeight="bold" component="span">
+                <Typography variant="body2" color="text.secondary" component="span">
+                  Accuracy:{" "}
+                </Typography>
+                  {yearFeedback > 0 ? (100 - (yearFeedback > 0 ? (yearNegativeFeedback / yearFeedback) * 100 : 0)).toFixed(1) : ""}%
+                </Typography>
+              </Box>
+            </Box>
+            </Box>
+          </Box>
 
-        {/* Right side chart */}
+        {/* Mid chart */}
         <Box
           sx={{
             display: "flex",
@@ -563,7 +595,7 @@ export default function StatCard({
           {loading ? (
             <Box
               sx={{
-                width: "550px", // Slightly reduced to accommodate the metrics section
+                width: "600px", // Slightly reduced to accommodate the metrics section
                 height: "100%",
                 display: "flex",
                 alignItems: "center",
@@ -597,8 +629,8 @@ export default function StatCard({
                     String(dataSets.positive[dataIndex] || 0),
                 },
               ]}
-              width={550} // Slightly reduced to accommodate the metrics section
-              height={350}
+              width={570} // Slightly reduced to accommodate the metrics section
+              height={450}
             />
           )}
         </Box>
@@ -606,23 +638,14 @@ export default function StatCard({
           sx={{
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center", // Centers content vertically
-            alignItems: "flex-start", // Aligns content to the left
-            width: "35%",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            width: "53%",
             pr: 4,
-            pl: 2, // Added left padding
+            pl: 2,
             pt: 1,
           }}
         >
-          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {totalAnswers}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Answers
-            </Typography>
-          </Box>
-
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
               {totalUsers}
@@ -631,23 +654,70 @@ export default function StatCard({
               Users
             </Typography>
           </Box>
-
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {totalFeedback}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Feedback
-            </Typography>
-          </Box>
-
-          <Box>
             <Typography variant="h5" fontWeight="bold" component="span">
               {totalSessions}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Sessions
             </Typography>
+          </Box>
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalAnswers}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Answers
+            </Typography>
+          </Box>
+          
+          {/* Feedback box with hover details */}
+          <Box 
+            sx={{ 
+              position: "relative",
+              mb: 1, 
+              pb: 2, 
+              borderBottom: "1px solid #ccc",
+              '&:hover .feedback-details': {
+                display: 'block'
+              }
+            }}
+          >
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalFeedback}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Feedback
+            </Typography>
+            
+            <Box sx={{pt: 1}}>
+              <Box sx={{display: "flex", flexDirection: "row"}}>
+                <Box sx={{pr: 1}}>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="error" component="span">
+                    N:{" "}
+                  </Typography>
+                    {totalNegativeFeedback}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="success" component="span">
+                    P:{" "}
+                  </Typography>
+                    {totalFeedback - totalNegativeFeedback}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box>
+                <Typography variant="body2" fontWeight="bold" component="span">
+                <Typography variant="body2" color="text.secondary" component="span">
+                  Accuracy:{" "}
+                </Typography>
+                  {totalFeedback > 0 ? (100 - (totalFeedback > 0 ? (totalNegativeFeedback / totalFeedback) * 100 : 0)).toFixed(1) : ""}%
+                </Typography>
+              </Box>
+            </Box> 
           </Box>
         </Box>
       </CardContent>
