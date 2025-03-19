@@ -11,7 +11,6 @@ import {
 import Loader from "../../Loader/Loader";
 import { TimeControlButtons } from "./TimeControlButtons";
 import Typography from "@mui/material/Typography";
-import { useTimeout } from "@mui/x-data-grid/internals";
 
 /**
  * Types
