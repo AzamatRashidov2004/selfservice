@@ -3,7 +3,6 @@ import { ChonkyActions } from 'chonky';
 import customActionNames from '../../../utility/customActionNames';
 import RocketIcon from '@mui/icons-material/Rocket';
 
-
 const uploadFileAction = (showContext) => {
   return defineFileAction({
     id: 'upload_file',
@@ -35,7 +34,8 @@ const launchProjectAction = (showContext) => {
     id: 'launch',
     button: {
       name: customActionNames.launch,
-      contextMenu: showContext, // Also show it in the context menu
+      contextMenu: showContext,
+      icon: ChonkyIconName.symlink,
     },
   });
 };
@@ -110,17 +110,29 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
 
   const isEmpty = selectedFiles.length === 0;
   const isSingle = selectedFiles.length === 1;
+  const isProject = isSingle && firstNodeInfo && firstNodeInfo.parent === 0;
   const hasDir = selectedFiles.some((item) => item.isDir === true);
-  if (!isEmpty) {
-    customActions.push(editFileAction);
-    customActions.push(deleteFileOrFolder);
-  }
 
   if (isEmpty || (hasDir && isSingle)) {
-    customActions.push(launchProjectAction(true));
+    // If selection is empty or is a single folder
     customActions.push(createFolderAction(true));
     customActions.push(uploadFileAction(true));
     customActions.push(uploadFolderAction(true));
+  }
+
+  if (!isEmpty && !hasDir) {
+    // The selection is not empty and is not a dir (so it is a file)
+    customActions.push(editFileAction);
+  }
+
+  if (isSingle && !hasDir) {
+    // If not a dir and a single file
+    customActions.push(downloadFile);
+  }
+
+  if (!isEmpty && !isProject) {
+    // The selection is not empty and not a project so it can be deleted
+    customActions.push(deleteFileOrFolder);
   }
 
   if (!isEmpty) {
@@ -139,14 +151,12 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
     });
   }
   console.log(firstNodeInfo);
-  if (isSingle && firstNodeInfo && firstNodeInfo.parent === 0) {
+  if (isProject) {
+    // If it is a project launch or show details
+    customActions.unshift(launchProjectAction(true));
     customActions.push(detailsAction(true));
   } else {
     customActions.push(detailsAction(false));
-  }
-
-  if (isSingle && !hasDir) {
-    customActions.push(downloadFile);
   }
   return customActions;
 };

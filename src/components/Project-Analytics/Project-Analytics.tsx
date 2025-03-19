@@ -16,6 +16,7 @@ import {
   TotalProjectUsers,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
+import { maestroApiUrl } from "../../api/apiEnv";
 
 type ProjectDetails = {
   setOpenDetails: () => void;
@@ -55,7 +56,6 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
       setFeedbackGraphLoading(true);
       fetchTotalUsers(selectedProjectData.projectId)
         .then((response) => {
-          console.log("YYY", response);
           setTotalProjectUsers(response);
         })
         .catch((error) => {
@@ -100,9 +100,11 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
     fetchData();
   }, [selectedProjectData, selectedTimeInterval]);
 
-  useEffect(() => {
-    console.log("XAXAXAXAX", totalProjectUsers);
-  }, [totalProjectUsers, selectedTimeInterval]);
+  function launchProject(){
+    if (selectedProjectData){
+      window.open(maestroApiUrl + `/app?project_id=${selectedProjectData.projectId}`);
+    }
+  }
 
   return (
     <div className="analytics-dashboard-wrapper">
@@ -113,7 +115,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
             flexDirection: "column",
           }}
         >
-          <h3>{selectedProjectData ? selectedProjectData.title : ""}</h3>
+          <h3 className="project-dashboard-title" onClick={launchProject}>{selectedProjectData ? selectedProjectData.title : ""}</h3>
           <span className="analytics-id-wrapper">
             id: {selectedProjectData ? selectedProjectData.projectId : ""}
           </span>

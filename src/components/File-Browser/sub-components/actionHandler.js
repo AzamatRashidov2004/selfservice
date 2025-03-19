@@ -19,9 +19,7 @@ import {
   getHTMLFromProject,
   getFSMFromProject,
 } from '../../../api/kronos/getKronos';
-import {
-  updateFSMFile
-} from '../../../api/kronos/postKronos';
+import { updateFSMFile } from '../../../api/kronos/postKronos';
 import {
   addItemToCache,
   isItemInCache,
@@ -29,7 +27,7 @@ import {
 } from '../../../utility/Session_Storage';
 
 import { getCustomActions } from './customActions';
-import { isProduction, maestroApiUrl } from '../../../api/apiEnv';
+import { maestroApiUrl } from '../../../api/apiEnv';
 
 async function handleAction(
   data,
@@ -48,7 +46,7 @@ async function handleAction(
   setFileActions,
   setDetailsOpen,
   setSelectedProjectData,
-  current_project_id,
+  current_project_id
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log('ACTION', data);
@@ -251,12 +249,11 @@ async function handleAction(
     }, uploadMode); // Pass the correct upload mode
   }
 
-  if (data.id === "launch") {
+  if (data.id === 'launch') {
     const selectedFile = data.state.selectedFilesForAction[0];
-    console.log("AZAMAT: ", selectedFile);
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
     const project_id = nodeInfo.kronosProjectId;
-    window.open(maestroApiUrl + `/app?project_id=${project_id}`)
+    window.open(maestroApiUrl + `/app?project_id=${project_id}`);
   }
 
   if (data.id === 'download_files') {
@@ -334,40 +331,39 @@ async function handleAction(
           var fsmData;
           if (isItemInCache(project_id + '.fsm')) {
             fsmData = getItemFromCache(project_id + '.fsm');
-
           } else {
             fsmData = await getFSMFromProject(project_id, keycloak.token);
             // add new editor_active and editor_initial_file fields so i can use them in chatbot
             if (fsmData !== '') {
-                // Parse the FSM JSON data
-                let fsmObject;
-                try {
-                  fsmObject = JSON.parse(fsmData);
-                } catch (e) {
-                  throw new Error('Invalid FSM JSON.');
-                }
-        
-                // Add new fields if they don't exist
-                if (fsmObject.editor_active === undefined) {
-                  console.log("Here");
-                  fsmObject.editor_active = true;
-                }
-                if (fsmObject.editor_initial_file === undefined) {
-                  console.log("Here");
-                  fsmObject.editor_initial_file = "";
-                }
-                // Convert back to formatted JSON string
-                fsmData = JSON.stringify(fsmObject, null, 2);
-                console.log("The updated data is : ", fsmData);
-                try {
-                  await updateFSMFile(
-                    project_id,
-                    fsmData ? fsmData : "",
-                    keycloak.token ? keycloak.token : ""
-                  );
-                } catch (e) {
-                  throw new Error(e);
-                }
+              // Parse the FSM JSON data
+              let fsmObject;
+              try {
+                fsmObject = JSON.parse(fsmData);
+              } catch (e) {
+                throw new Error('Invalid FSM JSON.');
+              }
+
+              // Add new fields if they don't exist
+              if (fsmObject.editor_active === undefined) {
+                console.log('Here');
+                fsmObject.editor_active = true;
+              }
+              if (fsmObject.editor_initial_file === undefined) {
+                console.log('Here');
+                fsmObject.editor_initial_file = '';
+              }
+              // Convert back to formatted JSON string
+              fsmData = JSON.stringify(fsmObject, null, 2);
+              console.log('The updated data is : ', fsmData);
+              try {
+                await updateFSMFile(
+                  project_id,
+                  fsmData ? fsmData : '',
+                  keycloak.token ? keycloak.token : ''
+                );
+              } catch (e) {
+                throw new Error(e);
+              }
             }
             addItemToCache(project_id + '.fsm', fsmData);
           }

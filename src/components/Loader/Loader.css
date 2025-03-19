@@ -2,7 +2,8 @@
   color: black;
   position: absolute;
   margin: 0;
-  bottom: -35px;
+  bottom: -40px;
+  width: max-content;
   left: 50%;
   transform: translateX(-50%);
   &.loader-text-white{

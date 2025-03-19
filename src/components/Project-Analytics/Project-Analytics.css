@@ -57,6 +57,11 @@
   width: 100%;
 }
 
+.project-dashboard-title{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .analytics-dashboard-nav {
   height: 84px;
   border-bottom: solid 1px #e0e0e0;
