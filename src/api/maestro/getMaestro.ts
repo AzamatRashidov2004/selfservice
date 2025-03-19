@@ -1,6 +1,7 @@
 import { maestroApiUrl } from "../apiEnv";
 
-const BASE_URL = maestroApiUrl;
+//const BASE_URL = maestroApiUrl;
+const BASE_URL = "http://localhost:8020";
 
 // Types for the return values
 
@@ -180,11 +181,12 @@ export async function fetchProjectSessionsErrors(
 
 // Fetch project stats errors
 export async function fetchTotalUsers(
-  projectId: string
+  projectId: string,
+  timeRange: string = "day",
 ): Promise<TotalProjectUsers> {
   const url = `${BASE_URL}/project-total-users?project_id=${encodeURIComponent(
     projectId
-  )}`;
+  )}&time_range=${encodeURIComponent(timeRange)}`;
 
   try {
     const response = await fetch(url, {

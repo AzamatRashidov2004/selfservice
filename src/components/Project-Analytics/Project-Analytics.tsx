@@ -6,10 +6,8 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import StatTotalCard from "./sub-components/StatTotalCard";
 
 import {
-  ProjectStatsResponse,
   ProjectSessionResponse,
   fetchProjectSessions,
-  fetchProjectStats,
   fetchProjectSessionsErrors,
   ProjectSessionErrorsResponse,
   fetchTotalUsers,
@@ -30,15 +28,17 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
   const [selectedTimeInterval, setSelectedTimeInterval] =
     useState<string>("day");
 
-  const [projectStats, setProjectState] = useState<null | ProjectStatsResponse>(
-    null
-  );
   const [sessionInfo, setSessionInfo] = useState<null | ProjectSessionResponse>(
     null
   );
 
   const [totalProjectUsers, setTotalProjectUsers] =
     useState<TotalProjectUsers | null>(null);
+
+  const [allTimeProjectUsers, setAllTimeProjectUsers] =
+    useState<TotalProjectUsers | null>(null);
+
+  const [totalGraphData, setTotalGraphData] = useState<ProjectSessionResponse | null>(null);
 
   const [sessionInfoErrors, setSessionInfoErrors] =
     useState<null | ProjectSessionErrorsResponse>(null);
@@ -49,12 +49,24 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
   const [feedbackGraphLoading, setFeedbackGraphLoading] =
     useState<boolean>(true);
 
+
   useEffect(() => {
     async function fetchData() {
       if (!selectedProjectData) return;
 
       setFeedbackGraphLoading(true);
-      fetchTotalUsers(selectedProjectData.projectId)
+
+      // Number of users all time ( a year )
+      fetchTotalUsers(selectedProjectData.projectId, "all")
+        .then((response) => {
+          setAllTimeProjectUsers(response);
+        })
+        .catch((error) => {
+          console.error("Error fetching total users:", error);
+        });
+
+      // Number of users on the time range
+      fetchTotalUsers(selectedProjectData.projectId, selectedTimeInterval)
         .then((response) => {
           setTotalProjectUsers(response);
         })
@@ -66,6 +78,24 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           setSessionInfoErrors(response);
         }
       );
+      
+      // For all time data 
+      fetchProjectSessions(
+        selectedProjectData.projectId,
+        "all"
+      ).then((response) => {
+        // Assuming response.session is an array
+        const filteredSessions = response.sessions.filter(
+          (session) => session.query_count !== 0
+        );
+        setTotalGraphData({
+          status: response.status,
+          sessions: filteredSessions,
+        });
+        setFeedbackGraphLoading(false);
+      });
+
+      // Data for the time interval
       fetchProjectSessions(
         selectedProjectData.projectId,
         selectedTimeInterval
@@ -83,17 +113,6 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           sessions: filteredSessions,
         });
         setFeedbackGraphLoading(false);
-      });
-      fetchProjectStats(selectedProjectData.projectId, "day").then(
-        (response) => {
-          setProjectState(response);
-        }
-      );
-      fetchProjectStats(
-        selectedProjectData.projectId,
-        selectedTimeInterval
-      ).then((response) => {
-        setProjectState(response);
       });
     }
 
@@ -125,7 +144,7 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
         </button>
       </div>
       <div className="analytics-dashboard-content">
-        {projectStats == null && sessionInfo == null ? (
+        {sessionInfo == null ? (
           <Loader />
         ) : (
           <>
@@ -136,6 +155,8 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
                 loading={feedbackGraphLoading}
                 setSelectedTimeInterval={setSelectedTimeInterval}
                 totalProjectUsers={totalProjectUsers}
+                allTimeProjectUsers={allTimeProjectUsers}
+                totalGraphData={totalGraphData}
               />
             </div>
             {sessionInfo ? (

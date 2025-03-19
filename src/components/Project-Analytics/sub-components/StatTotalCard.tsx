@@ -11,6 +11,7 @@ import {
 import Loader from "../../Loader/Loader";
 import { TimeControlButtons } from "./TimeControlButtons";
 import Typography from "@mui/material/Typography";
+import { useTimeout } from "@mui/x-data-grid/internals";
 
 /**
  * Types
@@ -21,6 +22,8 @@ export type StatCardProps = {
   loading: boolean;
   setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
   totalProjectUsers: TotalProjectUsers | null;
+  allTimeProjectUsers: TotalProjectUsers | null;
+  totalGraphData: ProjectSessionResponse | null;
 };
 
 /**
@@ -354,17 +357,31 @@ export default function StatCard({
   loading,
   setSelectedTimeInterval,
   totalProjectUsers,
+  totalGraphData,
+  allTimeProjectUsers,
 }: StatCardProps) {
   // Get the array of sessions (if available)
   let sessionStats: ProjectStatsSession[] = [];
+  let allTimeStats: ProjectStatsSession[] = [];
   if (graphFeedbackInfo) {
     sessionStats = graphFeedbackInfo.sessions;
   }
-
+  if (totalGraphData) {
+    allTimeStats = totalGraphData.sessions;
+  }
+  
+  // Data by time range
   const [totalAnswers, setTotalAnswers] = useState<number>(0);
   const [totalUsers, setTotalUsers] = useState<number>(0);
   const [totalFeedback, setTotalFeedback] = useState<number>(0);
   const [totalSessions, setTotalSesssions] = useState<number>(0);
+
+
+  // Data for all time ( 1 year )
+  const [yearAnswers, setYearAnswers] = useState<number>(0);
+  const [yearUsers, setYearUsers] = useState<number>(0);
+  const [yearFeedback, setYearFeedback] = useState<number>(0);
+  const [yearSessions, setYearSessions] = useState<number>(0);
 
   const [xLabels, setXLabels] = useState<string[]>([]);
   const [dataSets, setDataSets] = useState<FeedbackDataSets>({
@@ -384,6 +401,30 @@ export default function StatCard({
       selectedTimeInterval
     );
 
+    // Aggregate the sessionStats into buckets based for all time interval 
+    const aggregatedStatsAll = aggregateSessions(
+      allTimeStats,
+      "all"
+    );
+
+    // Calculate totals from aggregated stats
+    let allTimeAnswers = 0;
+    let allTimeSessions = 0;
+    let allTimeFeedback = 0;
+    
+
+    aggregatedStatsAll.forEach((stat) => {
+      allTimeAnswers += stat.total_queries;
+      allTimeSessions += stat.total_sessions;
+      allTimeFeedback +=
+        stat.total_positive_feedback + stat.total_negative_feedback;
+    });
+
+    setYearAnswers(allTimeAnswers);
+    setYearSessions(allTimeSessions);
+    setYearFeedback(allTimeFeedback);
+    setYearUsers(allTimeProjectUsers?.data ? allTimeProjectUsers?.data : 0);
+
     // Calculate totals from aggregated stats
     let totalAnswers = 0;
     let totalSessions = 0;
@@ -396,6 +437,8 @@ export default function StatCard({
         stat.total_positive_feedback + stat.total_negative_feedback;
     });
 
+
+    // For total time range data
     setTotalAnswers(totalAnswers);
     setTotalSesssions(totalSessions);
     setTotalFeedback(totalFeedback);
@@ -422,6 +465,14 @@ export default function StatCard({
   ]);
 
   useEffect(() => {
+
+    //console.log("THE TOTAL GRAPH DATA IS : ", totalGraphData);
+
+    // For all time data ( 1 year )
+    
+  },[totalGraphData, totalUsers]);
+
+  useEffect(() => {
     console.log("AAAAAA", totalProjectUsers?.data);
   }, [totalProjectUsers]);
 
@@ -430,7 +481,7 @@ export default function StatCard({
       variant="outlined"
       sx={{
         height: "400px",
-        width: "65%",
+        width: "95%",
         display: "flex",
         id: "graph-main-card",
         flexDirection: "column",
@@ -460,37 +511,37 @@ export default function StatCard({
         >
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
-              {totalAnswers}
+              {yearAnswers}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Answers
+              Total Answers
             </Typography>
           </Box>
 
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
-              {totalUsers}
+              {yearUsers}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Users
+              Total Users
             </Typography>
           </Box>
 
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
-              {totalFeedback}
+              {yearFeedback}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Feedback
+              Total Feedback
             </Typography>
           </Box>
 
           <Box>
             <Typography variant="h5" fontWeight="bold" component="span">
-              {totalSessions}
+              {yearSessions}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Sessions
+              Total Sessions
             </Typography>
           </Box>
         </Box>
@@ -551,6 +602,54 @@ export default function StatCard({
               height={350}
             />
           )}
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center", // Centers content vertically
+            alignItems: "flex-start", // Aligns content to the left
+            width: "35%",
+            pr: 4,
+            pl: 2, // Added left padding
+            pt: 1,
+          }}
+        >
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalAnswers}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Answers
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalUsers}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Users
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalFeedback}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Feedback
+            </Typography>
+          </Box>
+
+          <Box>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalSessions}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Sessions
+            </Typography>
+          </Box>
         </Box>
       </CardContent>
     </Card>
