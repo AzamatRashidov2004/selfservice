@@ -80,6 +80,13 @@ export type FilesData = {
   fileMap: FileMap;
 };
 
+export type ChatBotSceleton = {
+  userMessageColor: string;
+  botMessageColor: string;
+  navbarColor: string;
+  suggestionButtonColor: string;
+};
+
 // Define Settings interface
 export type SettingsType = {
   title: string; // Title of the bot

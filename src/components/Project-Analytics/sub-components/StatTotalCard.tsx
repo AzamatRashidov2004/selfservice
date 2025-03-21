@@ -368,7 +368,7 @@ export default function StatCard({
   if (totalGraphData) {
     allTimeStats = totalGraphData.sessions;
   }
-  
+
   // Data by time range
   const [totalAnswers, setTotalAnswers] = useState<number>(0);
   const [totalUsers, setTotalUsers] = useState<number>(0);

@@ -9,6 +9,7 @@ import {
   initResource,
 } from "../api/kronos/postKronos.ts";
 import {
+  ChatBotSceleton,
   fetchProjectsDataReturn,
   kronosKnowledgeBaseType,
   KronosProjectType,
@@ -143,7 +144,8 @@ export async function createInitialKronosProject(
   token: string | undefined,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   introMessage?: string, 
-  introImage?: string
+  introImage?: string,
+  chatbot?: ChatBotSceleton,
 ): Promise<boolean> {
   if (!token) return false;
   
@@ -167,8 +169,8 @@ export async function createInitialKronosProject(
   );
 
   try{
-    if ((introImage && introImage.trim() !== "") || (introMessage && introMessage.trim() !== "")){
-      await initResource(kronosProject._id, token, introImage, introMessage);
+    if ((introImage && introImage.trim() !== "") || (introMessage && introMessage.trim() !== "") || chatbot){
+      await initResource(kronosProject._id, token, introImage, introMessage, chatbot);
     }
   }catch{
     console.error("Failed while initialising the fsm")

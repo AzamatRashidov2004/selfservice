@@ -5,6 +5,7 @@ import {
 } from "../apiEnv";
 import {
   SettingsType,
+  ChatBotSceleton,
   KronosProjectType,
   kronosKnowledgeBaseType,
 } from "../../utility/types";
@@ -55,7 +56,8 @@ export async function initResource(
   projectId: string,
   token: string,
   imageUrl?: string,
-  message?: string
+  message?: string,
+  chatbot?: ChatBotSceleton,
 ): Promise<string | null> {
   try {
     const payload = {
@@ -63,6 +65,7 @@ export async function initResource(
       image_url_state_id: 1,
       message: message ?? null,
       message_state_id: 2,
+      chatbot: chatbot ?? null,
     };
 
     const requestUrl = `${apiUrl}/resources/dialogue_fsm/init?project_id=${encodeURIComponent(projectId)}`;
@@ -76,6 +79,7 @@ export async function initResource(
       },
       body: JSON.stringify(payload),
     });
+    console.log("DONE: ", chatbot);
 
     if (!response.ok) {
       console.error("Failed to initialize resource: " + response.statusText);

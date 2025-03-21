@@ -1,102 +1,186 @@
-import "../../assets/bot/453.88f55f10.chunk.js";
-import "../../assets/bot/main.9fd2091d.css";
-import "../../assets/bot/main.daa918cd.js";
-import {
-  botStaticDisplayConfig,
-  defaultSettings,
-} from "../../utility/Bot_Util.js";
-import { SettingsType } from "../../utility/types.js";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import "./Customize_Bot.css";
 import Loader from "../Loader/Loader.js";
+import { ChatBotSceleton } from "../../utility/types.js";
+import { ChatBotSceletonDefaultSettings } from "../../utility/Bot_Util.js";
 
 interface CustomizeBotProps {
-  saveSettings: (customSettings: SettingsType) => void;
-  selectedProjectConfig?: object;
   loading?: boolean;
+  selectedProjectConfig?: Partial<ChatBotSceleton>;
+  saveSettings: (settings: ChatBotSceleton) => Promise<void>;
 }
 
 const CustomizeBot: React.FC<CustomizeBotProps> = ({
-  saveSettings,
-  selectedProjectConfig,
   loading,
+  selectedProjectConfig,
+  saveSettings, // Make sure to include saveSettings in props
 }) => {
-  function initBot(id: string, settings: SettingsType): void {
-    const initFsBotEvent = new CustomEvent("initFsBot", {
-      detail: {
-        id,
-        settings,
-      },
-    });
-
-    function sleep(ms: number): Promise<void> {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, ms);
-      });
-    }
-
-    const time = 500; // Delay time in milliseconds
-    const maxAttempts = 5; // Maximum number of attempts
-
-    async function dispatchUntilMounted() {
-      let attempts = 0;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      while (!(window as any).isBotMounted && attempts < maxAttempts) {
-        attempts++;
-        document.dispatchEvent(initFsBotEvent);
-        await sleep(time); // Wait for 500ms before the next check
-      }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if ((window as any).isBotMounted) {
-        console.log("Bot is successfully mounted!");
-      } else {
-        console.log(`Bot failed to mount after ${maxAttempts} attempts.`);
-      }
-    }
-
-    sleep(time).then(() => {
-      console.log(`Initialized bot after ${time} ms!`);
-      dispatchUntilMounted(); // Start dispatching events until bot is mounted or max attempts are reached
-    });
-  }
+  const [config, setConfig] = useState<ChatBotSceleton>({
+    ...ChatBotSceletonDefaultSettings,
+    ...(selectedProjectConfig || {}),
+  });
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).isBotMounted = false;
-  }, []);
-
-  useEffect(() => {
-    let botSettings: SettingsType = defaultSettings;
-
     if (selectedProjectConfig) {
-      botSettings = { ...botSettings, ...selectedProjectConfig };
+      setConfig(prev => ({ ...prev, ...selectedProjectConfig }));
     }
+  }, [selectedProjectConfig]);
 
-    botSettings = { ...botSettings, ...botStaticDisplayConfig };
-    botSettings.save_callback = saveSettings;
-
-    initBot("bot-container", botSettings);
-
-    // Cleanup function to remove the listener if needed
-    return () => {
-      // Optionally, you could remove the listener here if you add one in this component
-      // document.removeEventListener("initFsBot", yourEventListener);
-    };
-  }, [saveSettings, selectedProjectConfig]);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // Call saveSettings with the current configuration
+      await saveSettings(config);
+    } catch (error) {
+      console.error("Error saving settings:", error);
+    }
+  };
 
   return (
     <section className="bot-customization-section">
-      {loading && loading == true ? (
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+      {loading ? (
         <div className="loader-container">
-          <Loader loaderText="Creating Project"/>
+          <Loader loaderText="Creating Project" />
         </div>
       ) : (
-        <div className="bot-customization-section-wrapper">
-          <div id="custom-container"></div>
-          <div id="bot-container"></div>
+      
+      <div className="chatbot-container">
+        {/* Controls Panel */}
+        <div className="control-panel">
+          <h2>Customize Chatbot</h2>
+          
+          <div className="color-control">
+            <label>Navbar Color:</label>
+            <input 
+              type="color" 
+              value={config.navbarColor}
+              onChange={(e) => setConfig({...config, navbarColor: e.target.value})}
+            />
+          </div>
+          
+          <div className="color-control">
+            <label>Bot Message Color:</label>
+            <input 
+              type="color" 
+              value={config.botMessageColor}
+              onChange={(e) => setConfig({...config, botMessageColor: e.target.value})}
+            />
+          </div>
+          
+          <div className="color-control">
+            <label>User Message Color:</label>
+            <input 
+              type="color" 
+              value={config.userMessageColor}
+              onChange={(e) => setConfig({...config, userMessageColor: e.target.value})}
+            />
+          </div>
+          
+          <div className="color-control">
+            <label>Suggestion Button Color:</label>
+            <input 
+              type="color" 
+              value={config.suggestionButtonColor}
+              onChange={(e) => setConfig({...config, suggestionButtonColor: e.target.value})}
+            />
+          </div>
+          
+          <button className="save-button" onClick={handleSubmit}>
+            Save Configuration
+          </button>
         </div>
+        
+        {/* Chatbot Preview */}
+        <div className="chatbot-preview">
+          {/* Navbar */}
+          <div 
+            className="chatbot-navbar"
+            style={{ backgroundColor: config.navbarColor }}
+          >
+            <span className="navbar-icon">≡</span>
+            Chatbot
+          </div>
+          
+          {/* Chat Messages Area */}
+          <div className="chat-messages">
+            {/* Bot Message with Suggestions Below */}
+            <div className="bot-message-container">
+              <div className="bot-message">
+                <div className="bot-icon">
+                  <i className="fas fa-robot"></i>
+                </div>
+                <div 
+                  className="message-bubble"
+                  style={{ backgroundColor: config.botMessageColor, color: 'white' }}
+                >
+                  Bot message 1
+                </div>
+              </div>
+            </div>
+            
+            {/* User Message */}
+            <div className="user-message">
+              <div className="user-icon">
+                <i className="fas fa-user"></i>
+              </div>
+              <div 
+                className="message-bubble"
+                style={{ backgroundColor: config.userMessageColor, color: 'white' }}
+              >
+                User message
+              </div>
+            </div>
+            <div className="bot-message-container">
+              <div className="bot-message">
+                <div className="bot-icon">
+                  <i className="fas fa-robot"></i>
+                </div>
+                <div 
+                  className="message-bubble"
+                  style={{ backgroundColor: config.botMessageColor, color: 'white' }}
+                >
+                  Bot message 2
+                </div>
+              </div>
+              
+              {/* Suggestion Buttons Below Bot Message */}
+              <div className="suggestions">
+                <button 
+                  className="suggestion-btn"
+                  style={{ backgroundColor: config.suggestionButtonColor }}
+                >
+                  Button 1
+                </button>
+                <button 
+                  className="suggestion-btn"
+                  style={{ backgroundColor: config.suggestionButtonColor }}
+                >
+                  Button 2
+                </button>
+                <button 
+                  className="suggestion-btn"
+                  style={{ backgroundColor: config.suggestionButtonColor }}
+                >
+                  Button 3
+                </button>
+              </div>
+            </div>
+          </div>
+
+          
+          
+          {/* Input Area */}
+          <div className="input-area">
+            <div className="message-input"></div>
+            <button className="send-button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
       )}
     </section>
   );
