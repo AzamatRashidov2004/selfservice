@@ -694,18 +694,18 @@ export default function StatCard({
               <Box sx={{display: "flex", flexDirection: "row"}}>
                 <Box sx={{pr: 1}}>
                   <Typography variant="body2" fontWeight="bold" component="span">
-                  <Typography variant="body2" fontWeight="bold" color="error" component="span">
-                    N:{" "}
-                  </Typography>
-                    {totalNegativeFeedback}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="body2" fontWeight="bold" component="span">
                   <Typography variant="body2" fontWeight="bold" color="success" component="span">
                     P:{" "}
                   </Typography>
                     {totalFeedback - totalNegativeFeedback}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="error" component="span">
+                    N:{" "}
+                  </Typography>
+                    {totalNegativeFeedback}
                   </Typography>
                 </Box>
               </Box>
