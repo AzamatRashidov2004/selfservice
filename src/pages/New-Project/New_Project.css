@@ -1,5 +1,5 @@
 section:not(.bot-customization-section) {
-  padding: 0 var(--customize-section-padding);
+  padding: 20px var(--customize-section-padding);
   text-align: start;
 }
 

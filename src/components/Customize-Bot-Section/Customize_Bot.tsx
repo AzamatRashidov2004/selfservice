@@ -87,7 +87,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
           </div>
           
           <button className="save-button" onClick={handleSubmit}>
-            Save Configuration
+            <b>Create Project</b>
           </button>
         </div>
         
