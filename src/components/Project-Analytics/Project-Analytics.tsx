@@ -108,6 +108,10 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           status: response.status,
           sessions: filteredSessions,
         });
+        console.log({
+          status: response.status,
+          sessions: filteredSessions,
+        });
         setGraphFeedbackInfo({
           status: response.status,
           sessions: filteredSessions,

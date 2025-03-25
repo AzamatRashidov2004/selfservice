@@ -2,6 +2,8 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { BarChart } from "@mui/x-charts/BarChart";
+import { ChartsAxisContentProps } from '@mui/x-charts';
+
 import React, { useEffect, useState } from "react";
 import {
   ProjectSessionResponse,
@@ -35,6 +37,7 @@ interface Stat {
   total_sessions: number;
 }
 
+
 /**
  * Session data with start_timestamp as a Date.
  */
@@ -51,6 +54,7 @@ interface SessionStat {
 interface FeedbackDataSets {
   negative: number[];
   positive: number[];
+  //no_feedback: number[];
 }
 
 /**
@@ -163,6 +167,7 @@ function getXLabels(interval: string): string[] {
 /**
  * Create the data arrays for the chart based on the aggregated stats.
  */
+// Updated createDataSets using query_count and feedback ratios
 function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
   const negativeArr: number[] = [];
   const positiveArr: number[] = [];
@@ -173,11 +178,23 @@ function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
       positiveArr.push(0);
       continue;
     }
-    negativeArr.push(item.total_negative_feedback);
-    positiveArr.push(item.total_positive_feedback);
+    const totalQueries = item.total_queries;
+    const totalFeedback = item.total_positive_feedback + item.total_negative_feedback;
+    if (totalFeedback > 0) {
+      const posPortion = totalQueries * (item.total_positive_feedback / totalFeedback);
+      const negPortion = totalQueries * (item.total_negative_feedback / totalFeedback);
+      positiveArr.push(posPortion);
+      negativeArr.push(negPortion);
+    } else {
+      // In case there is no feedback, show the full bar as positive (or adjust as needed)
+      positiveArr.push(totalQueries);
+      negativeArr.push(0);
+    }
   }
   return { negative: negativeArr, positive: positiveArr };
 }
+
+
 
 /**
  * Get the overall time range.
@@ -388,11 +405,16 @@ export default function StatCard({
   const [dataSets, setDataSets] = useState<FeedbackDataSets>({
     negative: [],
     positive: [],
+    //no_feedback: [],
   });
   // This state holds the computed maximum total feedback count.
   const [yAxisMax, setYAxisMax] = useState<number>(100);
+  const [aggregatedStats, setAggregatedStats] = useState<Stat[]>([]);
 
   useEffect(() => {
+    const stats = aggregateSessions(sessionStats, selectedTimeInterval);
+    setAggregatedStats(stats);
+
     const labelSet = getXLabels(selectedTimeInterval);
     setXLabels(labelSet);
 
@@ -451,13 +473,8 @@ export default function StatCard({
     setTotalNegativeFeedback(totalNegativeFeedback);
     setTotalUsers(totalProjectUsers != null ? totalProjectUsers.data : 0);
 
-    // Compute the maximum total feedback across all buckets.
-    const totals = aggregatedStats.map(
-      (stat) =>
-        (stat.total_negative_feedback || 0) +
-        (stat.total_positive_feedback || 0)
-    );
-
+    // Compute the maximum height using total_queries from each bucket.
+    const totals = aggregatedStats.map((stat) => stat.total_queries);
     const computedMax = Math.max(...totals, 1);
     setYAxisMax(computedMax);
 
@@ -577,61 +594,96 @@ export default function StatCard({
             </Box>
           </Box>
 
-        {/* Mid chart */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            width: "65%", // Adjusted to match the 35% for metrics
-            height: "100%",
+          {/* Mid chart */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              width: "65%", // Adjusted to match the 35% for metrics
+              height: "100%",
+            }}
+          >
+            <TimeControlButtons
+              setSelectedTimeInterval={setSelectedTimeInterval}
+              selectedTimeInterval={selectedTimeInterval}
+            />
+            {loading ? (
+              <Box
+                sx={{
+                  width: "600px", // Slightly reduced to accommodate the metrics section
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Loader />
+              </Box>
+            ) : (
+<BarChart
+  xAxis={[
+    {
+      scaleType: "band",
+      data: xLabels,
+    },
+  ]}
+  yAxis={[{ min: 0, max: yAxisMax }]}
+  tooltip={{
+    trigger: "axis",
+    axisContent: (props: ChartsAxisContentProps) => {
+      const { dataIndex } = props;
+      if (dataIndex == null) {
+        return null;
+      }
+      const bucket = aggregatedStats[dataIndex];
+      if (!bucket) return null;
+      return (
+        <div
+          style={{
+            padding: "8px",
+            background: "#fff",
+            border: "1px solid #ccc",
           }}
         >
-          <TimeControlButtons
-            setSelectedTimeInterval={setSelectedTimeInterval}
-            selectedTimeInterval={selectedTimeInterval}
-          />
-          {loading ? (
-            <Box
-              sx={{
-                width: "600px", // Slightly reduced to accommodate the metrics section
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Loader />
-            </Box>
-          ) : (
-            <BarChart
-              xAxis={[
-                {
-                  scaleType: "band",
-                  data: xLabels,
-                },
-              ]}
-              yAxis={[{ min: 0, max: yAxisMax }]}
-              series={[
-                {
-                  data: dataSets.negative,
-                  color: "#F44336",
-                  stack: "total",
-                  valueFormatter: (_v, { dataIndex }) =>
-                    String(dataSets.negative[dataIndex] || 0),
-                },
-                {
-                  data: dataSets.positive,
-                  color: "#74ef4b",
-                  stack: "total",
-                  valueFormatter: (_v, { dataIndex }) =>
-                    String(dataSets.positive[dataIndex] || 0),
-                },
-              ]}
-              width={570} // Slightly reduced to accommodate the metrics section
-              height={450}
-            />
+          <div>
+            <strong>Total Answers:</strong> {bucket.total_queries}
+          </div>
+          <div>
+            <strong>Positive Feedback:</strong> {bucket.total_positive_feedback}
+          </div>
+          <div>
+            <strong>Negative Feedback:</strong> {bucket.total_negative_feedback}
+          </div>
+        </div>
+      );
+    },
+  }}
+  
+  series={[
+    {
+      data: dataSets.negative,
+      color: "#F44336", // red
+      stack: "total",
+      valueFormatter: (_v, { dataIndex }) =>
+        (dataSets.negative?.[dataIndex] ?? 0).toString(),
+    },
+    {
+      data: dataSets.positive,
+      color: "#74ef4b", // green
+      stack: "total",
+      valueFormatter: (_v, { dataIndex }) =>
+        String(dataSets.positive[dataIndex] || 0),
+    },
+  ]}
+  width={570}
+  height={450}
+/>
+
+
+
+
           )}
         </Box>
         <Box
