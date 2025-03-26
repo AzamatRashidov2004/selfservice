@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { MenuItem, Select, FormControl } from "@mui/material";
+import React, { useState, useRef, useEffect } from "react";
+import { FolderOpen, FileUpload } from "@mui/icons-material";
 import "./File_Upload.css";
 import getFileExstension from "../../utility/File_Exstension";
 
@@ -23,8 +23,11 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 }) => {
   const [folderStructure, setFolderStructure] = useState<string>("");
   const [uploadMode, setUploadMode] = useState<"folder" | "file">("folder"); // Default: Folder Upload
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [folderFileCount, setFolderFileCount] = useState<number>(0);
   const [fileCount, setFileCount] = useState<number>(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+
 
   // Handle file/folder selection
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,12 +35,28 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
     if (files) {
       setFile(files);
       setFileCount(files.length);
+      setFolderFileCount(0);
       if (uploadMode === "folder") {
         const folderTree = await processFiles(files);
         setFolderStructure(folderTree);
       }
     }
   };
+
+  // Handle folder upload changes
+  const handleFolderChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const files = event.target.files;
+    if (files) {
+      setFile(files);
+      setFolderFileCount(files.length);
+      setFileCount(0);
+      const folderTree = await processFiles(files);
+      setFolderStructure(folderTree);
+    }
+  };
+
 
   const processFiles = async (files: FileList) => {
     const folderMap: Record<string, string[]> = {};
@@ -60,37 +79,83 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
 
   return (
     <section className="file-upload-wrapper mt-4">
-      <h2 className="file-upload-title">Upload {uploadMode === "folder" ? "Folder" : "File"}</h2>
-      <FormControl className="file-upload-form">
-        <Select value={uploadMode} onChange={(e) => setUploadMode(e.target.value as "folder" | "file")}>
-          <MenuItem value="folder">Folder Upload</MenuItem>
-          <MenuItem value="file">File Upload</MenuItem>
-        </Select>
-      </FormControl>
-      
-      <div className="file-upload-section mb-3" onClick={() => fileInputRef.current?.click()} style={{ cursor: "pointer", border: "2px dashed #ccc", padding: "20px", textAlign: "center" }}>
-        {
-          fileCount === 0 ?
-          <p>Click to upload {uploadMode === "folder" ? "a folder" : "files"}</p>
-          :
-          <span>Files selected {fileCount}</span>
-        }
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="form-control-file"
-          style={{ display: "none" }}
-          multiple
-          accept=".pdf, .xlsx, .csv"
-          onChange={handleFileChange}
-          {...(uploadMode === "folder" ? { webkitdirectory: "true", directory: "true" } : {})}
-        />
+      <h2 className="file-upload-title">Upload</h2>
+      <div style={{
+        display: "flex",
+        flexDirection: "row",
+        marginBottom: "15px",
+      }}>
+      <div
+          className="file-upload-section"
+          style={{
+            flex: 1,
+            cursor: "pointer",
+            border: "2px solid #ccc",
+            borderRight: "0px !important",
+            padding: "50px",
+            textAlign: "center",
+          }}
+          onClick={() => folderInputRef.current?.click()}
+        >
+          {folderFileCount === 0 ? (
+            <>
+            <FolderOpen style={{ fontSize: 40, color: "#3770F0" }} />
+            <p style={{color: "#3770F0"}} >Click to upload a folder</p>
+            </>
+          ) : (
+            <p style={{
+              marginTop: "20px"
+            }}>Folder selected ({folderFileCount} files)</p>
+          )}
+          <input
+            ref={folderInputRef}
+            type="file"
+            style={{ display: "none" }}
+            multiple
+            accept=".pdf, .xlsx, .csv"
+            onChange={handleFolderChange}
+            // These attributes enable folder selection
+            {...{ webkitdirectory: "true", directory: "true" }}
+          />
       </div>
 
+      {/* File Upload Field */}
+      <div
+          className="file-upload-section"
+          style={{
+            flex: 1,
+            cursor: "pointer",
+            border: "2px solid #ccc",
+            borderLeft: "0px",
+            padding: "50px",
+            textAlign: "center",
+          }}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          {fileCount === 0 ? (
+            <>
+              <FileUpload style={{ fontSize: 40, color: "#3770F0" }} />
+              <p style={{color: "#3770F0"}}>Click to upload files</p>
+            </>
+          ) : (
+            <p style={{
+              marginTop: "20px"
+            }}>Files selected ({fileCount})</p>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            style={{ display: "none" }}
+            multiple
+            accept=".pdf, .xlsx, .csv"
+            onChange={handleFileChange}
+          />
+        </div>
+      </div>
+      
       {folderStructure && (
         <div className="folder-structure alert alert-info" role="alert">
-          <h3>{uploadMode === "folder" ? "Folder Structure" : "Selected Files"}</h3>
+          <h3>Selected</h3>
           <pre>{folderStructure}</pre>
         </div>
       )}
@@ -99,7 +164,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         <button
           className="btn btn-primary"
           type="button"
-          disabled={!file || (isAnalytical && !notationFile)}
+          disabled={ (fileCount == 0 && folderFileCount == 0) || !file || (isAnalytical && !notationFile) }
           onClick={handleNextButtonClick}
         >
           Next Step
