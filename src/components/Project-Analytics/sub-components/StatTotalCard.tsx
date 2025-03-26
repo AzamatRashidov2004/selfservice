@@ -615,7 +615,7 @@ export default function StatCard({
             {loading ? (
               <Box
                 sx={{
-                  width: "600px", // Slightly reduced to accommodate the metrics section
+                  width: "570px", // Slightly reduced to accommodate the metrics section
                   height: "100%",
                   display: "flex",
                   alignItems: "center",
