@@ -149,7 +149,9 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
       </div>
       <div className="analytics-dashboard-content">
         {sessionInfo == null ? (
+          <div className="loader-container-analytics">
           <Loader />
+          </div>
         ) : (
           <>
             <div className="total-graph-parent">
