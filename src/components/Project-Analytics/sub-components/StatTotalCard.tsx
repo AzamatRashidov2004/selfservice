@@ -666,7 +666,7 @@ export default function StatCard({
 
       return (
         <div style={{ padding: 8, background: '#fff', border: '1px solid #ccc' }}>
-          <div><strong>Total Queries:</strong> {bucket.total_queries}</div>
+          <div><strong>Total Answers:</strong> {bucket.total_queries}</div>
           <div style={{ color: '#4A9A30', fontWeight: "bold" }}>
             Positive: {bucket.total_positive_feedback}
           </div>
