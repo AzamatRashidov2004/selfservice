@@ -85,6 +85,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         display: "flex",
         flexDirection: "row",
         marginBottom: "15px",
+        gap: "5px"
       }}>
       <div
           className="file-upload-section"
@@ -95,7 +96,6 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
             borderTopLeftRadius: "5px",
             borderBottomLeftRadius: "5px",
             border: "2px solid #ccc",
-            borderRight: "2px dashed #ccc",
             padding: "30px",
             textAlign: "center",
           }}
@@ -131,7 +131,6 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
             cursor: "pointer",
             border: "2px solid #ccc",
             backgroundColor: "#f2f2f7",
-            borderLeft: "0px",
             padding: "30px",
             textAlign: "center",
             borderTopRightRadius: "5px",

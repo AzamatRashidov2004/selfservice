@@ -90,6 +90,7 @@ export type ChatBotSceleton = {
   titleFontColor: string;
   botMessageFontColor: string;
   userMessageFontColor: string;
+  frameBorderColor: string;
 };
 
 // Define Settings interface

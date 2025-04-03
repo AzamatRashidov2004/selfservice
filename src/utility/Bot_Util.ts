@@ -10,6 +10,7 @@ export const ChatBotSceletonDefaultSettings: ChatBotSceleton = {
   titleText: "Chatbot",
   userMessageFontColor: "black",
   botMessageFontColor: "white",
+  frameBorderColor: "white",
 };
 
 // Default settings object
