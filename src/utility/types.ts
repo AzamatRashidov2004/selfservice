@@ -85,6 +85,11 @@ export type ChatBotSceleton = {
   botMessageColor: string;
   navbarColor: string;
   suggestionButtonColor: string;
+  suggestionButtonFontColor: string;
+  titleText: string;
+  titleFontColor: string;
+  botMessageFontColor: string;
+  userMessageFontColor: string;
 };
 
 // Define Settings interface

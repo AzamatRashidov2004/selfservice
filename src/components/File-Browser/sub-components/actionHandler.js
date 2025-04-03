@@ -253,7 +253,7 @@ async function handleAction(
     const selectedFile = data.state.selectedFilesForAction[0];
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
     const project_id = nodeInfo.kronosProjectId;
-    window.open(maestroApiUrl + `/app?project_id=${project_id}`);
+    window.open('http://localhost:8020' + `/app?project_id=${project_id}`);
   }
 
   if (data.id === 'download_files') {

@@ -78,6 +78,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
   };
 
   return (
+    <>
     <section className="file-upload-wrapper mt-4">
       <h2 className="file-upload-title">Upload</h2>
       <div style={{
@@ -90,9 +91,12 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           style={{
             flex: 1,
             cursor: "pointer",
+            backgroundColor: "#f2f2f7",
+            borderTopLeftRadius: "5px",
+            borderBottomLeftRadius: "5px",
             border: "2px solid #ccc",
-            borderRight: "0px !important",
-            padding: "50px",
+            borderRight: "2px dashed #ccc",
+            padding: "30px",
             textAlign: "center",
           }}
           onClick={() => folderInputRef.current?.click()}
@@ -126,9 +130,12 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
             flex: 1,
             cursor: "pointer",
             border: "2px solid #ccc",
+            backgroundColor: "#f2f2f7",
             borderLeft: "0px",
-            padding: "50px",
+            padding: "30px",
             textAlign: "center",
+            borderTopRightRadius: "5px",
+            borderBottomRightRadius: "5px",
           }}
           onClick={() => fileInputRef.current?.click()}
         >
@@ -160,6 +167,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
         </div>
       )}
 
+    </section>
       <div className="d-flex justify-content-end">
         <button
           className="btn btn-primary"
@@ -170,7 +178,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
           Next Step
         </button>
       </div>
-    </section>
+      </>
   );
 };
 

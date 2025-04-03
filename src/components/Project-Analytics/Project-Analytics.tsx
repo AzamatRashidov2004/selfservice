@@ -125,7 +125,8 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
 
   function launchProject(){
     if (selectedProjectData){
-      window.open(maestroApiUrl + `/app?project_id=${selectedProjectData.projectId}`);
+      // todo
+      window.open('http://localhost:8020' + `/app?project_id=${selectedProjectData.projectId}`);
     }
   }
 

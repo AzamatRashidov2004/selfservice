@@ -5,6 +5,11 @@ export const ChatBotSceletonDefaultSettings: ChatBotSceleton = {
   botMessageColor: "#808080",
   navbarColor: "#0E3F90",
   suggestionButtonColor: "#0E3F90",
+  suggestionButtonFontColor: "black",
+  titleFontColor: "white",
+  titleText: "Chatbot",
+  userMessageFontColor: "black",
+  botMessageFontColor: "white",
 };
 
 // Default settings object
