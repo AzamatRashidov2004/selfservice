@@ -6,13 +6,18 @@ import Loader from "../Loader/Loader.js";
 import "./Customize_Bot.css";
 import { ChromePicker } from 'react-color';
 
-
-
+// Update the interface to include input field customization
 interface CustomizeBotProps {
   loading?: boolean;
   selectedProjectConfig?: Partial<ChatBotSceleton>;
   saveSettings: (settings: ChatBotSceleton) => Promise<void>;
 }
+
+// Update default types in your types.js file
+// Extend ChatBotSceleton to include these new properties:
+// inputFieldColor: string;
+// inputFieldFontColor: string;
+// sendButtonColor: string;
 
 const colorSchemes = [
   {
@@ -26,6 +31,8 @@ const colorSchemes = [
     suggestionButtonColor: "#e8f0fe",
     suggestionButtonFontColor: "#1a73e8",
     frameBorderColor: "white",
+    sendButtonColor: "#1a73e8",
+    inputBackgroundColor: "#f5f5f5",
   },
   {
     titleText: "Forest Green",
@@ -38,6 +45,8 @@ const colorSchemes = [
     suggestionButtonColor: "#c8e6c9",
     suggestionButtonFontColor: "#2e7d32",
     frameBorderColor: "white",
+    sendButtonColor: "#2e7d32",
+    inputBackgroundColor: "#f5f5f5",
   },
   {
     titleText: "Warm Orange",
@@ -50,6 +59,8 @@ const colorSchemes = [
     suggestionButtonColor: "#ffe0b2",
     suggestionButtonFontColor: "#ed6c02",
     frameBorderColor: "white",
+    sendButtonColor: "#ed6c02",
+    inputBackgroundColor: "#f5f5f5",
   },
   {
     titleText: "Elegant Purple",
@@ -62,18 +73,22 @@ const colorSchemes = [
     suggestionButtonColor: "#e1bee7",
     suggestionButtonFontColor: "#7b1fa2",
     frameBorderColor: "white",
+    sendButtonColor: "#7b1fa2",
+    inputBackgroundColor: "#f5f5f5",
   },
   {
-    titleText: "Dark Mode",
+    titleText: "VS Code Dark",
     navbarColor: "#1e1e1e",
-    titleFontColor: "white",
-    botMessageColor: "#2d2d30",
-    botMessageFontColor: "white",
-    userMessageColor: "#505050",
-    userMessageFontColor: "white",
-    suggestionButtonColor: "#3e3e42",
-    suggestionButtonFontColor: "white",
-    frameBorderColor: "white",
+    titleFontColor: "#cccccc",
+    botMessageColor: "#252526",
+    botMessageFontColor: "#cccccc",
+    userMessageColor: "#0e639c",
+    userMessageFontColor: "#ffffff",
+    suggestionButtonColor: "#2d2d30",
+    suggestionButtonFontColor: "#cccccc",
+    frameBorderColor: "#1e1e1e",
+    inputBackgroundColor: "#3c3c3c",
+    sendButtonColor: "#0e639c",
   }
 ];
 
@@ -85,6 +100,8 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   const [config, setConfig] = useState<ChatBotSceleton>({
     ...ChatBotSceletonDefaultSettings,
     ...(selectedProjectConfig || {}),
+    inputBackgroundColor: (selectedProjectConfig?.inputBackgroundColor || "#f5f5f5"),
+    sendButtonColor: (selectedProjectConfig?.sendButtonColor || "#1a73e8"),
   });
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
 
@@ -177,7 +194,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       ),
       botMessage: (
         <div className="customization-panel">
-          <h3>Bot Message Customization</h3>
           <div className="form-group">
             <label>Text Color</label>
             <div className="color-toggle">
@@ -216,7 +232,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       ),
       userMessage: (
         <div className="customization-panel">
-          <h3>User Message Customization</h3>
           <div className="form-group">
             <label>Text Color</label>
             <div className="color-toggle">
@@ -255,7 +270,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       ),
       suggestionButtons: (
         <div className="customization-panel">
-          <h3>Suggestion Buttons Customization</h3>
           <div className="form-group">
             <label>Text Color</label>
             <div className="color-toggle">
@@ -294,7 +308,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       ),
       frame: (
         <div className="customization-panel">
-          <h3>Chat Frame Customization</h3>
           <div className="form-group">
             <label>Background Color</label>
             <ChromePicker
@@ -309,6 +322,50 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                     borderRadius: '8px',
                   },
                   // Hide the RGB input rows and toggle buttons
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
+        </div>
+      ),
+      inputField: (
+        <div className="customization-panel">
+          <div className="form-group">
+            <label>Input Background Color</label>
+            <ChromePicker
+              color={config.inputBackgroundColor}
+              onChange={(e) => setConfig({ ...config, inputBackgroundColor: e.hex })}
+              disableAlpha
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label>Send Button Color</label>
+            <ChromePicker
+              color={config.sendButtonColor}
+              onChange={(e) => setConfig({ ...config, sendButtonColor: e.hex })}
+              disableAlpha
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
                   body: {
                     paddingBottom: '0px',
                   },
@@ -531,20 +588,37 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                   </div>
                 </div>
 
-                {/* Input Area */}
-                <div className="input-area">
-                  <div className="message-input"></div>
-                  <button className="send-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
-                      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-                    </svg>
-                  </button>
-                </div>
+                {/* Input Area - Now Clickable */}
+                <div 
+                    className="input-area clickable"
+                    style={{ backgroundColor: config.inputBackgroundColor }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveComponent("inputField");
+                    }}
+                  >
+                    {activeComponent === "inputField" && (
+                      <div className="section-hint">
+                        <Zap size={14} />
+                        <span>Editing input field</span>
+                      </div>
+                    )}
+                    <div className="message-input">
+                      <span style={{ opacity: 0.6 }}></span>
+                    </div>
+                    <button 
+                      className="send-button"
+                      style={{ backgroundColor: config.sendButtonColor }}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                      </svg>
+                    </button>
+                  </div>
               </div>
             </div>
             
             {/* Customization Panel */}
-
             <div style={{
               display: "flex",
               flexDirection: "column",
@@ -569,22 +643,16 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                         onClick={() => setActiveTab("customization")}
                       >
                         {
-                          activeComponent != "suggestionButtons" ? 
+                          activeComponent === "suggestionButtons" ? 
+                          "Customize Buttons" :
+                          activeComponent === "inputField" ?
+                          "Customize Input" :
                           `Customize ${activeComponent.charAt(0).toUpperCase() + activeComponent.slice(1)}`
-                          :
-                          "Customize Buttons"
                         }
                       </button>
                     )}
                   </div>
                 </div>
-              {/*<button 
-                className="toolbar-button"
-                onClick={() => setActiveComponent("colorSchemes")}
-              >
-                <Palette size={18} />
-                Color Schemes
-              </button>*/}
             {
             renderCustomizationPanel()
             }
@@ -594,13 +662,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       )}          
     </div>
     <div className="customizer-header">
-              {/*<button 
-                className="toolbar-button"
-                onClick={() => setActiveComponent("colorSchemes")}
-              >
-                <Palette size={18} />
-                Color Schemes
-              </button>*/}
               <button 
                 className="save-button"
                 onClick={handleSubmit}
