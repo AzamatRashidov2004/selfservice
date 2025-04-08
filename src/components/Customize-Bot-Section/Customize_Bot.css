@@ -77,6 +77,16 @@
   align-items: center;
   position: relative;
 }
+
+.customization-navbar {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  height: 60.8px;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
 .navbar-icon {
   margin-right: 10px;
   font-size: 1.2rem;
@@ -166,11 +176,14 @@
   cursor: pointer;
 }
 .customization-panel {
-  width: 300px;
+  width: 400px;
+  height: 460px;
   padding: 20px;
   background-color: white;
   border: 1px solid #ddd;
   border-radius: 8px;
+  border-top-right-radius: 0px;
+  border-top-left-radius: 0px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 .customization-panel h3 {
@@ -282,4 +295,49 @@
   align-items: center;
   justify-content: center;
   height: 400px;
+}
+
+/* Hide RGB input rows and toggle buttons */
+.chrome-picker .flexbox-fix > div:nth-child(2),
+.chrome-picker .flexbox-fix > div:nth-child(3) {
+  display: none !important;
+}
+
+/* Hide the "HEX" label above the input */
+.chrome-picker label[for^="rc-editable-input"] {
+  display: none !important;
+}
+
+/* Remove the small color preview circle */
+.chrome-picker .flexbox-fix > div[style*="width: 22px"] {
+  display: none !important;
+}
+
+.tabs-container {
+  display: flex;
+  width: 100%;
+}
+.tab-button {
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  color: inherit;
+  opacity: 0.7;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  position: relative;
+}
+.tab-button.active-tab {
+  opacity: 1;
+}
+.tab-button.active-tab:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 10%;
+  width: 80%;
+  height: 3px;
+  background: currentColor;
+  border-radius: 2px 2px 0 0;
 }

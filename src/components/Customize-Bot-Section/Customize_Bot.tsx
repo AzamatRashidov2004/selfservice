@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { Palette, Save, Zap } from 'lucide-react';
+import { Save, Zap } from 'lucide-react';
 import { ChatBotSceleton } from "../../utility/types.js";
 import { ChatBotSceletonDefaultSettings } from "../../utility/Bot_Util.js";
 import Loader from "../Loader/Loader.js";
 import "./Customize_Bot.css";
+import { ChromePicker } from 'react-color';
+
+
 
 interface CustomizeBotProps {
   loading?: boolean;
@@ -105,26 +108,35 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   };
 
   const renderCustomizationPanel = () => {
-    if (!activeComponent) return null;
-
+    if (activeTab === "colorSchemes") {
+      return (
+        <div className="customization-panel">
+          <div className="color-schemes-list">
+            {colorSchemes.map((scheme, index) => (
+              <div key={index} className="color-scheme-item" onClick={() => applyColorScheme(scheme)}>
+                <div className="scheme-preview">
+                  <div style={{backgroundColor: scheme.navbarColor}}></div>
+                  <div style={{backgroundColor: scheme.botMessageColor}}></div>
+                  <div style={{backgroundColor: scheme.userMessageColor}}></div>
+                  <div style={{backgroundColor: scheme.suggestionButtonColor}}></div>
+                </div>
+                <span>{scheme.titleText}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
     const panels: Record<string, JSX.Element> = {
       navbar: (
         <div className="customization-panel">
-          <h3>Navbar Customization</h3>
+          {/*<h3>Navbar Customization</h3>*/}
           <div className="form-group">
             <label>Title Text</label>
             <input 
               type="text" 
               value={config.titleText}
               onChange={(e) => setConfig({...config, titleText: e.target.value})}
-            />
-          </div>
-          <div className="form-group">
-            <label>Navbar Color</label>
-            <input 
-              type="color" 
-              value={config.navbarColor}
-              onChange={(e) => setConfig({...config, navbarColor: e.target.value})}
             />
           </div>
           <div className="form-group">
@@ -140,19 +152,32 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
               >Dark</button>
             </div>
           </div>
+          <div className="form-group">
+            <label>Navbar Color</label>
+            <ChromePicker
+              color={config.navbarColor}
+              onChange={(e) => setConfig({ ...config, navbarColor: e.hex })}
+              disableAlpha // removes alpha slider for simplicity
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
+                  // Hide the RGB input rows and toggle buttons
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
         </div>
       ),
       botMessage: (
         <div className="customization-panel">
           <h3>Bot Message Customization</h3>
-          <div className="form-group">
-            <label>Background Color</label>
-            <input 
-              type="color" 
-              value={config.botMessageColor}
-              onChange={(e) => setConfig({...config, botMessageColor: e.target.value})}
-            />
-          </div>
           <div className="form-group">
             <label>Text Color</label>
             <div className="color-toggle">
@@ -166,19 +191,32 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
               >Dark</button>
             </div>
           </div>
+          <div className="form-group">
+            <label>Background Color</label>
+            <ChromePicker
+              color={config.botMessageColor}
+              onChange={(e) => setConfig({ ...config, botMessageColor: e.hex })}
+              disableAlpha // removes alpha slider for simplicity
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
+                  // Hide the RGB input rows and toggle buttons
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
         </div>
       ),
       userMessage: (
         <div className="customization-panel">
           <h3>User Message Customization</h3>
-          <div className="form-group">
-            <label>Background Color</label>
-            <input 
-              type="color" 
-              value={config.userMessageColor}
-              onChange={(e) => setConfig({...config, userMessageColor: e.target.value})}
-            />
-          </div>
           <div className="form-group">
             <label>Text Color</label>
             <div className="color-toggle">
@@ -192,19 +230,32 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
               >Dark</button>
             </div>
           </div>
+          <div className="form-group">
+            <label>Background Color</label>
+            <ChromePicker
+              color={config.userMessageColor}
+              onChange={(e) => setConfig({ ...config, userMessageColor: e.hex })}
+              disableAlpha // removes alpha slider for simplicity
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
+                  // Hide the RGB input rows and toggle buttons
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
         </div>
       ),
       suggestionButtons: (
         <div className="customization-panel">
           <h3>Suggestion Buttons Customization</h3>
-          <div className="form-group">
-            <label>Background Color</label>
-            <input 
-              type="color" 
-              value={config.suggestionButtonColor}
-              onChange={(e) => setConfig({...config, suggestionButtonColor: e.target.value})}
-            />
-          </div>
           <div className="form-group">
             <label>Text Color</label>
             <div className="color-toggle">
@@ -218,6 +269,27 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
               >Dark</button>
             </div>
           </div>
+          <div className="form-group">
+            <label>Background Color</label>
+            <ChromePicker
+              color={config.suggestionButtonColor}
+              onChange={(e) => setConfig({ ...config, suggestionButtonColor: e.hex })}
+              disableAlpha // removes alpha slider for simplicity
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
+                  // Hide the RGB input rows and toggle buttons
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
         </div>
       ),
       frame: (
@@ -225,10 +297,23 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
           <h3>Chat Frame Customization</h3>
           <div className="form-group">
             <label>Background Color</label>
-            <input 
-              type="color" 
-              value={config.frameBorderColor}
-              onChange={(e) => setConfig({...config, frameBorderColor: e.target.value})}
+            <ChromePicker
+              color={config.frameBorderColor}
+              onChange={(e) => setConfig({ ...config, frameBorderColor: e.hex })}
+              disableAlpha // removes alpha slider for simplicity
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
+                  // Hide the RGB input rows and toggle buttons
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
             />
           </div>
         </div>
@@ -257,8 +342,17 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       )
     };
 
+    if (!activeComponent) return panels["colorSchemes"];
     return panels[activeComponent] || null;
   };
+
+  const [activeTab, setActiveTab] = useState<string>("colorSchemes");
+
+  useEffect(() => {
+    if (activeComponent) {
+      setActiveTab("customization");
+    }
+  }, [activeComponent]);
 
   return (
     <>
@@ -291,10 +385,14 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                   }}
                   onClick={() => setActiveComponent("navbar")}
                 >
-                  <div className="section-hint">
-                    <Zap size={14} />
-                    <span>Click to edit</span>
-                  </div>
+                  {
+                  !activeComponent ? 
+                    <div className="section-hint">
+                      <Zap size={14} />
+                      <span>Click to edit</span>
+                    </div>
+                     : <></>
+                  }
                   <span className="navbar-icon">≡</span>
                   {config.titleText}
                 </div>
@@ -450,15 +548,43 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
             <div style={{
               display: "flex",
               flexDirection: "column",
-              gap: "10px"
             }}>
-              <button 
+               <div 
+                  className="customization-navbar"
+                  style={{ 
+                    backgroundColor: config.navbarColor,
+                    color: config.titleFontColor
+                  }}
+                >
+                  <div className="tabs-container">
+                    <button 
+                      className={`tab-button ${activeTab === "colorSchemes" ? "active-tab" : ""}`}
+                      onClick={() => {setActiveTab("colorSchemes"); setActiveComponent(null);}}
+                    >
+                      Color Schemes
+                    </button>
+                    {activeComponent && (
+                      <button 
+                        className={`tab-button ${activeTab === "customization" ? "active-tab" : ""}`}
+                        onClick={() => setActiveTab("customization")}
+                      >
+                        {
+                          activeComponent != "suggestionButtons" ? 
+                          `Customize ${activeComponent.charAt(0).toUpperCase() + activeComponent.slice(1)}`
+                          :
+                          "Customize Buttons"
+                        }
+                      </button>
+                    )}
+                  </div>
+                </div>
+              {/*<button 
                 className="toolbar-button"
                 onClick={() => setActiveComponent("colorSchemes")}
               >
                 <Palette size={18} />
                 Color Schemes
-              </button>
+              </button>*/}
             {
             renderCustomizationPanel()
             }
