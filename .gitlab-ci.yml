@@ -21,8 +21,8 @@ variables:
   VITE_KEYCLOACK_URL: $VITE_KEYCLOACK_URL
   VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID: $VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID
   FIREBASE_TOKEN: $FIREBASE_TOKEN
-  APP_LOCATION: $CI_PROJECT_DIR/
-  OUTPUT_LOCATION: $CI_PROJECT_DIR/dist
+  AZURE_TOKEN_PROD: $AZURE_TOKEN_PROD
+  AZURE_TOKEN_DEV: $AZURE_TOKEN_DEV
 
 build:
   stage: build
@@ -82,28 +82,29 @@ deploy:
   image: registry.gitlab.com/static-web-apps/azure-static-web-apps-deploy
   script:
     - |
-      # Decide which token to use based on the branch name
+      echo "Determining branch for deployment..."
       if [ "$CI_COMMIT_REF_NAME" = "main" ]; then
-        echo "Deploying to production environment..."
-        export API_TOKEN="$AZURE_TOKEN_PROD"
+         echo "Deploying to production environment..."
+         export API_TOKEN="$AZURE_TOKEN_PROD"
       elif [ "$CI_COMMIT_REF_NAME" = "development" ]; then
-        echo "Deploying to development environment..."
-        export API_TOKEN="$AZURE_TOKEN_DEV"
+         echo "Deploying to development environment..."
+         export API_TOKEN="$AZURE_TOKEN_DEV"
       else
-        echo "Branch $CI_COMMIT_REF_NAME is not set up for deployment. Skipping."
-        exit 0
+         echo "Branch $CI_COMMIT_REF_NAME is not configured for deployment. Skipping."
+         exit 0
       fi
-      # Set the app and output locations
+
+      # Define the app source and output directories.
       export APP_PATH="$CI_PROJECT_DIR/"
       export OUTPUT_PATH="$CI_PROJECT_DIR/dist"
+
+      # For debugging purposes, show the values.
+      echo "Using API_TOKEN: ${API_TOKEN:0:8}... (redacted)"
+      echo "APP_PATH: $APP_PATH"
+      echo "OUTPUT_PATH: $OUTPUT_PATH"
       
-      # For debugging, you can echo the values:
-      echo "API_TOKEN is set, APP_PATH is $APP_PATH, OUTPUT_PATH is $OUTPUT_PATH"
-      
-      # Run the Azure Static Web Apps CLI deploy command
-      azure-static-web-apps-deploy
+      # Call the Azure Static Web Apps deploy command with the required parameters.
+      azure-static-web-apps-deploy --verbose --api-token "$API_TOKEN" --app "$APP_PATH" --output-location "$OUTPUT_PATH"
   only:
     - main
     - development
-
-
