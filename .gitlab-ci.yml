@@ -21,6 +21,8 @@ variables:
   VITE_KEYCLOACK_URL: $VITE_KEYCLOACK_URL
   VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID: $VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID
   FIREBASE_TOKEN: $FIREBASE_TOKEN
+  APP_LOCATION: $CI_PROJECT_DIR/   # Location of your application source code
+  OUTPUT_LOCATION: $CI_PROJECT_DIR/dist      # Location of your build output
 
 build:
   stage: build
@@ -73,6 +75,7 @@ build:
     paths:
       - dist
       - .env
+      - $OUTPUT_LOCATION/
     expire_in: 1 hour
 
 deploy:
@@ -81,11 +84,22 @@ deploy:
     - build
   image: registry.gitlab.com/static-web-apps/azure-static-web-apps-deploy
   script:
-    - azure-static-web-apps-deploy
-  variables:
-    API_TOKEN: $AZURE_TOKEN
-    APP_PATH: $CI_PROJECT_DIR/
-    OUTPUT_PATH: $CI_PROJECT_DIR/dist
-
+    - |
+      if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
+        echo "Deploying to production environment..."
+        DEPLOYMENT_TOKEN=$AZURE_TOKEN_PRODUCTION
+      elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
+        echo "Deploying to development environment..."
+        DEPLOYMENT_TOKEN=$AZURE_TOKEN_DEVELOPMENT
+      else
+        echo "Unknown environment. Skipping deployment."
+        exit 0
+      fi
+    - npx @azure/static-web-apps-cli deploy
+        --app-location $APP_LOCATION
+        --output-location $OUTPUT_LOCATION
+        --deployment-token $DEPLOYMENT_TOKEN
   only:
+    - main
     - development
+
