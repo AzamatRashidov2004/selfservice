@@ -77,30 +77,13 @@ build:
 
 deploy:
   stage: deploy
-  dependencies:
-    - build
+  image: registry.gitlab.com/static-web-apps/azure-static-web-apps-deploy
   script:
-    # Step 1: Install Firebase CLI
-    - npm install -g firebase-tools
-
-    # Step 2: Verify that the 'dist' directory exists
-    - ls -al dist
-
-    # Step 3: Check the environment and deploy accordingly
-    - echo "Deploying to Firebase with token $FIREBASE_TOKEN"
-    - |
-      if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
-        echo "Deploying to production..."
-        firebase use --add sop-generator  # Ensure using the correct Firebase project for production
-        firebase deploy --only hosting:production --token $FIREBASE_TOKEN
-      elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
-        echo "Deploying to development..."
-        firebase use --add sop-generator  # Ensure using the correct Firebase project for development
-        firebase deploy --only hosting:development --token $FIREBASE_TOKEN
-      else
-        echo "Unknown environment. Skipping deployment."
-      fi
+    - azure-static-web-apps-deploy
+  variables:
+    API_TOKEN: $AZURE_TOKEN_PROD
+    APP_PATH: $CI_PROJECT_DIR/
+    OUTPUT_PATH: $CI_PROJECT_DIR/dist
 
   only:
     - main
-    - development
