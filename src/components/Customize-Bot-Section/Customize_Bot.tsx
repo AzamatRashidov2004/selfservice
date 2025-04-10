@@ -91,6 +91,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       {loading && loading == true ? (
         <div className="loader-container">
           <Loader />
+          <></>
         </div>
       ) : (
         <div className="bot-customization-section-wrapper">
