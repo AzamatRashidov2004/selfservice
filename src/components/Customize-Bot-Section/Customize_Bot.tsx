@@ -89,6 +89,20 @@ const colorSchemes = [
     frameBorderColor: "#1e1e1e",
     inputBackgroundColor: "#3c3c3c",
     sendButtonColor: "#0e639c",
+  },
+  {
+    titleText: "Dark Mode",
+    navbarColor: "#1e1e1e",
+    titleFontColor: "white",
+    botMessageColor: "#2d2d30",
+    botMessageFontColor: "white",
+    userMessageColor: "#505050",
+    userMessageFontColor: "white",
+    suggestionButtonColor: "#3e3e42",
+    suggestionButtonFontColor: "white",
+    frameBorderColor: "white",
+    inputBackgroundColor: "white",
+    sendButtonColor: "#4d5054",
   }
 ];
 
@@ -120,6 +134,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const applyColorScheme = (scheme: any) => {
     setConfig(scheme);
   };

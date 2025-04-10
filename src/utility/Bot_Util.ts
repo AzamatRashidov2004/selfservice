@@ -11,6 +11,8 @@ export const ChatBotSceletonDefaultSettings: ChatBotSceleton = {
   userMessageFontColor: "black",
   botMessageFontColor: "white",
   frameBorderColor: "white",
+  sendButtonColor: "#6e757c",
+  inputBackgroundColor: "white",
 };
 
 // Default settings object

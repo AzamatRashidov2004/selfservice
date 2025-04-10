@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { FolderOpen, FileUpload } from "@mui/icons-material";
 import "./File_Upload.css";
 import getFileExstension from "../../utility/File_Exstension";
@@ -22,7 +22,7 @@ const FileUploadSection: React.FC<FileUploadSectionProps> = ({
   handleNextButtonClick,
 }) => {
   const [folderStructure, setFolderStructure] = useState<string>("");
-  const [uploadMode, setUploadMode] = useState<"folder" | "file">("folder"); // Default: Folder Upload
+  const uploadMode = "folder"; // Default: Folder Upload
   const [folderFileCount, setFolderFileCount] = useState<number>(0);
   const [fileCount, setFileCount] = useState<number>(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
