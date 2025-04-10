@@ -23,6 +23,7 @@ variables:
   FIREBASE_TOKEN: $FIREBASE_TOKEN
   APP_LOCATION: $CI_PROJECT_DIR/   # Location of your application source code
   OUTPUT_LOCATION: $CI_PROJECT_DIR/dist      # Location of your build output
+  DEPLOYMENT_TOKEN: $AZURE_TOKEN_DEV
 
 build:
   stage: build
