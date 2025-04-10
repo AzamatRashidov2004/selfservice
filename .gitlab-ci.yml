@@ -87,10 +87,10 @@ deploy:
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
         echo "Deploying to production environment..."
-        DEPLOYMENT_TOKEN=$AZURE_TOKEN_PRODUCTION
+        DEPLOYMENT_TOKEN=$AZURE_TOKEN_PROD
       elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
         echo "Deploying to development environment..."
-        DEPLOYMENT_TOKEN=$AZURE_TOKEN_DEVELOPMENT
+        DEPLOYMENT_TOKEN=$AZURE_TOKEN_DEV
       else
         echo "Unknown environment. Skipping deployment."
         exit 0
