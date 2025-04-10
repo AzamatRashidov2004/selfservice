@@ -21,9 +21,6 @@ variables:
   VITE_KEYCLOACK_URL: $VITE_KEYCLOACK_URL
   VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID: $VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID
   FIREBASE_TOKEN: $FIREBASE_TOKEN
-  APP_LOCATION: $CI_PROJECT_DIR/   # Location of your application source code
-  OUTPUT_LOCATION: $CI_PROJECT_DIR/dist      # Location of your build output
-  DEPLOYMENT_TOKEN: $AZURE_TOKEN_DEV
 
 build:
   stage: build
@@ -100,6 +97,10 @@ deploy:
         --app $APP_LOCATION \
         --output-location $OUTPUT_LOCATION \
         --api-token $DEPLOYMENT_TOKEN
+  variables:
+    APP_LOCATION: $CI_PROJECT_DIR/   # Location of your application source code
+    OUTPUT_LOCATION: $CI_PROJECT_DIR/dist      # Location of your build output
+    DEPLOYMENT_TOKEN: $AZURE_TOKEN_DEV
   only:
     - main
     - development
