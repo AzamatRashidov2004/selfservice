@@ -519,14 +519,14 @@ export default function StatCard({
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            alignItems: "flex-start",
+            alignItems: "flex-end",
             width: "50%",
             pr: 4,
             pl: 2,
             pt: 1,
           }}
         >
-          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc", display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
               {yearUsers}
             </Typography>
@@ -534,7 +534,7 @@ export default function StatCard({
               Total Users
             </Typography>
           </Box>
-          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc", display: "flex", flexDirection: "column", alignItems: "flex-end"  }}>
             <Typography variant="h5" fontWeight="bold" component="span">
               {yearSessions}
             </Typography>
@@ -542,7 +542,7 @@ export default function StatCard({
               Total Sessions
             </Typography>
           </Box>
-          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc", display: "flex", flexDirection: "column", alignItems: "flex-end"  }}>
             <Typography variant="h5" fontWeight="bold" component="span">
               {yearAnswers}
             </Typography>
@@ -558,6 +558,7 @@ export default function StatCard({
               mb: 1, 
               pb: 2, 
               borderBottom: "1px solid #ccc",
+              display: "flex", flexDirection: "column", alignItems: "flex-end" 
             }}
           >
             <Typography variant="h5" fontWeight="bold" component="span">
