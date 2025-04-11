@@ -29,7 +29,7 @@ import {
 import { getCustomActions } from './customActions';
 import { maestroApiUrl } from '../../../api/apiEnv';
 
-async function handleAction(
+export default async function handleAction(
   data,
   setCurrentFolder,
   fileContext,
@@ -221,9 +221,6 @@ async function handleAction(
     const uploadMode = data.id === 'upload_folder' ? 'folder' : 'file';
 
     if (path.length > 0) path = path.slice(0, -1);
-
-    // Determine upload mode based on data.id
-    const uploadMode = data.id === 'upload_folder' ? 'folder' : 'file';
 
     createUploadFileModalEvent(async (files) => {
       try {
@@ -629,5 +626,5 @@ async function handleAction(
     }
   }
 }
+}
 
-export default handleAction;

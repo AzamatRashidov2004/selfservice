@@ -148,35 +148,6 @@ export async function fetchSessionEventsErrors(
   }
 }
 
-// Fetch session events errors
-export async function fetchSessionEventsErrors(
-  sessionId: string
-): Promise<SessionEventsResponseErrors> {
-  const url = `${BASE_URL}/session-events-errors?session_id=${encodeURIComponent(
-    sessionId
-  )}`;
-
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to fetch session events errors: ${response.statusText}`
-      );
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching session events errors:", error);
-    throw error;
-  }
-}
-
 // Fetch project stats
 export async function fetchProjectSessions(
   projectId: string,

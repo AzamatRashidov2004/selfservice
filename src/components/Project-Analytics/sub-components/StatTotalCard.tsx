@@ -471,10 +471,6 @@ export default function StatCard({
     setYearNegativeFeedback(allTimeNegativeFeedback);
     setYearUsers(allTimeProjectUsers?.data ? allTimeProjectUsers?.data : 0);
 
-    // Calculate totals from aggregated stats
-    let totalAnswers = 0;
-    let totalSessions = 0;
-    let totalFeedback = 0;
     let totalNegativeFeedback = 0;
 
     aggregatedStats.forEach((stat) => {
