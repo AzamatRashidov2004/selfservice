@@ -179,7 +179,7 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
   );
   const [sessionError, setSessionError] =
     useState<SessionEventsResponseErrors | null>(null);
-  const [showErrors, setShowErrors] = useState(true);
+  const [showErrors, setShowErrors] = useState(false);
   const [combinedRows, setCombinedRows] = useState<CombinedRow[]>([]);
 
   // Error row expansion state (only errors are expandable)
@@ -195,10 +195,25 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
 
   useEffect(() => {
     async function fetchData() {
-      const eventsResponse = await fetchSessionEvents(session_id);
-      setSessionData(eventsResponse);
-      const errorsResponse = await fetchSessionEventsErrors(session_id);
-      setSessionError(errorsResponse);
+      // Check cache for session events
+      const cachedEvents = sessionStorage.getItem(`session_events_${session_id}`);
+      if (cachedEvents) {
+        setSessionData(JSON.parse(cachedEvents));
+      } else {
+        const eventsResponse = await fetchSessionEvents(session_id);
+        sessionStorage.setItem(`session_events_${session_id}`, JSON.stringify(eventsResponse));
+        setSessionData(eventsResponse);
+      }
+
+      // Check cache for session errors
+      const cachedErrors = sessionStorage.getItem(`session_errors_${session_id}`);
+      if (cachedErrors) {
+        setSessionError(JSON.parse(cachedErrors));
+      } else {
+        const errorsResponse = await fetchSessionEventsErrors(session_id);
+        sessionStorage.setItem(`session_errors_${session_id}`, JSON.stringify(errorsResponse));
+        setSessionError(errorsResponse);
+      }
     }
     fetchData();
   }, [session_id]);

@@ -57,6 +57,11 @@
   width: 100%;
 }
 
+.project-dashboard-title{
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 .analytics-dashboard-nav {
   height: 84px;
   border-bottom: solid 1px #e0e0e0;
@@ -70,6 +75,7 @@
     font-size: 20px !important;
     border-color: white;
     margin-bottom: 0 !important;
+    margin-right: 10px;
   }
 }
 
@@ -96,4 +102,12 @@
 
 .analytics-project-details {
   justify-content: space-between;
+}
+
+.loader-container-analytics {
+  width: 100%;
+  height: 85%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

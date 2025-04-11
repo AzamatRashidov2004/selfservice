@@ -4,12 +4,12 @@ import FileUploadSection from "../../components/File-Upload-Section/File_Upload"
 import ProjectDetails from "../../components/Project-Details-Section/Project_Details";
 import { createNotificationEvent } from "../../utility/Modal_Util";
 import CustomizeBot from "../../components/Customize-Bot-Section/Customize_Bot";
-import { SettingsType } from "../../utility/types.ts";
-import getDate from "../../utility/Date_Util";
+import { ChatBotSceleton } from "../../utility/types.ts";
 import "./New_Project.css";
 import { createInitialKronosProject } from "../../utility/Api_Utils";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/authContext.tsx";
+import { defaultSettings } from "../../utility/Bot_Util.ts";
 
 const New_Project: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const New_Project: React.FC = () => {
   // States for Project Details
   const [projectName, setProjectName] = useState("");
   const [description, setDescription] = useState("");
-  const [language, setLanguage] = useState("English");
+  const [language, setLanguage] = useState<"cs-CZ" | "en-US">("en-US");
   const [introMessage, setIntroMessage] = useState("");
   const [introImage, setIntroImage] = useState("");
 
@@ -93,28 +93,23 @@ const New_Project: React.FC = () => {
   };
 
   // Save project settings and upload files (folder structure without root folder)
-  const saveSettings = async (settings: SettingsType) => {
-    settings.attributes = {
-      description,
-      intro_image: introImage,
-      language,
-      intro_message: introMessage,
-      last_update: getDate(),
-      project_name: projectName,
-    };
-
+  const saveSettings = async (chatbot: ChatBotSceleton) => {
     if (processedFiles.length === 0) return;
 
     // Convert processedFiles (File[]) to FileList
     const processedFileList = convertToFileList(processedFiles);
 
     const response = await createInitialKronosProject(
-      settings,
+      defaultSettings,
       projectName,
       description,
-      processedFileList, // ✅ Pass the correct FileList object
+      language,
+      processedFileList,
       keycloak.token,
-      setLoading
+      setLoading,
+      introMessage,
+      introImage,
+      chatbot,
     );
 
     if (!response) {
@@ -160,7 +155,6 @@ const New_Project: React.FC = () => {
           setProjectName={setProjectName}
           description={description}
           setDescription={setDescription}
-          language={language}
           setLanguage={setLanguage}
           introMessage={introMessage}
           setIntroMessage={setIntroMessage}

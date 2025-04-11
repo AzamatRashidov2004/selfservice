@@ -78,6 +78,7 @@ build:
 deploy:
   stage: deploy
   image: registry.gitlab.com/static-web-apps/azure-static-web-apps-deploy
+  image: registry.gitlab.com/static-web-apps/azure-static-web-apps-deploy
   script:
     - azure-static-web-apps-deploy
   variables:

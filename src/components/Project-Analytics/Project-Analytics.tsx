@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import "./Project-Analytics.css";
 import ProjectDataGrid from "./sub-components/ProjectDataGrid";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 
 import StatTotalCard from "./sub-components/StatTotalCard";
 
 import {
-  ProjectStatsResponse,
   ProjectSessionResponse,
   fetchProjectSessions,
-  fetchProjectStats,
   fetchProjectSessionsErrors,
   ProjectSessionErrorsResponse,
   fetchTotalUsers,
   TotalProjectUsers,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
+import { maestroApiUrl } from "../../api/apiEnv";
 
 type ProjectDetails = {
   setOpenDetails: () => void;
@@ -28,15 +28,17 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
   const [selectedTimeInterval, setSelectedTimeInterval] =
     useState<string>("day");
 
-  const [projectStats, setProjectState] = useState<null | ProjectStatsResponse>(
-    null
-  );
   const [sessionInfo, setSessionInfo] = useState<null | ProjectSessionResponse>(
     null
   );
 
   const [totalProjectUsers, setTotalProjectUsers] =
     useState<TotalProjectUsers | null>(null);
+
+  const [allTimeProjectUsers, setAllTimeProjectUsers] =
+    useState<TotalProjectUsers | null>(null);
+
+  const [totalGraphData, setTotalGraphData] = useState<ProjectSessionResponse | null>(null);
 
   const [sessionInfoErrors, setSessionInfoErrors] =
     useState<null | ProjectSessionErrorsResponse>(null);
@@ -47,14 +49,25 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
   const [feedbackGraphLoading, setFeedbackGraphLoading] =
     useState<boolean>(true);
 
+
   useEffect(() => {
     async function fetchData() {
       if (!selectedProjectData) return;
 
       setFeedbackGraphLoading(true);
-      fetchTotalUsers(selectedProjectData.projectId)
+
+      // Number of users all time ( a year )
+      fetchTotalUsers(selectedProjectData.projectId, "all")
         .then((response) => {
-          console.log("YYY", response);
+          setAllTimeProjectUsers(response);
+        })
+        .catch((error) => {
+          console.error("Error fetching total users:", error);
+        });
+
+      // Number of users on the time range
+      fetchTotalUsers(selectedProjectData.projectId, selectedTimeInterval)
+        .then((response) => {
           setTotalProjectUsers(response);
         })
         .catch((error) => {
@@ -65,6 +78,24 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           setSessionInfoErrors(response);
         }
       );
+      
+      // For all time data 
+      fetchProjectSessions(
+        selectedProjectData.projectId,
+        "all"
+      ).then((response) => {
+        // Assuming response.session is an array
+        const filteredSessions = response.sessions.filter(
+          (session) => session.query_count !== 0
+        );
+        setTotalGraphData({
+          status: response.status,
+          sessions: filteredSessions,
+        });
+        setFeedbackGraphLoading(false);
+      });
+
+      // Data for the time interval
       fetchProjectSessions(
         selectedProjectData.projectId,
         selectedTimeInterval
@@ -77,31 +108,27 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           status: response.status,
           sessions: filteredSessions,
         });
+        console.log({
+          status: response.status,
+          sessions: filteredSessions,
+        });
         setGraphFeedbackInfo({
           status: response.status,
           sessions: filteredSessions,
         });
         setFeedbackGraphLoading(false);
       });
-      fetchProjectStats(selectedProjectData.projectId, "day").then(
-        (response) => {
-          setProjectState(response);
-        }
-      );
-      fetchProjectStats(
-        selectedProjectData.projectId,
-        selectedTimeInterval
-      ).then((response) => {
-        setProjectState(response);
-      });
     }
 
     fetchData();
   }, [selectedProjectData, selectedTimeInterval]);
 
-  useEffect(() => {
-    console.log("XAXAXAXAX", totalProjectUsers);
-  }, [totalProjectUsers, selectedTimeInterval]);
+  function launchProject(){
+    if (selectedProjectData){
+      // todo
+      window.open(maestroApiUrl + `/app?project_id=${selectedProjectData.projectId}`);
+    }
+  }
 
   return (
     <div className="analytics-dashboard-wrapper">
@@ -112,18 +139,20 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
             flexDirection: "column",
           }}
         >
-          <h3>{selectedProjectData ? selectedProjectData.title : ""}</h3>
+          <h3 className="project-dashboard-title" onClick={launchProject}>{selectedProjectData ? selectedProjectData.title : ""}</h3>
           <span className="analytics-id-wrapper">
             id: {selectedProjectData ? selectedProjectData.projectId : ""}
           </span>
         </div>
         <button className="btn btn-outline-primary" onClick={setOpenDetails}>
-          File Browser
+          <ArrowBackIcon />
         </button>
       </div>
       <div className="analytics-dashboard-content">
-        {projectStats == null && sessionInfo == null ? (
+        {sessionInfo == null ? (
+          <div className="loader-container-analytics">
           <Loader />
+          </div>
         ) : (
           <>
             <div className="total-graph-parent">
@@ -133,6 +162,8 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
                 loading={feedbackGraphLoading}
                 setSelectedTimeInterval={setSelectedTimeInterval}
                 totalProjectUsers={totalProjectUsers}
+                allTimeProjectUsers={allTimeProjectUsers}
+                totalGraphData={totalGraphData}
               />
             </div>
             {sessionInfo ? (

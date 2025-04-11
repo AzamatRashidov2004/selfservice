@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import { BarChart } from "@mui/x-charts/BarChart";
+
 import React, { useEffect, useState } from "react";
 import {
   ProjectSessionResponse,
@@ -21,6 +22,8 @@ export type StatCardProps = {
   loading: boolean;
   setSelectedTimeInterval: React.Dispatch<React.SetStateAction<string>>;
   totalProjectUsers: TotalProjectUsers | null;
+  allTimeProjectUsers: TotalProjectUsers | null;
+  totalGraphData: ProjectSessionResponse | null;
 };
 
 /**
@@ -32,6 +35,7 @@ interface Stat {
   total_negative_feedback: number;
   total_sessions: number;
 }
+
 
 /**
  * Session data with start_timestamp as a Date.
@@ -49,6 +53,7 @@ interface SessionStat {
 interface FeedbackDataSets {
   negative: number[];
   positive: number[];
+  no_feedback: number[];  // Add no feedback array
 }
 
 /**
@@ -161,21 +166,38 @@ function getXLabels(interval: string): string[] {
 /**
  * Create the data arrays for the chart based on the aggregated stats.
  */
+// Updated createDataSets using query_count and feedback ratios
 function createDataSets(stats: Stat[], labelCount: number): FeedbackDataSets {
   const negativeArr: number[] = [];
   const positiveArr: number[] = [];
+  const noFeedbackArr: number[] = [];
+  
   for (let i = 0; i < labelCount; i++) {
     const item = stats[i];
     if (!item) {
       negativeArr.push(0);
       positiveArr.push(0);
+      noFeedbackArr.push(0);
       continue;
     }
-    negativeArr.push(item.total_negative_feedback);
+
+    // Calculate values based on actual counts
+    const totalFeedback = item.total_positive_feedback + item.total_negative_feedback;
+    const noFeedback = item.total_queries - totalFeedback;
+
     positiveArr.push(item.total_positive_feedback);
+    negativeArr.push(item.total_negative_feedback);
+    noFeedbackArr.push(noFeedback);
   }
-  return { negative: negativeArr, positive: positiveArr };
+  
+  return { 
+    negative: negativeArr, 
+    positive: positiveArr, 
+    no_feedback: noFeedbackArr 
+  };
 }
+
+
 
 /**
  * Get the overall time range.
@@ -354,27 +376,48 @@ export default function StatCard({
   loading,
   setSelectedTimeInterval,
   totalProjectUsers,
+  totalGraphData,
+  allTimeProjectUsers,
 }: StatCardProps) {
   // Get the array of sessions (if available)
   let sessionStats: ProjectStatsSession[] = [];
+  let allTimeStats: ProjectStatsSession[] = [];
   if (graphFeedbackInfo) {
     sessionStats = graphFeedbackInfo.sessions;
   }
+  if (totalGraphData) {
+    allTimeStats = totalGraphData.sessions;
+  }
 
+  // Data by time range
   const [totalAnswers, setTotalAnswers] = useState<number>(0);
   const [totalUsers, setTotalUsers] = useState<number>(0);
+  const [totalNegativeFeedback, setTotalNegativeFeedback] = useState<number>(0);
   const [totalFeedback, setTotalFeedback] = useState<number>(0);
   const [totalSessions, setTotalSesssions] = useState<number>(0);
+
+
+  // Data for all time ( 1 year )
+  const [yearAnswers, setYearAnswers] = useState<number>(0);
+  const [yearUsers, setYearUsers] = useState<number>(0);
+  const [yearFeedback, setYearFeedback] = useState<number>(0);
+  const [yearNegativeFeedback, setYearNegativeFeedback] = useState<number>(0);
+  const [yearSessions, setYearSessions] = useState<number>(0);
 
   const [xLabels, setXLabels] = useState<string[]>([]);
   const [dataSets, setDataSets] = useState<FeedbackDataSets>({
     negative: [],
     positive: [],
+    no_feedback: [],
   });
   // This state holds the computed maximum total feedback count.
   const [yAxisMax, setYAxisMax] = useState<number>(100);
+  const [aggregatedStats, setAggregatedStats] = useState<Stat[]>([]);
 
   useEffect(() => {
+    const stats = aggregateSessions(sessionStats, selectedTimeInterval);
+    setAggregatedStats(stats);
+
     const labelSet = getXLabels(selectedTimeInterval);
     setXLabels(labelSet);
 
@@ -401,13 +444,57 @@ export default function StatCard({
     setTotalFeedback(totalFeedback);
     setTotalUsers(totalProjectUsers != null ? totalProjectUsers.data : 0);
 
-    // Compute the maximum total feedback across all buckets.
-    const totals = aggregatedStats.map(
-      (stat) =>
-        (stat.total_negative_feedback || 0) +
-        (stat.total_positive_feedback || 0)
+    // Aggregate the sessionStats into buckets based for all time interval 
+    const aggregatedStatsAll = aggregateSessions(
+      allTimeStats,
+      "all"
     );
 
+    // Calculate totals from aggregated stats
+    let allTimeAnswers = 0;
+    let allTimeSessions = 0;
+    let allTimeFeedback = 0;
+    
+    let allTimeNegativeFeedback = 0;
+
+    aggregatedStatsAll.forEach((stat) => {
+      allTimeAnswers += stat.total_queries;
+      allTimeSessions += stat.total_sessions;
+      allTimeFeedback +=
+        stat.total_positive_feedback + stat.total_negative_feedback;
+      allTimeNegativeFeedback += stat.total_negative_feedback;
+    });
+
+    setYearAnswers(allTimeAnswers);
+    setYearSessions(allTimeSessions);
+    setYearFeedback(allTimeFeedback);
+    setYearNegativeFeedback(allTimeNegativeFeedback);
+    setYearUsers(allTimeProjectUsers?.data ? allTimeProjectUsers?.data : 0);
+
+    // Calculate totals from aggregated stats
+    let totalAnswers = 0;
+    let totalSessions = 0;
+    let totalFeedback = 0;
+    let totalNegativeFeedback = 0;
+
+    aggregatedStats.forEach((stat) => {
+      totalAnswers += stat.total_queries;
+      totalSessions += stat.total_sessions;
+      totalFeedback +=
+        stat.total_positive_feedback + stat.total_negative_feedback;
+      totalNegativeFeedback += stat.total_negative_feedback;
+    });
+
+
+    // For total time range data
+    setTotalAnswers(totalAnswers);
+    setTotalSesssions(totalSessions);
+    setTotalFeedback(totalFeedback);
+    setTotalNegativeFeedback(totalNegativeFeedback);
+    setTotalUsers(totalProjectUsers != null ? totalProjectUsers.data : 0);
+
+    // Compute the maximum height using total_queries from each bucket.
+    const totals = aggregatedStats.map((stat) => stat.total_queries);
     const computedMax = Math.max(...totals, 1);
     setYAxisMax(computedMax);
 
@@ -419,20 +506,19 @@ export default function StatCard({
     selectedTimeInterval,
     sessionStats,
     totalProjectUsers,
+    allTimeStats,
+    allTimeProjectUsers?.data,
   ]);
-
-  useEffect(() => {
-    console.log("AAAAAA", totalProjectUsers?.data);
-  }, [totalProjectUsers]);
 
   return (
     <Card
       variant="outlined"
       id="graph-main-card"
       sx={{
-        height: "400px",
-        width: "75%",
+        height: "500px",
+        width: "100%",
         display: "flex",
+        id: "graph-main-card",
         flexDirection: "column",
       }}
     >
@@ -445,28 +531,192 @@ export default function StatCard({
           width: "100%",
         }}
       >
-        {/* Left side metrics - more compact and centered */}
+
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center", // Centers content vertically
-            alignItems: "flex-start", // Aligns content to the left
-            width: "35%",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            width: "50%",
             pr: 4,
-            pl: 2, // Added left padding
+            pl: 2,
             pt: 1,
           }}
         >
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
-              {totalAnswers}
+              {yearUsers}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Answers
+              Total Users
             </Typography>
           </Box>
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {yearSessions}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Total Sessions
+            </Typography>
+          </Box>
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {yearAnswers}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Total Answers
+            </Typography>
+          </Box>
+          
+          {/* Feedback box with hover details */}
+          <Box 
+            sx={{ 
+              position: "relative",
+              mb: 1, 
+              pb: 2, 
+              borderBottom: "1px solid #ccc",
+            }}
+          >
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {yearFeedback}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Total Feedback
+            </Typography>
+            <Box sx={{pt: 1}}>
+              <Box sx={{display: "flex", flexDirection: "row"}}>
+                <Box sx={{pr: 1}}>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="success" component="span">
+                    P:{" "}
+                  </Typography>
+                    {yearFeedback - yearNegativeFeedback}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="error" component="span">
+                    N:{" "}
+                  </Typography>
+                    {yearNegativeFeedback}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box>
+                <Typography variant="body2" fontWeight="bold" component="span">
+                <Typography variant="body2" color="text.secondary" component="span">
+                  Accuracy:{" "}
+                </Typography>
+                  {yearFeedback > 0 ? (100 - (yearFeedback > 0 ? (yearNegativeFeedback / yearFeedback) * 100 : 0)).toFixed(1) : ""}%
+                </Typography>
+              </Box>
+            </Box>
+            </Box>
+          </Box>
 
+          {/* Mid chart */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+              width: "65%", // Adjusted to match the 35% for metrics
+              height: "100%",
+            }}
+          >
+            <TimeControlButtons
+              setSelectedTimeInterval={setSelectedTimeInterval}
+              selectedTimeInterval={selectedTimeInterval}
+            />
+            {loading ? (
+              <Box
+                sx={{
+                  width: "570px", // Slightly reduced to accommodate the metrics section
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Loader />
+              </Box>
+            ) : (
+<BarChart
+  xAxis={[{ scaleType: "band", data: xLabels }]}
+  yAxis={[{ min: 0, max: yAxisMax }]}
+  series={[
+    // Positive feedback (green)
+    {
+      data: dataSets.positive,
+      color: "#74ef4b",
+      stack: "total",
+      valueFormatter: (v) => v?.toFixed(0) || '0',
+    },
+    // Negative feedback (red)
+    {
+      data: dataSets.negative,
+      color: "#F44336",
+      stack: "total",
+      valueFormatter: (v) => v?.toFixed(0) || '0',
+    },
+    // No feedback (grey) - base layer
+    {
+      data: dataSets.no_feedback,
+      color: "#e0e0e0",
+      stack: "total",
+      valueFormatter: (v) => v?.toFixed(0) || '0',
+    },
+  ]}
+  width={570}
+  height={450}
+  tooltip={{ 
+    trigger: "axis",
+    axisContent: ({ dataIndex }) => {
+      if (dataIndex == null) return null;
+      const bucket = aggregatedStats[dataIndex];
+      if (!bucket) return null;
+      
+      const noFeedback = bucket.total_queries - 
+                        (bucket.total_positive_feedback + 
+                         bucket.total_negative_feedback);
+
+      return (
+        <div style={{ padding: 8, background: '#fff', border: '1px solid #ccc' }}>
+          <div><strong>Total Answers:</strong> {bucket.total_queries}</div>
+          <div style={{ color: '#4A9A30', fontWeight: "bold" }}>
+            Positive: {bucket.total_positive_feedback}
+          </div>
+          <div style={{ color: '#C2185B', fontWeight: "bold" }}>
+            Negative: {bucket.total_negative_feedback}
+          </div>
+          <div style={{ color: '#757575', fontWeight: "bold" }}>
+            No Feedback: {noFeedback}
+          </div>
+        </div>
+      );
+    }
+  }}
+/>
+
+
+
+
+          )}
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "flex-start",
+            width: "53%",
+            pr: 4,
+            pl: 2,
+            pt: 1,
+          }}
+        >
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
             <Typography variant="h5" fontWeight="bold" component="span">
               {totalUsers}
@@ -475,17 +725,7 @@ export default function StatCard({
               Users
             </Typography>
           </Box>
-
           <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
-            <Typography variant="h5" fontWeight="bold" component="span">
-              {totalFeedback}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Feedback
-            </Typography>
-          </Box>
-
-          <Box>
             <Typography variant="h5" fontWeight="bold" component="span">
               {totalSessions}
             </Typography>
@@ -493,64 +733,63 @@ export default function StatCard({
               Sessions
             </Typography>
           </Box>
-        </Box>
-
-        {/* Right side chart */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "column",
-            width: "65%", // Adjusted to match the 35% for metrics
-            height: "100%",
-          }}
-        >
-          <TimeControlButtons
-            setSelectedTimeInterval={setSelectedTimeInterval}
-            selectedTimeInterval={selectedTimeInterval}
-          />
-          {loading ? (
-            <Box
-              sx={{
-                width: "550px", // Slightly reduced to accommodate the metrics section
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Loader />
-            </Box>
-          ) : (
-            <BarChart
-              xAxis={[
-                {
-                  scaleType: "band",
-                  data: xLabels,
-                },
-              ]}
-              yAxis={[{ min: 0, max: yAxisMax }]}
-              series={[
-                {
-                  data: dataSets.negative,
-                  color: "#F44336",
-                  stack: "total",
-                  valueFormatter: (_v, { dataIndex }) =>
-                    String(dataSets.negative[dataIndex] || 0),
-                },
-                {
-                  data: dataSets.positive,
-                  color: "#74ef4b",
-                  stack: "total",
-                  valueFormatter: (_v, { dataIndex }) =>
-                    String(dataSets.positive[dataIndex] || 0),
-                },
-              ]}
-              width={550} // Slightly reduced to accommodate the metrics section
-              height={350}
-            />
-          )}
+          <Box sx={{ mb: 1, pb: 2, borderBottom: "1px solid #ccc" }}>
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalAnswers}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Answers
+            </Typography>
+          </Box>
+          
+          {/* Feedback box with hover details */}
+          <Box 
+            sx={{ 
+              position: "relative",
+              mb: 1, 
+              pb: 2, 
+              borderBottom: "1px solid #ccc",
+              '&:hover .feedback-details': {
+                display: 'block'
+              }
+            }}
+          >
+            <Typography variant="h5" fontWeight="bold" component="span">
+              {totalFeedback}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Feedback
+            </Typography>
+            
+            <Box sx={{pt: 1}}>
+              <Box sx={{display: "flex", flexDirection: "row"}}>
+                <Box sx={{pr: 1}}>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="success" component="span">
+                    P:{" "}
+                  </Typography>
+                    {totalFeedback - totalNegativeFeedback}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" fontWeight="bold" component="span">
+                  <Typography variant="body2" fontWeight="bold" color="error" component="span">
+                    N:{" "}
+                  </Typography>
+                    {totalNegativeFeedback}
+                  </Typography>
+                </Box>
+              </Box>
+              <Box>
+                <Typography variant="body2" fontWeight="bold" component="span">
+                <Typography variant="body2" color="text.secondary" component="span">
+                  Accuracy:{" "}
+                </Typography>
+                  {totalFeedback > 0 ? (100 - (totalFeedback > 0 ? (totalNegativeFeedback / totalFeedback) * 100 : 0)).toFixed(1) : ""}%
+                </Typography>
+              </Box>
+            </Box> 
+          </Box>
         </Box>
       </CardContent>
     </Card>

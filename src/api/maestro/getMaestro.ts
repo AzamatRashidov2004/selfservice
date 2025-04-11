@@ -1,8 +1,14 @@
 import { maestroApiUrl } from "../apiEnv";
 
 const BASE_URL = maestroApiUrl;
+//const BASE_URL = "http://localhost:8020";
 
 // Types for the return values
+
+export interface TotalProjectUsers {
+  data: number;
+}
+
 
 export interface TotalProjectUsers {
   data: number;
@@ -23,8 +29,20 @@ export interface SessionEventErrors {
   message: string;
 }
 
+export interface SessionEventErrors {
+  timestamp: string;
+  type: string;
+  level: string;
+  stack: string;
+  message: string;
+}
+
 export interface SessionEventsResponse {
   data: SessionEvent[];
+}
+
+export interface SessionEventsResponseErrors {
+  data: SessionEventErrors[];
 }
 
 export interface SessionEventsResponseErrors {
@@ -46,9 +64,18 @@ export interface ProjectStatsSessionErrors {
   occurrences: number;
 }
 
+export interface ProjectStatsSessionErrors {
+  session_id: string;
+  occurrences: number;
+}
+
 export interface ProjectSessionResponse {
   status: string;
   sessions: ProjectStatsSession[];
+}
+
+export interface ProjectSessionErrorsResponse {
+  data: ProjectStatsSessionErrors[];
 }
 
 export interface ProjectSessionErrorsResponse {
@@ -88,6 +115,35 @@ export async function fetchSessionEvents(
     return await response.json();
   } catch (error) {
     console.error("Error fetching session events:", error);
+    throw error;
+  }
+}
+
+// Fetch session events errors
+export async function fetchSessionEventsErrors(
+  sessionId: string
+): Promise<SessionEventsResponseErrors> {
+  const url = `${BASE_URL}/session-events-errors?session_id=${encodeURIComponent(
+    sessionId
+  )}`;
+
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch session events errors: ${response.statusText}`
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching session events errors:", error);
     throw error;
   }
 }
@@ -180,11 +236,12 @@ export async function fetchProjectSessionsErrors(
 
 // Fetch project stats errors
 export async function fetchTotalUsers(
-  projectId: string
+  projectId: string,
+  timeRange: string = "day",
 ): Promise<TotalProjectUsers> {
   const url = `${BASE_URL}/project-total-users?project_id=${encodeURIComponent(
     projectId
-  )}`;
+  )}&time_range=${encodeURIComponent(timeRange)}`;
 
   try {
     const response = await fetch(url, {

@@ -1,4 +1,19 @@
-import { SettingsType } from "./types.ts";
+import { ChatBotSceleton, SettingsType } from "./types.ts";
+
+export const ChatBotSceletonDefaultSettings: ChatBotSceleton = {
+  userMessageColor: "#81C89F",
+  botMessageColor: "#808080",
+  navbarColor: "#0E3F90",
+  suggestionButtonColor: "#0E3F90",
+  suggestionButtonFontColor: "black",
+  titleFontColor: "white",
+  titleText: "Chatbot",
+  userMessageFontColor: "black",
+  botMessageFontColor: "white",
+  frameBorderColor: "white",
+  sendButtonColor: "#6e757c",
+  inputBackgroundColor: "white",
+};
 
 // Default settings object
 export const defaultSettings: SettingsType = {

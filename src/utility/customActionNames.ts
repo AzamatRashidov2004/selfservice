@@ -1,8 +1,9 @@
 const CUSTOM_ACTION_NAMES = {
+    launch: "Launch",
+    open: "Open",
     upload_file: "Upload File",
     upload_folder: "Upload Folder",
     details: "Details",
-    open: "Open",
     newFolder: "New Folder",
     delete: "Delete",
     download: "Download",
