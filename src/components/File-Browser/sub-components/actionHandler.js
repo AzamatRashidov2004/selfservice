@@ -29,7 +29,7 @@ import {
 import { getCustomActions } from './customActions';
 import { maestroApiUrl } from '../../../api/apiEnv';
 
-export default async function handleAction(
+async function handleAction(
   data,
   setCurrentFolder,
   fileContext,
@@ -198,7 +198,6 @@ export default async function handleAction(
 
   // Handle Create File custom action
   if (data.id === 'upload_file' || data.id === 'upload_folder') {
-  if (data.id === 'upload_file' || data.id === 'upload_folder') {
     if (!keycloak || !keycloak.token) return;
     let targetID = parseInt(currentFolder);
 
@@ -219,8 +218,6 @@ export default async function handleAction(
 
     // Determine upload mode based on data.id
     const uploadMode = data.id === 'upload_folder' ? 'folder' : 'file';
-
-    if (path.length > 0) path = path.slice(0, -1);
 
     createUploadFileModalEvent(async (files) => {
       try {
@@ -626,5 +623,5 @@ export default async function handleAction(
     }
   }
 }
-}
 
+export default handleAction;
