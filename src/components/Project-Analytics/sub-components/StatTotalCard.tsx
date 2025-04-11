@@ -427,23 +427,6 @@ export default function StatCard({
       selectedTimeInterval
     );
 
-    // Calculate totals from aggregated stats
-    let totalAnswers = 0;
-    let totalSessions = 0;
-    let totalFeedback = 0;
-
-    aggregatedStats.forEach((stat) => {
-      totalAnswers += stat.total_queries;
-      totalSessions += stat.total_sessions;
-      totalFeedback +=
-        stat.total_positive_feedback + stat.total_negative_feedback;
-    });
-
-    setTotalAnswers(totalAnswers);
-    setTotalSesssions(totalSessions);
-    setTotalFeedback(totalFeedback);
-    setTotalUsers(totalProjectUsers != null ? totalProjectUsers.data : 0);
-
     // Aggregate the sessionStats into buckets based for all time interval 
     const aggregatedStatsAll = aggregateSessions(
       allTimeStats,
@@ -471,6 +454,10 @@ export default function StatCard({
     setYearNegativeFeedback(allTimeNegativeFeedback);
     setYearUsers(allTimeProjectUsers?.data ? allTimeProjectUsers?.data : 0);
 
+    // Calculate totals from aggregated stats
+    let totalAnswers = 0;
+    let totalSessions = 0;
+    let totalFeedback = 0;
     let totalNegativeFeedback = 0;
 
     aggregatedStats.forEach((stat) => {
@@ -509,7 +496,6 @@ export default function StatCard({
   return (
     <Card
       variant="outlined"
-      id="graph-main-card"
       sx={{
         height: "500px",
         width: "100%",
