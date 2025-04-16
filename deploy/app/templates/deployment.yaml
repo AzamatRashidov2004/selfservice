@@ -27,10 +27,6 @@ spec:
               name: http-app
           resources:
           {{- toYaml .Values.app.resources | nindent 12 }}
-          volumeMounts:
-            - name: secrets
-              mountPath: /app/.env
-              subPath: {{ .Values.secretsName }}
       nodeSelector:
         kubernetes.io/os: linux
       imagePullSecrets:
@@ -40,10 +36,3 @@ spec:
           key: kubernetes.azure.com/scalesetpriority
           operator: Equal
           value: spot
-      volumes:
-        - name: secrets
-          csi:
-            driver: secrets-store.csi.k8s.io
-            readOnly: true
-            volumeAttributes:
-              secretProviderClass: azure-secret-provider

@@ -2,12 +2,10 @@ namespace: develop
 name: selfservice-react
 version: 0.0.1
 
-hostName: maestro
 baseDomain: promethist.dev
 clusterIssuer: letsencrypt
 ingressClassName: nginx
 replicaCount: 1
-secretsName: selfservice-react-develop
 
 app:
   image:
