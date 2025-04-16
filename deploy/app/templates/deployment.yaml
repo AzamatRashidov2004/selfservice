@@ -29,7 +29,7 @@ spec:
           {{- toYaml .Values.app.resources | nindent 12 }}
           volumeMounts:
             - name: secrets
-              mountPath: /.env
+              mountPath: /app/.env
               subPath: {{ .Values.secretsName }}
       nodeSelector:
         kubernetes.io/os: linux
