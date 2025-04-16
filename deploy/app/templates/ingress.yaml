@@ -23,10 +23,10 @@ spec:
   {{ end }}
 
   rules:
-    - host: {{ .Values.hostName }}.{{ .Values.baseDomain }}
+    - host: {{ .Values.name }}{{ if .Values.nameSuffix }}-{{ .Values.nameSuffix }}{{ end }}.{{ .Values.baseDomain }}
       http:
         paths:
-          - path: /admin
+          - path: /
             pathType: Prefix
             backend:
               service:
@@ -37,6 +37,6 @@ spec:
   {{ if ne .Values.clusterIssuer "none" }}
   tls:
     - hosts:
-        - {{ .Values.hostName }}.{{ .Values.baseDomain }}
-      secretName: {{ .Values.hostName }}-tls
+        - {{ .Values.name }}{{ if .Values.nameSuffix }}-{{ .Values.nameSuffix }}{{ end }}.{{ .Values.baseDomain }}
+      secretName: {{ .Release.Name }}-tls
   {{ end }}

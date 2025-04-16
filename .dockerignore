@@ -11,3 +11,4 @@
 .gitlab-ci.yml
 config.*.env
 Dockerfile
+firebase.json
