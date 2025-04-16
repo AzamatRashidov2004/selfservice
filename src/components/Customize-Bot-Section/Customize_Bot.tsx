@@ -111,58 +111,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   selectedProjectConfig,
   saveSettings,
 }) => {
-
-  function removeExactPaddingDivs() {
-    let divs = document.querySelectorAll<HTMLDivElement>('div[style]');
-  
-    divs.forEach((div) => {
-      const style = div.getAttribute('style')?.trim();
-  
-      if (style === 'padding: 16px 16px 0px;' || style === 'padding: 16px 16px 0px') {
-        div.removeAttribute('style');
-      }
-    });
-
-    divs = document.querySelectorAll<HTMLDivElement>('div[style]');
-
-    divs.forEach((div) => {
-      const style = div.getAttribute('style')?.trim();
-
-      if (style === 'margin-right: -4px;margin-top: 12px;cursor: pointer;position: relative;' ||
-          style === 'margin-right: -4px; margin-top: 12px; cursor: pointer; position: relative;') {
-
-        const newStyle = style
-          .split(';')
-          .map(s => s.trim())
-          .filter(s => !s.startsWith('margin-top'))
-          .join(';')
-          .replace(/;+$/, ''); // remove trailing semicolons
-
-        div.setAttribute('style', newStyle);
-      }
-    });
-
-    divs = document.querySelectorAll<HTMLDivElement>('div.flexbox-fix[style]');
-
-    divs.forEach((div) => {
-      const style = div.getAttribute('style')?.trim();
-
-    if (style === '-webkit-box-flex: 1;flex: 1 1 0%;display: flex;margin-left: -6px;' ||
-        style === '-webkit-box-flex: 1; flex: 1 1 0%; display: flex; margin-left: -6px;') {
-
-      const newStyle = style
-        .split(';')
-        .map(s => s.trim())
-        .filter(s => !s.startsWith('margin-left'))
-        .join(';')
-        .replace(/;+$/, '');
-
-      div.setAttribute('style', newStyle);
-    }
-  });
-
-  }
-
   const [config, setConfig] = useState<ChatBotSceleton>({
     ...ChatBotSceletonDefaultSettings,
     ...(selectedProjectConfig || {}),
@@ -170,7 +118,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     sendButtonColor: (selectedProjectConfig?.sendButtonColor || "#1a73e8"),
   });
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
-
 
   useEffect(() => {
     if (selectedProjectConfig) {
@@ -472,15 +419,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   };
 
   const [activeTab, setActiveTab] = useState<string>("colorSchemes");
-
-
-  useEffect(() => {
-    removeExactPaddingDivs();
-  }, []);
-
-  useEffect(() => {
-    removeExactPaddingDivs();
-  }, [activeComponent, activeTab]);
 
   useEffect(() => {
     if (activeComponent) {
