@@ -25,3 +25,8 @@ dist-ssr
 .env
 .env.local
 cypress.env.json
+
+# Local env files
+config.develop.env
+config.local.env
+config.prod.env

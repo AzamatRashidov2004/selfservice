@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  strategy:
+    # rollingUpdate:
+    #   maxSurge: {{ .Values.replicaCount }}
+    #   maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: app
+          image: {{ .Values.app.image.name }}:{{ .Values.app.image.tag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.app.port }}
+              name: http-app
+          resources:
+          {{- toYaml .Values.app.resources | nindent 12 }}
+          volumeMounts:
+            - name: secrets
+              mountPath: /.env
+              subPath: {{ .Values.secretsName }}
+      nodeSelector:
+        kubernetes.io/os: linux
+      imagePullSecrets:
+        - name: promethistai-projects-registry
+      tolerations:
+        - effect: NoSchedule
+          key: kubernetes.azure.com/scalesetpriority
+          operator: Equal
+          value: spot
+      volumes:
+        - name: secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: azure-secret-provider
