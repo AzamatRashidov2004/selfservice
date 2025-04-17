@@ -1,14 +1,11 @@
 /.git
-/.firebase
 /build
 /deploy
 /node_modules
 
+*.env
 *.log
 .dockerignore
-.firebaserc
 .gitignore
 .gitlab-ci.yml
-config.*.env
 Dockerfile
-firebase.json
