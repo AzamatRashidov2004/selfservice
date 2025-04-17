@@ -214,15 +214,6 @@ async function uploadBatch(
       }
     }
 
-
-    if (sourcePath.trim().length > 0){
-      const program_name = extractProgramName(sourcePath)
-
-      if (program_name){
-        url.searchParams.append("custom_metadata", program_name);
-      }
-    }
-
     url.searchParams.append("source_path", sourcePath);
 
 
