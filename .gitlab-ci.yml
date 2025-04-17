@@ -1,90 +1,120 @@
-image: node:18
-
 stages:
   - build
   - deploy
 
 variables:
-  VITE_ANALYTICAL_URL_PRODUCTION: $VITE_ANALYTICAL_URL_PRODUCTION
-  VITE_ANALYTICAL_URL_DEVELOPMENT: $VITE_ANALYTICAL_URL_DEVELOPMENT
-  VITE_DOCRETR_URL_DEVELOPMENT: $VITE_DOCRETR_URL_DEVELOPMENT
-  VITE_DOCRETR_API_KEY_DEVELOPMENT: $VITE_DOCRETR_API_KEY_DEVELOPMENT
-  VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
-  VITE_KRONOS_URL_DEVELOPMENT: $VITE_KRONOS_URL_DEVELOPMENT
-  VITE_KRONOS_API_KEY_PRODUCTION: $VITE_KRONOS_API_KEY_PRODUCTION
-  VITE_MAESTRO_URL_PRODUCTION: $VITE_MAESTRO_URL_PRODUCTION
-  VITE_MAESTRO_URL_DEVELOPMENT: $VITE_MAESTRO_URL_DEVELOPMENT
+  VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT: $VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
+  VITE_KEYCLOAK_CLIENT_ID_PRODUCTION: $VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
+  VITE_KEYCLOAK_REALM: $VITE_KEYCLOAK_REALM
+  VITE_KEYCLOAK_URL: $VITE_KEYCLOAK_URL
   VITE_KRONOS_API_KEY_DEVELOPMENT: $VITE_KRONOS_API_KEY_DEVELOPMENT
-  VITE_KEYCLOACK_CLIENT_ID: $VITE_KEYCLOACK_CLIENT_ID
-  VITE_KEYCLOACK_PRODUCTION_CLIENT_ID: $VITE_KEYCLOACK_PRODUCTION_CLIENT_ID
-  VITE_KEYCLOACK_REALM: $VITE_KEYCLOACK_REALM
-  VITE_KEYCLOACK_URL: $VITE_KEYCLOACK_URL
-  VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID: $VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID
-  FIREBASE_TOKEN: $FIREBASE_TOKEN
+  VITE_KRONOS_API_KEY_PRODUCTION: $VITE_KRONOS_API_KEY_PRODUCTION
+  VITE_KRONOS_URL_DEVELOPMENT: $VITE_KRONOS_URL_DEVELOPMENT
+  VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
+  VITE_MAESTRO_URL_DEVELOPMENT: $VITE_MAESTRO_URL_DEVELOPMENT
+  VITE_MAESTRO_URL_PRODUCTION: $VITE_MAESTRO_URL_PRODUCTION
 
-build:
+build unstable:
   stage: build
-  script:
-    # Step 1: Set environment based on branch
-    - echo "Checking branch $CI_COMMIT_REF_NAME"
-    - |
-      if [[ "$CI_COMMIT_REF_NAME" == "main" ]]; then
-        export VITE_ENVIRONMENT=PRODUCTION
-        echo "Setting environment to production"
-      elif [[ "$CI_COMMIT_REF_NAME" == "development" ]]; then
-        export VITE_ENVIRONMENT=DEVELOPMENT
-        echo "Setting environment to development"
-      else
-        export VITE_ENVIRONMENT=unknown
-        echo "Branch is not 'main' or 'development'. Setting environment to unknown."
-      fi
-
-    # Step 2: Create the .env file dynamically with the appropriate environment variables
-    - echo "Creating .env file for Vite..."
-    - |
-      echo "VITE_ENVIRONMENT=$VITE_ENVIRONMENT" > .env
-      echo "VITE_ANALYTICAL_URL_PRODUCTION=$VITE_ANALYTICAL_URL_PRODUCTION" >> .env
-      echo "VITE_ANALYTICAL_URL_DEVELOPMENT=$VITE_ANALYTICAL_URL_DEVELOPMENT" >> .env
-      echo "VITE_DOCRETR_URL_DEVELOPMENT=$VITE_DOCRETR_URL_DEVELOPMENT" >> .env
-      echo "VITE_DOCRETR_API_KEY_DEVELOPMENT=$VITE_DOCRETR_API_KEY_DEVELOPMENT" >> .env
-      echo "VITE_KRONOS_URL_PRODUCTION=$VITE_KRONOS_URL_PRODUCTION" >> .env
-      echo "VITE_KRONOS_URL_DEVELOPMENT=$VITE_KRONOS_URL_DEVELOPMENT" >> .env
-      echo "VITE_MAESTRO_URL_DEVELOPMENT=$VITE_MAESTRO_URL_DEVELOPMENT" >> .env
-      echo "VITE_MAESTRO_URL_PRODUCTION=$VITE_MAESTRO_URL_PRODUCTION" >> .env
-      echo "VITE_KRONOS_API_KEY_PRODUCTION=$VITE_KRONOS_API_KEY_PRODUCTION" >> .env
-      echo "VITE_KRONOS_API_KEY_DEVELOPMENT=$VITE_KRONOS_API_KEY_DEVELOPMENT" >> .env
-      echo "VITE_KEYCLOACK_CLIENT_ID=$VITE_KEYCLOACK_CLIENT_ID" >> .env
-      echo "VITE_KEYCLOACK_PRODUCTION_CLIENT_ID=$VITE_KEYCLOACK_PRODUCTION_CLIENT_ID" >> .env
-      echo "VITE_KEYCLOACK_REALM=$VITE_KEYCLOACK_REALM" >> .env
-      echo "VITE_KEYCLOACK_URL=$VITE_KEYCLOACK_URL" >> .env
-      echo "FIREBASE_TOKEN=$FIREBASE_TOKEN" >> .env
-      echo "VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID=$VITE_KEYCLOACK_DEVELOPMENT_CLIENT_ID" >> .env
-
-    # Step 3: Verify that the .env file was created correctly
-    - cat .env
-
-    # Step 4: Install dependencies
-    - npm install
-
-    # Step 6: Build the project and generate the 'dist' directory
-    - npm run build
-
-  artifacts:
-    paths:
-      - dist
-      - .env
-    expire_in: 1 hour
-
-deploy:
-  stage: deploy
-  image: registry.gitlab.com/static-web-apps/azure-static-web-apps-deploy
-  image: registry.gitlab.com/static-web-apps/azure-static-web-apps-deploy
-  script:
-    - azure-static-web-apps-deploy
-  variables:
-    API_TOKEN: $AZURE_TOKEN_PROD
-    APP_PATH: $CI_PROJECT_DIR/
-    OUTPUT_PATH: $CI_PROJECT_DIR/dist
-
+  image:
+    name: gcr.io/kaniko-project/executor:v1.8.0-debug
+    entrypoint: [ "" ]
   only:
-    - main
+    refs:
+      - develop
+  script:
+    - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
+    - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - GODEBUG="http2client=0" /kaniko/executor
+      --context .
+      --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+      --compressed-caching=false
+      --build-arg VERSION=$CI_COMMIT_SHORT_SHA
+      --build-arg IS_MAIN="False"
+      --build-arg VITE_ENVIRONMENT="DEVELOPMENT"
+      --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
+      --build-arg VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
+      --build-arg VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
+      --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY_DEVELOPMENT
+      --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_DEVELOPMENT
+      --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_DEVELOPMENT
+      --force
+
+build release:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.8.0-debug
+    entrypoint: [ "" ]
+  only:
+    refs:
+      - tags
+  except:
+    - /^(!main).+@/
+  script:
+    - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
+    - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - GODEBUG="http2client=0" /kaniko/executor
+      --context .
+      --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+      --compressed-caching=false
+      --build-arg VERSION=$CI_COMMIT_TAG
+      --build-arg IS_MAIN="True"
+      --build-arg VITE_ENVIRONMENT="PRODUCTION"
+      --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
+      --build-arg VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
+      --build-arg VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
+      --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY_PRODUCTION
+      --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_PRODUCTION
+      --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_PRODUCTION
+
+deploy unstable:
+  stage: deploy
+  image: registry.gitlab.com/promethistai/system/deployer:211222
+  variables:
+    NAME: maestro-admin
+  only:
+    refs:
+      - develop
+  script:
+    - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
+    - /bin/sh deploy/prepare-namespace.sh develop
+    - helm upgrade
+      --install
+      --namespace develop
+      --set namespace=develop
+      --set version=$CI_COMMIT_SHORT_SHA
+      --set app.image.name=$CI_REGISTRY_IMAGE
+      --set app.image.tag=$CI_COMMIT_SHORT_SHA
+      --set imagePullPolicy=Always
+      --set baseDomain=promethist.dev
+      --set name=$NAME
+      --reset-values
+      --debug
+      $NAME deploy/app
+
+deploy release:
+  stage: deploy
+  image: registry.gitlab.com/promethistai/system/deployer:211222
+  variables:
+    NAME: maestro-admin
+  only:
+    refs:
+      - tags
+  except:
+    - /^(!main).+@/
+  script:
+    - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
+    - /bin/sh deploy/prepare-namespace.sh default
+    - helm upgrade
+      --install
+      --namespace default
+      --set namespace=default
+      --set version=$CI_COMMIT_REF_NAME
+      --set app.image.name=$CI_REGISTRY_IMAGE
+      --set app.image.tag=$CI_COMMIT_REF_NAME
+      --set imagePullPolicy=Always
+      --set baseDomain=promethist.ai
+      --set name=$NAME
+      --reset-values
+      --debug
+      $NAME deploy/app

@@ -1,23 +1,27 @@
-# Use the official Node.js image as a base
 FROM node:18-alpine
 
-# Set the working directory inside the container
+# Install requirements
 WORKDIR /app
-
-# Copy package.json and package-lock.json (if present)
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy the entire app into the container
+# Copy project files
 COPY . .
+
+# Env vars required for build
+# FixMe: Passing secrets this way is insecure.
+ARG VITE_ENVIRONMENT
+ARG VITE_KEYCLOAK_CLIENT_ID
+ARG VITE_KEYCLOAK_REALM
+ARG VITE_KEYCLOAK_URL
+ARG VITE_KRONOS_API_KEY
+ARG VITE_KRONOS_URL
+ARG VITE_MAESTRO_URL
 
 # Build the React app
 RUN npm run build
 
-# Expose the port the app will run on
-EXPOSE 8080
-
-# Command to run the app in production mode (serve the built app)
+# Serve the built app
 CMD ["npm", "run", "preview"]
+
+EXPOSE 8080

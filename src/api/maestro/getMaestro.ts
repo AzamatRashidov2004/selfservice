@@ -9,11 +9,6 @@ export interface TotalProjectUsers {
   data: number;
 }
 
-
-export interface TotalProjectUsers {
-  data: number;
-}
-
 export interface SessionEvent {
   timestamp: string;
   query?: string;
@@ -29,20 +24,8 @@ export interface SessionEventErrors {
   message: string;
 }
 
-export interface SessionEventErrors {
-  timestamp: string;
-  type: string;
-  level: string;
-  stack: string;
-  message: string;
-}
-
 export interface SessionEventsResponse {
   data: SessionEvent[];
-}
-
-export interface SessionEventsResponseErrors {
-  data: SessionEventErrors[];
 }
 
 export interface SessionEventsResponseErrors {
@@ -64,18 +47,9 @@ export interface ProjectStatsSessionErrors {
   occurrences: number;
 }
 
-export interface ProjectStatsSessionErrors {
-  session_id: string;
-  occurrences: number;
-}
-
 export interface ProjectSessionResponse {
   status: string;
   sessions: ProjectStatsSession[];
-}
-
-export interface ProjectSessionErrorsResponse {
-  data: ProjectStatsSessionErrors[];
 }
 
 export interface ProjectSessionErrorsResponse {
