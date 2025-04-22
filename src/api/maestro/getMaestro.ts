@@ -1,7 +1,7 @@
 import { maestroApiUrl } from "../apiEnv";
 
-//const BASE_URL = maestroApiUrl;
-const BASE_URL = "http://localhost:8020";
+const BASE_URL = maestroApiUrl;
+// const BASE_URL = "http://localhost:8020";
 
 // Types for the return values
 
