@@ -18,6 +18,16 @@ ARG VITE_KRONOS_API_KEY
 ARG VITE_KRONOS_URL
 ARG VITE_MAESTRO_URL
 
+RUN echo "<DEBUG_START>" \
+    && echo $VITE_ENVIRONMENT \
+    && echo $VITE_KEYCLOAK_CLIENT_ID \
+    && echo $VITE_KEYCLOAK_REALM \
+    && echo $VITE_KEYCLOAK_URL \
+    && echo $VITE_KRONOS_API_KEY \
+    && echo $VITE_KRONOS_URL \
+    && echo $VITE_MAESTRO_URL \
+    && echo "<DEBUG_END>"
+
 # Build the React app
 RUN npm run build
 
