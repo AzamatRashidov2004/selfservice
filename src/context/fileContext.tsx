@@ -6,7 +6,8 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { kronosKnowledgeBaseType, projectFetchReturn } from "../utility/types";
+import { ChatBotSceleton, kronosKnowledgeBaseType, projectFetchReturn } from "../utility/types";
+import { FullBotConfig } from "../utility/Bot_Util";
 // import sampleData from "./sampleData.json";
 
 // Define the shape of your context data
@@ -77,6 +78,8 @@ interface FilesContextType {
   setPdfUrl: React.Dispatch<React.SetStateAction<string>>;
   current_project_id: string;
   setCurrentProjectId: React.Dispatch<React.SetStateAction<string>>;
+  currentBotConfig: FullBotConfig | null;
+  setCurrentBotConfig: React.Dispatch<React.SetStateAction<FullBotConfig | null>>;
 }
 
 // Create the context with the initial value
@@ -129,6 +132,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   const [pdfUrl, setPdfUrl] = useState<string>("");
   const [pdfVisible, setPdfVisible] = useState<boolean>(false);
   const [current_project_id, setCurrentProjectId] = useState<string>("");
+  const [currentBotConfig, setCurrentBotConfig] = useState<FullBotConfig | null>(null);
 
   useEffect(() => {
     setFileStructure([]); // Transform and set the initial state
@@ -522,6 +526,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   const [codeValue, setCodeValue] = useState<string>("");
   const [codeLanguage, setCodeLanguage] = useState<string>("");
 
+
   const contextValue: FilesContextType = {
     setProjectsContext,
     getFileStructure,
@@ -558,6 +563,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     codeLanguage,
     current_project_id,
     setCurrentProjectId,
+    currentBotConfig,
+    setCurrentBotConfig,
   };
 
   return (
