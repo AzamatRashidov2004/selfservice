@@ -6,7 +6,7 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { ChatBotSceleton, kronosKnowledgeBaseType, projectFetchReturn } from "../utility/types";
+import {  kronosKnowledgeBaseType, projectFetchReturn } from "../utility/types";
 import { FullBotConfig } from "../utility/Bot_Util";
 // import sampleData from "./sampleData.json";
 

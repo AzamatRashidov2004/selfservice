@@ -6,7 +6,7 @@ import Loader from "../Loader/Loader.js";
 import "./Customize_Bot.css";
 import { ChromePicker } from 'react-color';
 import { useFiles } from "../../context/fileContext.js";
-import { updateFile, updateFSMFile } from "../../api/kronos/postKronos.js";
+import { updateFile } from "../../api/kronos/postKronos.js";
 import { createNotificationEvent } from "../../utility/Modal_Util.js";
 import { useAuth } from "../../context/authContext.js";
 import { useNavigate } from "react-router-dom";
