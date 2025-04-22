@@ -6,6 +6,7 @@ import {
   createNotificationEvent,
 } from '../../../utility/Modal_Util';
 
+
 import { updateSinglePath } from '../../../utility/Api_Utils';
 import handlePathChangeAtDepth from '../../../utility/FileSystem_Utils';
 import {
@@ -29,6 +30,8 @@ import {
 import { getCustomActions } from './customActions';
 import { maestroApiUrl } from '../../../api/apiEnv';
 
+
+
 async function handleAction(
   data,
   setCurrentFolder,
@@ -46,7 +49,10 @@ async function handleAction(
   setFileActions,
   setDetailsOpen,
   setSelectedProjectData,
-  current_project_id
+  current_project_id,
+  currentBotConfig,
+  setCurrentBotConfig,
+  navigate,
 ) {
   const fileData = fileContext.getFileStructure(true);
   console.log('ACTION', data);
@@ -254,6 +260,25 @@ async function handleAction(
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
     const project_id = nodeInfo.kronosProjectId;
     window.open(maestroApiUrl + `/app?project_id=${project_id}`);
+  }
+
+  if (data.id === 'edit') {
+    const selectedFile = data.state.selectedFilesForAction[0];
+    const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
+    const project_id = nodeInfo.kronosProjectId;
+    let config = null;
+    const fsmData = await getFSMFromProject(project_id, keycloak.token);
+    if (fsmData !== '') {
+      // Parse the FSM JSON data
+      try {
+        setCurrentProjectId(project_id);
+        const text = JSON.parse(fsmData);
+        setCurrentBotConfig(text);
+      } catch (e) {
+        throw new Error('Invalid FSM JSON.');
+      }
+    }
+    navigate('/edit');
   }
 
   if (data.id === 'download_files') {

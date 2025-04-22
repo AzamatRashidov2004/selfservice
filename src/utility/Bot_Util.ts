@@ -93,3 +93,69 @@ export const defaultSettings: SettingsType = {
     save_callback: () => {}
   }
 
+  export type ChatBotSkeleton = {
+    userMessageColor: string;
+    botMessageColor: string;
+    navbarColor: string;
+    suggestionButtonColor: string;
+    suggestionButtonFontColor: string;
+    titleText: string;
+    titleFontColor: string;
+    botMessageFontColor: string;
+    userMessageFontColor: string;
+    frameBorderColor: string;
+    sendButtonColor: string;
+    inputBackgroundColor: string;
+  };
+  
+  export type CommandType =
+    | {
+        type: 'image';
+        text: string;
+        link: string;
+        next_state: number;
+      }
+    | {
+        type: 'display_text';
+        text: string;
+        next_state: number;
+      }
+    | {
+        type: 'get_rag';
+        text: string;
+        next_state: number;
+        streaming: boolean;
+        top_n_buttons_enabled: boolean;
+        top_n_count: number;
+      }
+    | {
+        type: 'get_top_n';
+        text: string;
+        next_state: number;
+        top_n_count: number;
+      };
+  
+  export type Command = {
+    name: string;
+    state: number;
+  };
+  
+  export type State = {
+    state_id: number;
+    command: CommandType;
+  };
+  
+  export type FullBotConfig = {
+    dialogue_id: number;
+    dialogue_name: string;
+    dialogue_author: string;
+    dialogue_description: string;
+    language: string;
+    editor_active: boolean;
+    editor_initial_file: string;
+    commands: Command[];
+    states: State[];
+    chatbot: ChatBotSkeleton;
+  };
+  
+

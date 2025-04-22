@@ -2,6 +2,18 @@ stages:
   - build
   - deploy
 
+variables:
+  VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT: $VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
+  VITE_KEYCLOAK_CLIENT_ID_PRODUCTION: $VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
+  VITE_KEYCLOAK_REALM: $VITE_KEYCLOAK_REALM
+  VITE_KEYCLOAK_URL: $VITE_KEYCLOAK_URL
+  VITE_KRONOS_API_KEY_DEVELOPMENT: $VITE_KRONOS_API_KEY_DEVELOPMENT
+  VITE_KRONOS_API_KEY_PRODUCTION: $VITE_KRONOS_API_KEY_PRODUCTION
+  VITE_KRONOS_URL_DEVELOPMENT: $VITE_KRONOS_URL_DEVELOPMENT
+  VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
+  VITE_MAESTRO_URL_DEVELOPMENT: $VITE_MAESTRO_URL_DEVELOPMENT
+  VITE_MAESTRO_URL_PRODUCTION: $VITE_MAESTRO_URL_PRODUCTION
+
 build unstable:
   stage: build
   image:
@@ -9,7 +21,7 @@ build unstable:
     entrypoint: [ "" ]
   only:
     refs:
-      - development
+      - develop
   script:
     - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
     - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
@@ -19,6 +31,13 @@ build unstable:
       --compressed-caching=false
       --build-arg VERSION=$CI_COMMIT_SHORT_SHA
       --build-arg IS_MAIN="False"
+      --build-arg VITE_ENVIRONMENT="DEVELOPMENT"
+      --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
+      --build-arg VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
+      --build-arg VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
+      --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY_DEVELOPMENT
+      --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_DEVELOPMENT
+      --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_DEVELOPMENT
       --force
 
 build release:
@@ -40,15 +59,22 @@ build release:
       --compressed-caching=false
       --build-arg VERSION=$CI_COMMIT_TAG
       --build-arg IS_MAIN="True"
+      --build-arg VITE_ENVIRONMENT="PRODUCTION"
+      --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
+      --build-arg VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
+      --build-arg VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
+      --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY_PRODUCTION
+      --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_PRODUCTION
+      --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_PRODUCTION
 
 deploy unstable:
   stage: deploy
   image: registry.gitlab.com/promethistai/system/deployer:211222
   variables:
-    NAME: selfservice-react
+    NAME: maestro-admin
   only:
     refs:
-      - development
+      - develop
   script:
     - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
     - /bin/sh deploy/prepare-namespace.sh develop
@@ -61,7 +87,6 @@ deploy unstable:
       --set app.image.tag=$CI_COMMIT_SHORT_SHA
       --set imagePullPolicy=Always
       --set baseDomain=promethist.dev
-      --set secretsName=$NAME-develop
       --set name=$NAME
       --reset-values
       --debug
@@ -71,7 +96,7 @@ deploy release:
   stage: deploy
   image: registry.gitlab.com/promethistai/system/deployer:211222
   variables:
-    NAME: selfservice-react
+    NAME: maestro-admin
   only:
     refs:
       - tags
@@ -89,7 +114,6 @@ deploy release:
       --set app.image.tag=$CI_COMMIT_REF_NAME
       --set imagePullPolicy=Always
       --set baseDomain=promethist.ai
-      --set secretsName=$NAME
       --set name=$NAME
       --reset-values
       --debug

@@ -9,9 +9,11 @@ const isLocalhost = () => {
   return window.location.hostname === 'localhost';
 };
 const keycloak = new Keycloak({
-  url: import.meta.env.VITE_KEYCLOACK_URL,
-  realm: import.meta.env.VITE_KEYCLOACK_REALM,
-  clientId: isLocalhost() ? import.meta.env.VITE_KEYCLOACK_CLIENT_ID : `${import.meta.env[`VITE_KEYCLOACK_${environment}_CLIENT_ID`]}`,
+  url: import.meta.env.VITE_KEYCLOAK_URL,
+  realm: import.meta.env.VITE_KEYCLOAK_REALM,
+  clientId: isLocalhost()
+  ? import.meta.env.VITE_KEYCLOAK_CLIENT_ID
+  : import.meta.env[`VITE_KEYCLOAK_CLIENT_ID_${environment}`],
 });
 
 export default keycloak;

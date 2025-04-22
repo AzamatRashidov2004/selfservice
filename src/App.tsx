@@ -29,6 +29,7 @@ import "./App.css";
 import "./responsive.css";
 import Contact_Page from "./pages/Contact/Contact_Page";
 import { FilesProvider } from "./context/fileContext";
+import CustomizeBot from "./components/Customize-Bot-Section/Customize_Bot";
 
 const App: React.FC = () => {
   // Window size listener for Scrollbar width styling
@@ -59,6 +60,7 @@ const App: React.FC = () => {
             <Route path="/new-project" element={<New_Project />} />
             <Route path="/try-now" element={<Try_Now />} />
             <Route path="/contact" element={<Contact_Page />} />
+            <Route path="/edit" element={<CustomizeBot />} />
           </Routes>
           <Footer />
         </Router>

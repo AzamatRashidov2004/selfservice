@@ -9,7 +9,8 @@ export const kronosApiKey: string = `${
   import.meta.env[`VITE_KRONOS_API_KEY_${environment}`]
 }`;
 export const maestroApiUrl: string = `${
-  import.meta.env[`VITE_MAESTRO_URL_${environment}`]
+  //import.meta.env[`VITE_MAESTRO_URL_${environment}`]
+  "http://localhost:8020"
 }`;
 
 export const analystApiUrl: string = `${
