@@ -23,7 +23,6 @@ RUN echo "<DEBUG_START>" \
     && echo $VITE_KEYCLOAK_CLIENT_ID \
     && echo $VITE_KEYCLOAK_REALM \
     && echo $VITE_KEYCLOAK_URL \
-    && echo $VITE_KRONOS_API_KEY \
     && echo $VITE_KRONOS_URL \
     && echo $VITE_MAESTRO_URL \
     && echo "<DEBUG_END>"
