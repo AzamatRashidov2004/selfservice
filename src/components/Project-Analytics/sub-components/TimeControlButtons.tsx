@@ -56,7 +56,7 @@ export const TimeControlButtons = ({
   return (
     <Box
       sx={{
-        zIndex: "10001",
+        zIndex: "100",
         width: "100%",
         display: "flex",
         alignItems: "center",
