@@ -1,16 +1,21 @@
 import { useState, useEffect } from "react";
 import { Save, Zap } from 'lucide-react';
 import { ChatBotSceleton } from "../../utility/types.js";
-import { ChatBotSceletonDefaultSettings } from "../../utility/Bot_Util.js";
+import { ChatBotSceletonDefaultSettings, FullBotConfig } from "../../utility/Bot_Util.js";
 import Loader from "../Loader/Loader.js";
 import "./Customize_Bot.css";
 import { ChromePicker } from 'react-color';
+import { useFiles } from "../../context/fileContext.js";
+import { updateFile } from "../../api/kronos/postKronos.js";
+import { createNotificationEvent } from "../../utility/Modal_Util.js";
+import { useAuth } from "../../context/authContext.js";
+import { useNavigate } from "react-router-dom";
 
 // Update the interface to include input field customization
 interface CustomizeBotProps {
   loading?: boolean;
   selectedProjectConfig?: Partial<ChatBotSceleton>;
-  saveSettings: (settings: ChatBotSceleton) => Promise<void>;
+  saveSettings?: (settings: ChatBotSceleton) => Promise<void>;
 }
 
 // Update default types in your types.js file
@@ -112,6 +117,55 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   saveSettings,
 }) => {
 
+  const getChatBotSkeleton = (config: FullBotConfig): ChatBotSceleton => {
+
+    console.log("THE CHATBOT CONFIG IS11 : ", config);
+    const { chatbot } = config;
+    console.log("THE CHATBOT CONFIG IS13 : ", config.chatbot);
+    console.log("THE CHATBOT CONFIG IS14 : ", chatbot);
+
+    return {
+      userMessageColor: chatbot.userMessageColor,
+      botMessageColor: chatbot.botMessageColor,
+      navbarColor: chatbot.navbarColor,
+      suggestionButtonColor: chatbot.suggestionButtonColor,
+      suggestionButtonFontColor: chatbot.suggestionButtonFontColor,
+      titleText: chatbot.titleText,
+      titleFontColor: chatbot.titleFontColor,
+      botMessageFontColor: chatbot.botMessageFontColor,
+      userMessageFontColor: chatbot.userMessageFontColor,
+      frameBorderColor: chatbot.frameBorderColor,
+      sendButtonColor: chatbot.sendButtonColor, // Hardcoded as per your example
+      inputBackgroundColor: chatbot.inputBackgroundColor // Hardcoded as per your example
+    };
+  };
+
+  const { currentBotConfig, setCurrentBotConfig, current_project_id } = useFiles();
+  const fullBotConfig = currentBotConfig;
+
+
+  const isFromApp = currentBotConfig !== null;
+  let chatbot = null;
+  if (isFromApp)
+    chatbot = getChatBotSkeleton(currentBotConfig as FullBotConfig);
+
+  useEffect(() => {
+    const el = document.getElementsByClassName("bot-customizer-container")[0] as HTMLElement;
+    if (isFromApp && el) {
+      el.style.setProperty("margin-top", "80px", "important");
+    }
+    return () => {
+      if (el) el.style.removeProperty("margin-top");
+    };
+  }, []);
+
+
+  useEffect(() => {
+    return () => {
+      setCurrentBotConfig(null);
+    }
+  }, []);
+
   function removeExactPaddingDivs() {
     let divs = document.querySelectorAll<HTMLDivElement>('div[style]');
   
@@ -164,10 +218,8 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   }
 
   const [config, setConfig] = useState<ChatBotSceleton>({
-    ...ChatBotSceletonDefaultSettings,
+    ...(chatbot !== null ? chatbot : ChatBotSceletonDefaultSettings),
     ...(selectedProjectConfig || {}),
-    inputBackgroundColor: (selectedProjectConfig?.inputBackgroundColor || "#f5f5f5"),
-    sendButtonColor: (selectedProjectConfig?.sendButtonColor || "#1a73e8"),
   });
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
 
@@ -178,12 +230,50 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     }
   }, [selectedProjectConfig]);
 
+  const { keycloak } = useAuth();
+  const navigate = useNavigate();
+
   const handleSubmit = async () => {
-    try {
-      console.log("the result config is : ", config as ChatBotSceleton);
-      await saveSettings(config as ChatBotSceleton);
-    } catch (error) {
-      console.error("Error saving settings:", error);
+    if (!isFromApp && saveSettings) {
+      try {
+        console.log("the result config is : ", config as ChatBotSceleton);
+        await saveSettings(config as ChatBotSceleton);
+      } catch (error) {
+        console.error("Error saving settings:", error);
+      }
+    } else if (isFromApp) {
+        console.log("JFKLSDJFLSDJFLSDJFLSDJFLSDF: ");
+      try {
+        const currentCustom = fullBotConfig as FullBotConfig;
+        currentCustom.chatbot = {
+          ...config
+        };
+        console.log("JFKLSDJFLSDJFLSDJFLSDJFLSDF: ", currentCustom);
+        createNotificationEvent(
+          "Project Created",
+          "Project successfully created with your configurations",
+          "success"
+        );
+        const response = await updateFile(current_project_id, JSON.stringify(currentCustom), 'config.fsm', 'fsm', keycloak.token ? keycloak.token:"");
+        if (!response) {
+          createNotificationEvent(
+            "Something Went Wrong",
+            "While editing you bot, something went wrong. Please try again later...",
+            "danger",
+            4000
+          );
+          return;
+        }
+    
+        createNotificationEvent(
+          "Bot Updated",
+          "Bot successfully updated with your configurations",
+          "success"
+        );
+        navigate("/dashboard");
+      } catch (error) {
+        console.error("Error saving settings:", error);
+      }
     }
   };
 

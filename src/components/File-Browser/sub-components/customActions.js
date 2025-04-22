@@ -40,6 +40,17 @@ const launchProjectAction = (showContext) => {
   });
 };
 
+const editProjectAction = (showContext) => {
+  return defineFileAction({
+    id: 'edit',
+    button: {
+      name: customActionNames.edit,
+      contextMenu: showContext,
+      icon: ChonkyIconName.config,
+    },
+  });
+};
+
 const detailsAction = (context = false) => {
   return defineFileAction({
     id: 'details',
@@ -152,6 +163,11 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
   }
   console.log(firstNodeInfo);
   if (isProject) {
+
+    customActions.unshift(editProjectAction(true));
+    customActions.push(detailsAction(true));
+
+
     // If it is a project launch or show details
     customActions.unshift(launchProjectAction(true));
     customActions.push(detailsAction(true));

@@ -12,6 +12,7 @@ import { useFiles } from "../../context/fileContext"; // Import the useFiles hoo
 import { useAuth } from "../../context/authContext";
 import "./FileBrowser.css";
 import { clearSelection } from "../../utility/chonkyActionCalls";
+import { useNavigate } from "react-router-dom";
 
 export default function FileBrowser({
   setDetailsOpen,
@@ -49,10 +50,13 @@ export default function FileBrowser({
     codeValue,
     current_project_id,
     setCurrentProjectId,
+    currentBotConfig,
+    setCurrentBotConfig
   } = useFiles(); // Get the context function
   const { keycloak } = useAuth();
   const [files, setFiles] = useState([]);
   const chonkyRef = useRef(null);
+  const navigate = useNavigate();
   // Handle actions such as opening files, switching views, etc.
   const handleActionWrapper = useCallback(
     (data) => {
@@ -85,9 +89,12 @@ export default function FileBrowser({
         setDetailsOpen,
         setSelectedProjectData,
         current_project_id,
+        currentBotConfig,
+        setCurrentBotConfig,
+        navigate
       );
     },
-    [getFileStructure, dragAndDropFile]
+    [getFileStructure, dragAndDropFile, navigate]
   );
 
   // Set the Chonky icon set
