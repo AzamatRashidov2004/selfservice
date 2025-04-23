@@ -7,9 +7,9 @@ export const createPopupEvent = (title: string, text: string, buttons: PopupStat
     window.dispatchEvent(showPopupEvent);
   };
 
-export const createNotificationEvent = (title: string, text: string, type: NotificationState['type'], notification_time?: number) => {
+export const createNotificationEvent = (title: string, text: string, type: NotificationState['type'], notification_time?: number, onResponse?: (e: boolean) => void) => {
     const showNotificationEvent = new CustomEvent('showNotification', {
-      detail: { title, text, type, notification_time }
+      detail: { title, text, type, notification_time, onResponse }
     });
     window.dispatchEvent(showNotificationEvent);
   };

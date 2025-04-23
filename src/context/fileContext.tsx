@@ -80,6 +80,7 @@ interface FilesContextType {
   setCurrentProjectId: React.Dispatch<React.SetStateAction<string>>;
   currentBotConfig: FullBotConfig | null;
   setCurrentBotConfig: React.Dispatch<React.SetStateAction<FullBotConfig | null>>;
+  deleteProject: (id: number) => void;
 }
 
 // Create the context with the initial value
@@ -264,6 +265,43 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     });
 
     setFileStructure(newFileStructure);
+  };
+
+  const deleteProject = (id: number) => {
+    // Find the project node first
+    const projectNode = filesData.find(file => file.id === id);
+    
+    if (!projectNode) {
+      console.error("Project not found:", id);
+      return;
+    }
+    
+    // For collecting all IDs to delete
+    const idsToDelete: number[] = [id]; // Start with the project ID itself
+    
+    // Recursive function to find all children
+    const collectChildren = (parentId: number) => {
+      // Find all direct children
+      const children = filesData.filter(file => file.parent === parentId);
+      
+      // Add each child's ID to our list
+      children.forEach(child => {
+        idsToDelete.push(child.id);
+        
+        // If this child is a folder (droppable), also collect its children
+        if (child.droppable) {
+          collectChildren(child.id);
+        }
+      });
+    };
+    
+    // Collect all children of the project
+    collectChildren(id);
+    
+    console.log("Deleting project and all children:", idsToDelete);
+    
+    // Use existing deleteFiles to update state with all collected IDs
+    deleteFiles(idsToDelete);
   };
 
   const getFileStructure = (
@@ -565,6 +603,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     setCurrentProjectId,
     currentBotConfig,
     setCurrentBotConfig,
+    deleteProject,
   };
 
   return (

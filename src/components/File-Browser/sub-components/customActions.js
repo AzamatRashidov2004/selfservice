@@ -40,6 +40,17 @@ const launchProjectAction = (showContext) => {
   });
 };
 
+const deleteProjectAction = (showContext) => {
+  return defineFileAction({
+    id: 'delete',
+    button: {
+      name: customActionNames.delete,
+      contextMenu: showContext,
+      icon: ChonkyIconName.trash,
+    },
+  });
+};
+
 const editProjectAction = (showContext) => {
   return defineFileAction({
     id: 'edit',
@@ -164,6 +175,10 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
   console.log(firstNodeInfo);
   if (isProject) {
 
+    // If it is a project launch or show details
+    customActions.unshift(deleteProjectAction(true));
+    customActions.push(detailsAction(true));
+
     customActions.unshift(editProjectAction(true));
     customActions.push(detailsAction(true));
 
@@ -171,6 +186,9 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
     // If it is a project launch or show details
     customActions.unshift(launchProjectAction(true));
     customActions.push(detailsAction(true));
+
+
+
   } else {
     customActions.push(detailsAction(false));
   }
