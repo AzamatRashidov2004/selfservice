@@ -591,7 +591,7 @@ export default function StatCard({
                 <Typography variant="body2" color="text.secondary" component="span">
                   Accuracy:{" "}
                 </Typography>
-                  {yearFeedback > 0 ? (100 - (yearFeedback > 0 ? (yearNegativeFeedback / yearFeedback) * 100 : 0)).toFixed(1) : ""}%
+                  {yearAnswers > 0 ? (100-yearNegativeFeedback/yearAnswers*100).toFixed(1) : ""}%
                 </Typography>
               </Box>
             </Box>
@@ -768,7 +768,7 @@ export default function StatCard({
                 <Typography variant="body2" color="text.secondary" component="span">
                   Accuracy:{" "}
                 </Typography>
-                  {totalFeedback > 0 ? (100 - (totalFeedback > 0 ? (totalNegativeFeedback / totalFeedback) * 100 : 0)).toFixed(1) : ""}%
+                  {totalAnswers > 0 ? (100-totalNegativeFeedback/totalAnswers*100).toFixed(1) : ""}%
                 </Typography>
               </Box>
             </Box> 
