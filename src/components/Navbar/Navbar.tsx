@@ -21,6 +21,13 @@ const Navbar: React.FC = () => {
           <Link className="navbar-brand" to="/">
             Maestro Dashboard
           </Link>
+          <p style={{
+            marginLeft:"-3px",
+            marginTop: "4px",
+            fontSize:"12px"
+          }}>
+            v1.0.0
+          </p>
 
           {/* Right-aligned buttons */}
           <div className="d-flex ms-auto">
