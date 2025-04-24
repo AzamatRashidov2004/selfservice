@@ -125,18 +125,18 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     console.log("THE CHATBOT CONFIG IS14 : ", chatbot);
 
     return {
-      userMessageColor: chatbot.userMessageColor,
-      botMessageColor: chatbot.botMessageColor,
-      navbarColor: chatbot.navbarColor,
-      suggestionButtonColor: chatbot.suggestionButtonColor,
-      suggestionButtonFontColor: chatbot.suggestionButtonFontColor,
-      titleText: chatbot.titleText,
-      titleFontColor: chatbot.titleFontColor,
-      botMessageFontColor: chatbot.botMessageFontColor,
-      userMessageFontColor: chatbot.userMessageFontColor,
-      frameBorderColor: chatbot.frameBorderColor,
-      sendButtonColor: chatbot.sendButtonColor, // Hardcoded as per your example
-      inputBackgroundColor: chatbot.inputBackgroundColor // Hardcoded as per your example
+      userMessageColor: ((chatbot && chatbot.userMessageColor) ? chatbot.userMessageColor : ChatBotSceletonDefaultSettings.userMessageColor),
+      botMessageColor: ((chatbot && chatbot.botMessageColor) ? chatbot.botMessageColor : ChatBotSceletonDefaultSettings.botMessageColor),
+      navbarColor: ((chatbot && chatbot.navbarColor) ? chatbot.navbarColor : ChatBotSceletonDefaultSettings.navbarColor),
+      suggestionButtonColor: ((chatbot && chatbot.suggestionButtonColor) ? chatbot.suggestionButtonColor : ChatBotSceletonDefaultSettings.suggestionButtonColor),
+      suggestionButtonFontColor: ((chatbot && chatbot.suggestionButtonFontColor) ? chatbot.suggestionButtonFontColor : ChatBotSceletonDefaultSettings.suggestionButtonFontColor),
+      titleText: ((chatbot && chatbot.titleText) ? chatbot.titleText : ChatBotSceletonDefaultSettings.titleText),
+      titleFontColor: ((chatbot && chatbot.titleFontColor) ? chatbot.titleFontColor : ChatBotSceletonDefaultSettings.titleFontColor),
+      botMessageFontColor: ((chatbot && chatbot.botMessageFontColor) ? chatbot.botMessageFontColor : ChatBotSceletonDefaultSettings.botMessageFontColor),
+      userMessageFontColor: ((chatbot && chatbot.userMessageFontColor) ? chatbot.userMessageFontColor : ChatBotSceletonDefaultSettings.userMessageFontColor),
+      frameBorderColor: ((chatbot && chatbot.frameBorderColor) ?  chatbot.frameBorderColor : ChatBotSceletonDefaultSettings.frameBorderColor),
+      sendButtonColor: ((chatbot && chatbot.sendButtonColor) ? chatbot.sendButtonColor : ChatBotSceletonDefaultSettings.sendButtonColor), // Hardcoded as per your example
+      inputBackgroundColor: ((chatbot && chatbot.inputBackgroundColor) ? chatbot.inputBackgroundColor : ChatBotSceletonDefaultSettings.inputBackgroundColor) // Hardcoded as per your example
     };
   };
 
