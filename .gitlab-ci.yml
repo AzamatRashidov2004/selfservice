@@ -1,4 +1,5 @@
 stages:
+  - version
   - build
   - deploy
 
@@ -13,6 +14,47 @@ variables:
   VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
   VITE_MAESTRO_URL_DEVELOPMENT: $VITE_MAESTRO_URL_DEVELOPMENT
   VITE_MAESTRO_URL_PRODUCTION: $VITE_MAESTRO_URL_PRODUCTION
+  NODE_VERSION: "18"
+
+# Automatic versioning
+version:
+  stage: version
+  image: node:${NODE_VERSION}
+  only:
+    refs:
+      - develop
+  script:
+    - npm ci
+    # Install semver for version manipulation
+    - npm install --no-save semver
+    
+    # Get current version from package.json
+    - CURRENT_VERSION=$(node -p "require('./package.json').version")
+    
+    # Calculate new version based on commit message but don't commit back
+    - |
+      if [[ "$CI_COMMIT_MESSAGE" =~ ^feat(\(.+\))?!:.*$ ]] || [[ "$CI_COMMIT_MESSAGE" =~ ^BREAKING[\s-]CHANGE:.*$ ]]; then
+        NEW_VERSION=$(node -e "console.log(require('semver').inc('$CURRENT_VERSION', 'major'))")
+      elif [[ "$CI_COMMIT_MESSAGE" =~ ^feat(\(.+\))?:.*$ ]]; then
+        NEW_VERSION=$(node -e "console.log(require('semver').inc('$CURRENT_VERSION', 'minor'))")
+      else
+        NEW_VERSION=$(node -e "console.log(require('semver').inc('$CURRENT_VERSION', 'patch'))")
+      fi
+    
+    # Determine build number (commit count since last tag)
+    - COMMIT_COUNT=$(git rev-list --count HEAD)
+    
+    # Create full version string with build metadata
+    - VERSION_STRING="${NEW_VERSION}+${COMMIT_COUNT}.${CI_COMMIT_SHORT_SHA}"
+    - echo "Calculated version: $VERSION_STRING"
+    
+    # Save version to a file for other jobs to use
+    - echo "$VERSION_STRING" > VERSION.txt
+  artifacts:
+    paths:
+      - VERSION.txt
+    expire_in: 1 day
+
 
 build unstable:
   stage: build
@@ -53,11 +95,13 @@ build release:
   script:
     - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
     - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - VERSION=$(cat VERSION.txt)
+    - echo "Building version: $VERSION"
     - GODEBUG="http2client=0" /kaniko/executor
       --context .
       --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
       --compressed-caching=false
-      --build-arg VERSION=$CI_COMMIT_TAG
+      --build-arg VERSION=$VERSION
       --build-arg IS_MAIN="True"
       --build-arg VITE_ENVIRONMENT="PRODUCTION"
       --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
@@ -66,6 +110,8 @@ build release:
       --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY_PRODUCTION
       --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_PRODUCTION
       --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_PRODUCTION
+  dependencies:
+    - version
 
 deploy unstable:
   stage: deploy

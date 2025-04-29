@@ -26,7 +26,7 @@ const Navbar: React.FC = () => {
             marginTop: "4px",
             fontSize:"12px"
           }}>
-            v1.0.0
+            {import.meta.env.VITE_APP_VERSION}
           </p>
 
           {/* Right-aligned buttons */}
