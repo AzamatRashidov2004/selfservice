@@ -26,10 +26,7 @@ version:
       - develop
       - tags
   script:
-    # Install package for semantic versioning
-    - npm install --no-save semver
-    
-    # Check if package.json exists and contains a version
+    # Read version from package.json, default to 0.1.0 if not found
     - |
       if [ -f package.json ]; then
         CURRENT_VERSION=$(node -p "require('./package.json').version || '0.1.0'")
@@ -39,46 +36,35 @@ version:
       fi
       echo "Current version: $CURRENT_VERSION"
     
-    # Determine version increment type based on commit message
+    # Extract the components of the version number
     - |
-      if [[ "$CI_COMMIT_MESSAGE" =~ ^feat(\(.+\))?!:.*$ ]] || [[ "$CI_COMMIT_MESSAGE" =~ ^BREAKING[\s-]CHANGE:.*$ ]]; then
-        INCREMENT_TYPE="major"
-      elif [[ "$CI_COMMIT_MESSAGE" =~ ^feat(\(.+\))?:.*$ ]]; then
-        INCREMENT_TYPE="minor"
-      elif [[ "$CI_COMMIT_MESSAGE" =~ ^fix(\(.+\))?:.*$ ]]; then
-        INCREMENT_TYPE="patch"
-      else
-        INCREMENT_TYPE="patch"  # Default to patch for other commit types
-      fi
-      echo "Detected version increment type: $INCREMENT_TYPE"
-    
-    # Calculate new version
+      MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
+      MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
+      PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
+      
+    # Auto-increment patch version for each build on develop branch
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "develop" ]]; then
-        # For develop branch, increment based on commit type
-        NEW_VERSION=$(node -e "console.log(require('semver').inc('$CURRENT_VERSION', '$INCREMENT_TYPE'))")
-        VERSION_SUFFIX=""
+        # Just increment the patch version by 1
+        NEW_PATCH=$((PATCH + 1))
+        NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
       else
-        # For tags, use the tag as the version (usually for releases)
+        # For tags, use the tag as version (usually for releases)
         NEW_VERSION=$CI_COMMIT_REF_NAME
         # Remove 'v' prefix if present
         if [[ "$NEW_VERSION" == v* ]]; then
           NEW_VERSION=${NEW_VERSION:1}
         fi
-        VERSION_SUFFIX=""
       fi
       
-      # Final version string
-      FULL_VERSION="${NEW_VERSION}${VERSION_SUFFIX}"
-      echo "New version: $FULL_VERSION"
-      
-      # Save version to file for other jobs
-      echo "$FULL_VERSION" > VERSION.txt
+      # Final version output
+      echo "New version: $NEW_VERSION"
+      echo "$NEW_VERSION" > VERSION.txt
   artifacts:
     paths:
       - VERSION.txt
     expire_in: 1 day
-
+  
 # Existing build jobs modified to use semantic versioning
 build unstable:
   stage: build
