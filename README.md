@@ -26,6 +26,13 @@ Store all assets (icons, images) in the `assets` folder. Prefer using SVG files 
 5. Update routing in `App.jsx` as needed
 6. Keep assets organized in the `assets` folder
 
+## Versioning Guidelines
+We use X.Y.Z versioning system on the Development version
+
+1. Use fix: some commit, to push a new version with minor fix == X.Y.Z+1
+2. Use feat: some commit, to push a new version with a new feature == X.Y+1.0
+3. Use feat!: some commit, to push a new version with big changes == X+1.0.0
+
 For any questions or issues, please refer to the project documentation or contact the project maintainer.
 
 ## React + Vite
