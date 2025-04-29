@@ -46,7 +46,6 @@ version:
     
     # Create full version string with build metadata
     - VERSION_STRING="${NEW_VERSION}+${COMMIT_COUNT}.${CI_COMMIT_SHORT_SHA}"
-    - echo "Calculated version: $VERSION_STRING"
     
     # Save version to a file for other jobs to use
     - echo "$VERSION_STRING" > VERSION.txt
