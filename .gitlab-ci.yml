@@ -39,13 +39,11 @@ version:
     
     # Read current version
     - CURRENT_VERSION=$(cat "$VERSION_FILE")
-    - echo "Current version: $CURRENT_VERSION"
     
     # Extract version components using cut command
     - MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
     - MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
     - PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
-    - echo "Current version components: Major=$MAJOR, Minor=$MINOR, Patch=$PATCH"
     
     # For develop branch, determine version increment based on commit message
     - |
@@ -86,7 +84,6 @@ version:
       fi
       
     # Output the new version
-    - echo "Final version: $NEW_VERSION"
     - echo "$NEW_VERSION" > VERSION.txt
     
     # Updated .version file in the repo to persist the version
@@ -128,7 +125,6 @@ build unstable:
     - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
     - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - VERSION=$(cat VERSION.txt)
-    - echo "Building version: $VERSION"
     - GODEBUG="http2client=0" /kaniko/executor
       --context .
       --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
@@ -161,7 +157,6 @@ build release:
     - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
     - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - VERSION=$(cat VERSION.txt)
-    - echo "Building version: $VERSION"
     - GODEBUG="http2client=0" /kaniko/executor
       --context .
       --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
@@ -191,7 +186,6 @@ deploy unstable:
     - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
     - /bin/sh deploy/prepare-namespace.sh develop
     - VERSION=$(cat VERSION.txt)
-    - echo "Deploying version: $VERSION"
     - helm upgrade
       --install
       --namespace develop
@@ -222,7 +216,6 @@ deploy release:
     - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
     - /bin/sh deploy/prepare-namespace.sh default
     - VERSION=$(cat VERSION.txt)
-    - echo "Deploying version: $VERSION"
     - helm upgrade
       --install
       --namespace default
