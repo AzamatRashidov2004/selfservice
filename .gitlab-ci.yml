@@ -22,8 +22,9 @@ variables:
 
 version:
   stage: version
-  image: alpine:latest
-  entrypoint: ["/bin/bash", "-lc"]
+  image: 
+      name: alpine:latest
+      entrypoint: ["/bin/bash", "-lc"]
   only:
     refs:
       - develop
