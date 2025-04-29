@@ -40,6 +40,8 @@ const launchProjectAction = (showContext) => {
   });
 };
 
+// test
+
 const deleteProjectAction = (showContext) => {
   return defineFileAction({
     id: 'delete',
