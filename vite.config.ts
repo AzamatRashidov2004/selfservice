@@ -1,13 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
-import { version } from './package.json'
 
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   define: {
-    'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.VERSION || version)
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.VERSION || "development")
   },
   server: {
     host: '0.0.0.0',  // Make sure the dev server listens on all interfaces
