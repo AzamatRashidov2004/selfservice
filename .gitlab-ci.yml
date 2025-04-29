@@ -15,51 +15,80 @@ variables:
   VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
   VITE_MAESTRO_URL_DEVELOPMENT: $VITE_MAESTRO_URL_DEVELOPMENT
   VITE_MAESTRO_URL_PRODUCTION: $VITE_MAESTRO_URL_PRODUCTION
+  VERSION_FILE: ".version"
   NODE_VERSION: "18"
 
 # Version job using semantic versioning (X.Y.Z format)
 version:
   stage: version
-  image: node:${NODE_VERSION}
+  image: alpine:latest
   only:
     refs:
       - develop
       - tags
   script:
-    # Read version from package.json, default to 0.1.0 if not found
-    - |
-      if [ -f package.json ]; then
-        CURRENT_VERSION=$(node -p "require('./package.json').version || '0.1.0'")
-      else
-        CURRENT_VERSION="0.1.0"
-        echo '{"version": "0.1.0"}' > package.json
-      fi
-      echo "Current version: $CURRENT_VERSION"
+    # Install required tools
+    - apk add --no-cache git bash
     
-    # Extract the components of the version number
+    # Check if .version file exists, if not create it with 0.1.0
+    - |
+      if [ ! -f "$VERSION_FILE" ]; then
+        echo "0.1.0" > "$VERSION_FILE"
+        echo "Created new version file with initial version 0.1.0"
+      fi
+    
+    # Read current version
+    - CURRENT_VERSION=$(cat "$VERSION_FILE")
+    - echo "Current version: $CURRENT_VERSION"
+    
+    # Extract version components
     - |
       MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
       MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
       PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
       
-    # Auto-increment patch version for each build on develop branch
+    # For develop branch, determine version increment based on commit message
     - |
       if [[ "$CI_COMMIT_REF_NAME" == "develop" ]]; then
-        # Just increment the patch version by 1
-        NEW_PATCH=$((PATCH + 1))
-        NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
-      else
-        # For tags, use the tag as version (usually for releases)
-        NEW_VERSION=$CI_COMMIT_REF_NAME
-        # Remove 'v' prefix if present
-        if [[ "$NEW_VERSION" == v* ]]; then
-          NEW_VERSION=${NEW_VERSION:1}
+        echo "Analyzing commit message: $CI_COMMIT_MESSAGE"
+        
+        if [[ "$CI_COMMIT_MESSAGE" =~ ^feat(\(.+\))?!:.*$ ]] || [[ "$CI_COMMIT_MESSAGE" =~ ^BREAKING[\s-]CHANGE:.*$ ]]; then
+          echo "Detected BREAKING CHANGE - incrementing MAJOR version"
+          MAJOR=$((MAJOR + 1))
+          MINOR=0
+          PATCH=0
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          
+        elif [[ "$CI_COMMIT_MESSAGE" =~ ^feat(\(.+\))?:.*$ ]]; then
+          echo "Detected feat: - incrementing MINOR version"
+          MINOR=$((MINOR + 1))
+          PATCH=0
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          
+        elif [[ "$CI_COMMIT_MESSAGE" =~ ^fix(\(.+\))?:.*$ ]]; then
+          echo "Detected fix: - incrementing PATCH version"
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          
+        else
+          echo "No conventional commit prefix detected - incrementing PATCH version"
+          PATCH=$((PATCH + 1))
+          NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
         fi
+        
+      elif [[ "$CI_COMMIT_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        # For version tags like v1.2.3, use the tag version
+        NEW_VERSION="${CI_COMMIT_REF_NAME:1}"  # Remove 'v' prefix
+        echo "Using tag version: $NEW_VERSION"
+      else
+        # For other tags, just use current version
+        NEW_VERSION="$CURRENT_VERSION"
+        echo "Using current version: $NEW_VERSION"
       fi
       
-      # Final version output
-      echo "New version: $NEW_VERSION"
-      echo "$NEW_VERSION" > VERSION.txt
+    # Output the new version
+    - echo "New version: $NEW_VERSION"
+    - echo "$NEW_VERSION" > VERSION.txt
   artifacts:
     paths:
       - VERSION.txt
@@ -78,6 +107,7 @@ build unstable:
     - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
     - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - VERSION=$(cat VERSION.txt)
+    - echo "Building version: $VERSION"
     - GODEBUG="http2client=0" /kaniko/executor
       --context .
       --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
