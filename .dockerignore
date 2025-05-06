@@ -1,0 +1,11 @@
+/.git
+/build
+/deploy
+/node_modules
+
+*.env
+*.log
+.dockerignore
+.gitignore
+.gitlab-ci.yml
+Dockerfile

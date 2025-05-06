@@ -1,0 +1,146 @@
+body {
+  font-family: "Poppins", sans-serif;
+  /* Use Poppins as the default font */
+}
+
+.landing-page-body {
+  padding: 0;
+}
+
+@media (max-width: 1150px) {
+  .custom-padding {
+    padding: 3% !important;
+  }
+}
+
+@media (min-width: 1151px) {
+  .custom-padding {
+    padding: 10px calc(var(--body-padding) - var(--scrollbar-gutter)) !important;
+  }
+}
+
+.hero {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url("../../assets/hero-bg.jpg");
+  background-size: cover;
+  /* Ensures the image covers the entire hero section */
+  background-position: center;
+  /* Centers the background image */
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  /* Ensures the background doesn't repeat */
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 5rem;
+  /* Increase padding for more space */
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,
+      0,
+      0,
+      0.45);
+  /* Adjusted overlay for better contrast */
+  z-index: 1;
+}
+
+.hero .container {
+  position: relative;
+  z-index: 2;
+  /* Ensures the content is above the overlay */
+  color: #ffffff;
+  /* Make the text white to stand out on the dark overlay */
+}
+
+.sub-heading {
+  font-size: 1.25rem;
+  /* Smaller than the main heading */
+  color: rgba(255, 255, 255, 0.85);
+  /* Slightly lighter color */
+  margin-bottom: 2rem;
+  /* Added space between text and button */
+}
+
+.features h2 {
+  font-size: 1.75rem;
+  color: #333;
+}
+
+.features p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.feature i {
+  color: #007bff;
+}
+
+.login-section {
+  height: 90vh;
+}
+
+@keyframes highlightFromLeft {
+  0% {
+    background-size: 0% 100%;
+    color: inherit;
+    /* Initial text color */
+  }
+
+  50% {
+    color: inherit;
+    /* Keep the initial color while background grows */
+  }
+
+  100% {
+    background-size: 100% 100%;
+    color: #dff0d8;
+    /* Final text color after the highlight */
+  }
+}
+
+.highlight-text {
+  display: inline-block;
+  padding: 0 20px;
+  background-image: linear-gradient(90deg,
+      rgba(255, 255, 0, 0.5),
+      rgba(255, 255, 0, 0.5));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  transition: background-size 1s ease-in-out;
+  animation: highlightFromLeft 1s ease forwards;
+  color: inherit;
+  /* Text starts with initial inherited color */
+  border-radius: 20px;
+}
+
+.btn-call-to-action {
+  padding: 1rem 3rem;
+  /* Increased padding for larger button */
+  font-size: 1.25rem;
+  /* Larger font for emphasis */
+  background-color: #007bff;
+  border-color: #0056b3;
+  transition: background-color 0.3s ease;
+}
+
+.btn-call-to-action:hover {
+  background-color: #0056b3;
+}
+
+.card {
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  background-color: #fff;
+}

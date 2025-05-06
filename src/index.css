@@ -1,0 +1,26 @@
+:root {
+  --body-padding: 5%;
+  --scrollbar-gutter: 0;
+  --customize-section-padding: 33%;
+}
+
+body {
+  /* Body Padding */
+  padding: 0 var(--body-padding);
+  overflow-x: hidden;
+  min-height: calc(100vh - 90px);
+}
+
+p {
+  margin-bottom: 0;
+}
+
+.hidden,
+.locked-hidden {
+  display: none !important;
+}
+
+.main-container {
+  padding: 0;
+  margin-top: 50px;
+}
