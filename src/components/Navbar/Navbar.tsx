@@ -1,10 +1,14 @@
 import React from "react";
-import { Link } from "react-router-dom"; // Import Link component
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import "./Navbar.css";
 import { useAuth } from "../../context/authContext";
+import { useNavigation } from "../../context/navigationContext";
 
 const Navbar: React.FC = () => {
   const { logout, login, authenticated } = useAuth();
+  const navigate = useNavigate(); // Add this hook
+  const { currentBlocker } = useNavigation();
+  
   const handleSubmit = async () => {
     try {
       await login();
@@ -12,12 +16,24 @@ const Navbar: React.FC = () => {
       console.error("Login error:", err);
     }
   };
-
+  
+  // Modified navigation handler
+  const handleNavigate = (path: string) => {
+    // Check if there's any navigation blocking conditions
+    if (currentBlocker && currentBlocker.hasUnsavedChanges) {
+      // Use the navigation context to trigger the confirmation flow
+      useNavigation().setPendingNavigation(path);
+    } else {
+      // If no blockers, navigate directly
+      navigate(path);
+    }
+  };
+  
   return (
     <>
       <nav className="navbar-container navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <div className="container-fluid navbar-wrapper">
-          {/* Logo Text */}
+          {/* Logo Text - Keep as Link since it's always safe to go home */}
           <Link className="navbar-brand" to="/">
             Maestro Dashboard
           </Link>
@@ -33,18 +49,24 @@ const Navbar: React.FC = () => {
           <div className="d-flex ms-auto">
             {authenticated ? (
               <>
-                <Link
-                  className="btn btn-link custom-link me-2"
-                  to="/new-project"
+                <button 
+                  className="btn btn-link custom-link me-2" 
+                  onClick={() => handleNavigate('/new-project')}
                 >
                   New
-                </Link>
-                <Link className="btn btn-link custom-link me-2" to="/dashboard">
+                </button>
+                <button 
+                  className="btn btn-link custom-link me-2" 
+                  onClick={() => handleNavigate('/dashboard')}
+                >
                   Dashboard
-                </Link>
-                <Link className="btn btn-link custom-link me-2" to="/contact">
+                </button>
+                <button 
+                  className="btn btn-link custom-link me-2" 
+                  onClick={() => handleNavigate('/contact')}
+                >
                   Contact
-                </Link>
+                </button>
                 <button
                   className="btn btn-primary"
                   onClick={async () => {
@@ -62,12 +84,18 @@ const Navbar: React.FC = () => {
                 >
                   Login
                 </button>
-                <Link className="btn btn-link custom-link me-2" to="/contact">
+                <button 
+                  className="btn btn-link custom-link me-2" 
+                  onClick={() => handleNavigate('/contact')}
+                >
                   Contact
-                </Link>
-                <Link className="btn btn-primary" to="/try-now">
+                </button>
+                <button 
+                  className="btn btn-primary" 
+                  onClick={() => handleNavigate('/try-now')}
+                >
                   Try Now
-                </Link>
+                </button>
               </>
             )}
           </div>

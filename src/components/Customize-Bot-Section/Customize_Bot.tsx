@@ -10,7 +10,9 @@ import { updateFile } from "../../api/kronos/postKronos.js";
 import { createNotificationEvent, createPopupEvent } from "../../utility/Modal_Util.js";
 import { useAuth } from "../../context/authContext.js";
 import { useNavigate } from "react-router-dom";
-import { useNavigationPrompt } from "./NavigationHandler";
+import { useNavigation } from '../../context/navigationContext';
+import { useNavigationPrompt } from "../../hooks/useNavigationPrompt.js";
+
 
 
 // Extended interface to include new customizable elements
@@ -165,6 +167,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   // Track changes to detect unsaved edits
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [initialConfig, setInitialConfig] = useState<ChatBotSceleton | null>(null);
+  const { registerBlocker, unregisterBlocker } = useNavigation();
 
 
   const getChatBotSkeleton = (config: FullBotConfig): ChatBotSceleton => {
@@ -199,6 +202,8 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   let chatbot = null;
   if (isFromApp)
     chatbot = getChatBotSkeleton(currentBotConfig as FullBotConfig);
+
+  
 
   useEffect(() => {
     const el = document.getElementsByClassName("bot-customizer-container")[0] as HTMLElement;
@@ -373,7 +378,17 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     return false;
   };
 
-  useNavigationPrompt(hasUnsavedChanges, handleSubmit);
+  const promptBeforeNavigate = useNavigationPrompt(hasUnsavedChanges, handleSubmit);
+   // Example navigation handler for a button
+   const handleNavigate = (destination: any) => {
+    if (promptBeforeNavigate(destination)) {
+      navigate(destination);
+    }
+  };
+  const handleCancelClick = () => {
+    handleNavigate("/dashboard");
+  };
+
 
   // Handle back button and browser navigation
   useEffect(() => {
@@ -766,6 +781,71 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     }
   }, [activeComponent]);
 
+    // Ensure handleSave is defined with useCallback to prevent unnecessary re-renders
+    const handleSave = useCallback(async () => {
+      if (!isFromApp && saveSettings) {
+        try {
+          await saveSettings(config);
+          setHasUnsavedChanges(false);
+          setInitialConfig(config);
+          return true;
+        } catch (error) {
+          console.error("Error saving settings:", error);
+          return false;
+        }
+      } else if (isFromApp) {
+        try {
+          const currentCustom = fullBotConfig as FullBotConfig;
+          currentCustom.chatbot = {
+            ...config
+          };
+          
+          const response = await updateFile(
+            current_project_id, 
+            JSON.stringify(currentCustom), 
+            'config.fsm', 
+            'fsm', 
+            keycloak.token ? keycloak.token : ""
+          );
+          
+          if (!response) {
+            createNotificationEvent(
+              "Something Went Wrong",
+              "While editing your bot, something went wrong. Please try again later...",
+              "danger",
+              4000
+            );
+            return false;
+          }
+      
+          createNotificationEvent(
+            "Bot Updated",
+            "Bot successfully updated with your configurations",
+            "success"
+          );
+          setHasUnsavedChanges(false);
+          setInitialConfig(config);
+          return true;
+        } catch (error) {
+          console.error("Error saving settings:", error);
+          return false;
+        }
+      }
+      return false;
+    }, [isFromApp, saveSettings, config, fullBotConfig, current_project_id, keycloak.token]);
+
+  useEffect(() => {
+    registerBlocker({
+      hasUnsavedChanges,
+      handleSave 
+    });
+
+    // Unregister when component unmounts
+    return () => {
+      unregisterBlocker();
+    };
+  }, [hasUnsavedChanges, handleSave, registerBlocker, unregisterBlocker]);
+
   return (
     <>
     <div className="bot-customizer">
@@ -1057,7 +1137,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       </button>
       <button
         className="cancel-button"
-        onClick={() => navigate("/dashboard")}
+        onClick={handleCancelClick}
         disabled={loading}
       >
         Cancel
