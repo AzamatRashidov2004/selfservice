@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Save, Zap } from 'lucide-react';
+import { useState, useEffect, useCallback } from "react";
+import { Save, Zap, Mic } from 'lucide-react';
 import { ChatBotSceleton } from "../../utility/types.js";
 import { ChatBotSceletonDefaultSettings, FullBotConfig } from "../../utility/Bot_Util.js";
 import Loader from "../Loader/Loader.js";
@@ -7,23 +7,22 @@ import "./Customize_Bot.css";
 import { ChromePicker } from 'react-color';
 import { useFiles } from "../../context/fileContext.js";
 import { updateFile } from "../../api/kronos/postKronos.js";
-import { createNotificationEvent } from "../../utility/Modal_Util.js";
+import { createNotificationEvent, createPopupEvent } from "../../utility/Modal_Util.js";
 import { useAuth } from "../../context/authContext.js";
 import { useNavigate } from "react-router-dom";
+import { useNavigation } from '../../context/navigationContext';
+import { useNavigationPrompt } from "../../hooks/useNavigationPrompt.js";
 
-// Update the interface to include input field customization
+
+
+// Extended interface to include new customizable elements
 interface CustomizeBotProps {
   loading?: boolean;
   selectedProjectConfig?: Partial<ChatBotSceleton>;
   saveSettings?: (settings: ChatBotSceleton) => Promise<void>;
 }
 
-// Update default types in your types.js file
-// Extend ChatBotSceleton to include these new properties:
-// inputFieldColor: string;
-// inputFieldFontColor: string;
-// sendButtonColor: string;
-
+// Extended color schemes
 const colorSchemes = [
   {
     titleText: "Classic Blue",
@@ -38,6 +37,11 @@ const colorSchemes = [
     frameBorderColor: "white",
     sendButtonColor: "#1a73e8",
     inputBackgroundColor: "#f5f5f5",
+    botIconColor: "#1a73e8",
+    userIconColor: "#1a73e8",
+    editFieldBackgroundColor: "#ffffff",
+    editFieldBorderColor: "#e0e0e0",
+    footerBackgroundColor: "#ffffff"
   },
   {
     titleText: "Forest Green",
@@ -52,6 +56,11 @@ const colorSchemes = [
     frameBorderColor: "white",
     sendButtonColor: "#2e7d32",
     inputBackgroundColor: "#f5f5f5",
+    botIconColor: "#2e7d32",
+    userIconColor: "#2e7d32",
+    editFieldBackgroundColor: "#ffffff",
+    editFieldBorderColor: "#e0e0e0",
+    footerBackgroundColor: "#ffffff"
   },
   {
     titleText: "Warm Orange",
@@ -66,6 +75,11 @@ const colorSchemes = [
     frameBorderColor: "white",
     sendButtonColor: "#ed6c02",
     inputBackgroundColor: "#f5f5f5",
+    botIconColor: "#ed6c02",
+    userIconColor: "#ed6c02",
+    editFieldBackgroundColor: "#ffffff",
+    editFieldBorderColor: "#e0e0e0",
+    footerBackgroundColor: "#ffffff"
   },
   {
     titleText: "Elegant Purple",
@@ -80,6 +94,11 @@ const colorSchemes = [
     frameBorderColor: "white",
     sendButtonColor: "#7b1fa2",
     inputBackgroundColor: "#f5f5f5",
+    botIconColor: "#7b1fa2",
+    userIconColor: "#7b1fa2",
+    editFieldBackgroundColor: "#ffffff",
+    editFieldBorderColor: "#e0e0e0",
+    footerBackgroundColor: "#ffffff"
   },
   {
     titleText: "VS Code Dark",
@@ -94,6 +113,11 @@ const colorSchemes = [
     frameBorderColor: "#1e1e1e",
     inputBackgroundColor: "#3c3c3c",
     sendButtonColor: "#0e639c",
+    botIconColor: "#cccccc",
+    userIconColor: "#0e639c",
+    editFieldBackgroundColor: "#252526",
+    editFieldBorderColor: "#252526",
+    footerBackgroundColor: "#1e1e1e"
   },
   {
     titleText: "Dark Mode",
@@ -101,13 +125,37 @@ const colorSchemes = [
     titleFontColor: "white",
     botMessageColor: "#2d2d30",
     botMessageFontColor: "white",
-    userMessageColor: "#505050",
+    userMessageColor: "#444654",
     userMessageFontColor: "white",
     suggestionButtonColor: "#3e3e42",
     suggestionButtonFontColor: "white",
-    frameBorderColor: "white",
-    inputBackgroundColor: "white",
+    frameBorderColor: "#1e1e1e",
+    inputBackgroundColor: "#383838",
     sendButtonColor: "#4d5054",
+    botIconColor: "#9e9e9e",
+    userIconColor: "#9e9e9e",
+    editFieldBackgroundColor: "#444654",
+    editFieldBorderColor: "#444654",
+    footerBackgroundColor: "#1e1e1e"
+  },
+  {
+    titleText: "OpenAI Dark",
+    navbarColor: "#0f0f0f",
+    titleFontColor: "#d9d9e3",
+    botMessageColor: "#444654",
+    botMessageFontColor: "#d9d9e3",
+    userMessageColor: "#343541",
+    userMessageFontColor: "#d9d9e3",
+    suggestionButtonColor: "#2a2b32",
+    suggestionButtonFontColor: "#d9d9e3",
+    frameBorderColor: "#0f0f0f",
+    inputBackgroundColor: "#40414f",
+    sendButtonColor: "#8e8ea0",
+    botIconColor: "#10a37f", // ChatGPT's green for bot
+    userIconColor: "#8e8ea0", // Light grey for user
+    editFieldBackgroundColor: "#40414f",
+    editFieldBorderColor: "#2a2b32",
+    footerBackgroundColor: "#0f0f0f"
   }
 ];
 
@@ -116,14 +164,15 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   selectedProjectConfig,
   saveSettings,
 }) => {
+  // Track changes to detect unsaved edits
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [initialConfig, setInitialConfig] = useState<ChatBotSceleton | null>(null);
+  const { registerBlocker, unregisterBlocker } = useNavigation();
+
 
   const getChatBotSkeleton = (config: FullBotConfig): ChatBotSceleton => {
-
-    console.log("THE CHATBOT CONFIG IS11 : ", config);
     const { chatbot } = config;
-    console.log("THE CHATBOT CONFIG IS13 : ", config.chatbot);
-    console.log("THE CHATBOT CONFIG IS14 : ", chatbot);
-
+    
     return {
       userMessageColor: ((chatbot && chatbot.userMessageColor) ? chatbot.userMessageColor : ChatBotSceletonDefaultSettings.userMessageColor),
       botMessageColor: ((chatbot && chatbot.botMessageColor) ? chatbot.botMessageColor : ChatBotSceletonDefaultSettings.botMessageColor),
@@ -135,19 +184,26 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       botMessageFontColor: ((chatbot && chatbot.botMessageFontColor) ? chatbot.botMessageFontColor : ChatBotSceletonDefaultSettings.botMessageFontColor),
       userMessageFontColor: ((chatbot && chatbot.userMessageFontColor) ? chatbot.userMessageFontColor : ChatBotSceletonDefaultSettings.userMessageFontColor),
       frameBorderColor: ((chatbot && chatbot.frameBorderColor) ?  chatbot.frameBorderColor : ChatBotSceletonDefaultSettings.frameBorderColor),
-      sendButtonColor: ((chatbot && chatbot.sendButtonColor) ? chatbot.sendButtonColor : ChatBotSceletonDefaultSettings.sendButtonColor), // Hardcoded as per your example
-      inputBackgroundColor: ((chatbot && chatbot.inputBackgroundColor) ? chatbot.inputBackgroundColor : ChatBotSceletonDefaultSettings.inputBackgroundColor) // Hardcoded as per your example
+      sendButtonColor: ((chatbot && chatbot.sendButtonColor) ? chatbot.sendButtonColor : ChatBotSceletonDefaultSettings.sendButtonColor),
+      inputBackgroundColor: ((chatbot && chatbot.inputBackgroundColor) ? chatbot.inputBackgroundColor : ChatBotSceletonDefaultSettings.inputBackgroundColor),
+      // New extended properties with fallbacks
+      botIconColor: ((chatbot && chatbot.botIconColor) ? chatbot.botIconColor : ChatBotSceletonDefaultSettings.botIconColor),
+      userIconColor: ((chatbot && chatbot.userIconColor) ? chatbot.userIconColor : ChatBotSceletonDefaultSettings.userIconColor),
+      editFieldBackgroundColor: ((chatbot && chatbot.editFieldBackgroundColor) ? chatbot.editFieldBackgroundColor : ChatBotSceletonDefaultSettings.editFieldBackgroundColor),
+      editFieldBorderColor: ((chatbot && chatbot.editFieldBorderColor) ? chatbot.editFieldBorderColor : ChatBotSceletonDefaultSettings.editFieldBorderColor),
+      footerBackgroundColor: ((chatbot && chatbot.footerBackgroundColor) ? chatbot.footerBackgroundColor : ChatBotSceletonDefaultSettings.footerBackgroundColor)
     };
   };
 
   const { currentBotConfig, setCurrentBotConfig, current_project_id } = useFiles();
   const fullBotConfig = currentBotConfig;
 
-
   const isFromApp = currentBotConfig !== null;
   let chatbot = null;
   if (isFromApp)
     chatbot = getChatBotSkeleton(currentBotConfig as FullBotConfig);
+
+  
 
   useEffect(() => {
     const el = document.getElementsByClassName("bot-customizer-container")[0] as HTMLElement;
@@ -158,7 +214,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       if (el) el.style.removeProperty("margin-top");
     };
   }, []);
-
 
   useEffect(() => {
     return () => {
@@ -214,15 +269,33 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       div.setAttribute('style', newStyle);
     }
   });
-
   }
 
-  const [config, setConfig] = useState<ChatBotSceleton>({
-    ...(chatbot !== null ? chatbot : ChatBotSceletonDefaultSettings),
+  const defaultConfig = {
+    ...ChatBotSceletonDefaultSettings,
+    ...(chatbot !== null ? chatbot : {}),
     ...(selectedProjectConfig || {}),
-  });
+  };
+
+  const [config, setConfig] = useState<ChatBotSceleton>(defaultConfig);
   const [activeComponent, setActiveComponent] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!initialConfig) {
+      setInitialConfig(config);
+    }
+  }, []);
+
+  // Track changes to detect unsaved work
+  useEffect(() => {
+    if (initialConfig) {
+      const hasChanges = Object.keys(config).some(key => {
+        return config[key as keyof ChatBotSceleton] !== 
+               initialConfig[key as keyof ChatBotSceleton];
+      });
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [config, initialConfig]);
 
   useEffect(() => {
     if (selectedProjectConfig) {
@@ -233,36 +306,60 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   const { keycloak } = useAuth();
   const navigate = useNavigate();
 
+  // Handle navigation with unsaved changes
+  const handleBeforeNavigate = useCallback(() => {
+    if (hasUnsavedChanges) {
+      createPopupEvent(
+        "Unsaved Changes",
+        "You have unsaved customization changes. Do you want to save them before leaving?",
+        {
+          success: { text: "Save Changes", type: "primary" },
+          cancel: { text: "Discard Changes", type: "danger" }
+        },
+        (success: boolean) => {
+          if (success) {
+            // Save changes before navigating
+            handleSubmit().then(() => {
+              navigate("/dashboard");
+            });
+          } else {
+            // Discard changes and navigate
+            navigate("/dashboard");
+          }
+        }
+      );
+      return false; // Prevent immediate navigation
+    }
+    return true; // Allow navigation
+  }, [hasUnsavedChanges, navigate]);
+
   const handleSubmit = async () => {
     if (!isFromApp && saveSettings) {
       try {
-        console.log("the result config is : ", config as ChatBotSceleton);
-        await saveSettings(config as ChatBotSceleton);
+        await saveSettings(config);
+        setHasUnsavedChanges(false);
+        setInitialConfig(config);
+        return true;
       } catch (error) {
         console.error("Error saving settings:", error);
+        return false;
       }
     } else if (isFromApp) {
-        console.log("JFKLSDJFLSDJFLSDJFLSDJFLSDF: ");
       try {
         const currentCustom = fullBotConfig as FullBotConfig;
         currentCustom.chatbot = {
           ...config
         };
-        console.log("JFKLSDJFLSDJFLSDJFLSDJFLSDF: ", currentCustom);
-        createNotificationEvent(
-          "Project Created",
-          "Project successfully created with your configurations",
-          "success"
-        );
+        
         const response = await updateFile(current_project_id, JSON.stringify(currentCustom), 'config.fsm', 'fsm', keycloak.token ? keycloak.token:"");
         if (!response) {
           createNotificationEvent(
             "Something Went Wrong",
-            "While editing you bot, something went wrong. Please try again later...",
+            "While editing your bot, something went wrong. Please try again later...",
             "danger",
             4000
           );
-          return;
+          return false;
         }
     
         createNotificationEvent(
@@ -270,12 +367,45 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
           "Bot successfully updated with your configurations",
           "success"
         );
-        navigate("/dashboard");
+        setHasUnsavedChanges(false);
+        setInitialConfig(config);
+        return true;
       } catch (error) {
         console.error("Error saving settings:", error);
+        return false;
       }
     }
+    return false;
   };
+
+  const promptBeforeNavigate = useNavigationPrompt(hasUnsavedChanges, handleSubmit);
+   // Example navigation handler for a button
+   const handleNavigate = (destination: any) => {
+    if (promptBeforeNavigate(destination)) {
+      navigate(destination);
+    }
+  };
+  const handleCancelClick = () => {
+    handleNavigate("/dashboard");
+  };
+
+
+  // Handle back button and browser navigation
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        const message = "You have unsaved changes. Are you sure you want to leave?";
+        e.returnValue = message;
+        return message;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [hasUnsavedChanges]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const applyColorScheme = (scheme: any) => {
@@ -305,7 +435,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     const panels: Record<string, JSX.Element> = {
       navbar: (
         <div className="customization-panel">
-          {/*<h3>Navbar Customization</h3>*/}
           <div className="form-group">
             <label>Title Text</label>
             <input 
@@ -340,7 +469,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                     width: '200px',
                     borderRadius: '8px',
                   },
-                  // Hide the RGB input rows and toggle buttons
                   body: {
                     paddingBottom: '0px',
                   },
@@ -370,7 +498,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
             <ChromePicker
               color={config.botMessageColor}
               onChange={(e) => setConfig({ ...config, botMessageColor: e.hex })}
-              disableAlpha // removes alpha slider for simplicity
+              disableAlpha
               styles={{
                 default: {
                   picker: {
@@ -378,7 +506,26 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                     width: '200px',
                     borderRadius: '8px',
                   },
-                  // Hide the RGB input rows and toggle buttons
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label>Bot Icon Color</label>
+            <ChromePicker
+              color={config.botIconColor}
+              onChange={(e) => setConfig({ ...config, botIconColor: e.hex })}
+              disableAlpha
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
                   body: {
                     paddingBottom: '0px',
                   },
@@ -408,7 +555,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
             <ChromePicker
               color={config.userMessageColor}
               onChange={(e) => setConfig({ ...config, userMessageColor: e.hex })}
-              disableAlpha // removes alpha slider for simplicity
+              disableAlpha
               styles={{
                 default: {
                   picker: {
@@ -416,7 +563,26 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                     width: '200px',
                     borderRadius: '8px',
                   },
-                  // Hide the RGB input rows and toggle buttons
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label>User Icon Color</label>
+            <ChromePicker
+              color={config.userIconColor}
+              onChange={(e) => setConfig({ ...config, userIconColor: e.hex })}
+              disableAlpha
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
                   body: {
                     paddingBottom: '0px',
                   },
@@ -446,7 +612,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
             <ChromePicker
               color={config.suggestionButtonColor}
               onChange={(e) => setConfig({ ...config, suggestionButtonColor: e.hex })}
-              disableAlpha // removes alpha slider for simplicity
+              disableAlpha
               styles={{
                 default: {
                   picker: {
@@ -454,7 +620,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                     width: '200px',
                     borderRadius: '8px',
                   },
-                  // Hide the RGB input rows and toggle buttons
                   body: {
                     paddingBottom: '0px',
                   },
@@ -471,7 +636,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
             <ChromePicker
               color={config.frameBorderColor}
               onChange={(e) => setConfig({ ...config, frameBorderColor: e.hex })}
-              disableAlpha // removes alpha slider for simplicity
+              disableAlpha
               styles={{
                 default: {
                   picker: {
@@ -479,7 +644,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                     width: '200px',
                     borderRadius: '8px',
                   },
-                  // Hide the RGB input rows and toggle buttons
                   body: {
                     paddingBottom: '0px',
                   },
@@ -492,10 +656,50 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       inputField: (
         <div className="customization-panel">
           <div className="form-group">
-            <label>Input Background Color</label>
+            <label>Input Field Background Color</label>
             <ChromePicker
-              color={config.inputBackgroundColor}
-              onChange={(e) => setConfig({ ...config, inputBackgroundColor: e.hex })}
+              color={config.editFieldBackgroundColor}
+              onChange={(e) => setConfig({ ...config, editFieldBackgroundColor: e.hex })}
+              disableAlpha
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label>Input Field Border Color</label>
+            <ChromePicker
+              color={config.editFieldBorderColor}
+              onChange={(e) => setConfig({ ...config, editFieldBorderColor: e.hex })}
+              disableAlpha
+              styles={{
+                default: {
+                  picker: {
+                    boxShadow: 'none',
+                    width: '200px',
+                    borderRadius: '8px',
+                  },
+                  body: {
+                    paddingBottom: '0px',
+                  },
+                }
+              }}
+            />
+          </div>
+          <div className="form-group">
+            <label>Footer Background Color</label>
+            <ChromePicker
+              color={config.footerBackgroundColor}
+              onChange={(e) => setConfig({ ...config, footerBackgroundColor: e.hex })}
               disableAlpha
               styles={{
                 default: {
@@ -563,7 +767,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
 
   const [activeTab, setActiveTab] = useState<string>("colorSchemes");
 
-
   useEffect(() => {
     removeExactPaddingDivs();
   }, []);
@@ -578,6 +781,71 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
     }
   }, [activeComponent]);
 
+    // Ensure handleSave is defined with useCallback to prevent unnecessary re-renders
+    const handleSave = useCallback(async () => {
+      if (!isFromApp && saveSettings) {
+        try {
+          await saveSettings(config);
+          setHasUnsavedChanges(false);
+          setInitialConfig(config);
+          return true;
+        } catch (error) {
+          console.error("Error saving settings:", error);
+          return false;
+        }
+      } else if (isFromApp) {
+        try {
+          const currentCustom = fullBotConfig as FullBotConfig;
+          currentCustom.chatbot = {
+            ...config
+          };
+          
+          const response = await updateFile(
+            current_project_id, 
+            JSON.stringify(currentCustom), 
+            'config.fsm', 
+            'fsm', 
+            keycloak.token ? keycloak.token : ""
+          );
+          
+          if (!response) {
+            createNotificationEvent(
+              "Something Went Wrong",
+              "While editing your bot, something went wrong. Please try again later...",
+              "danger",
+              4000
+            );
+            return false;
+          }
+      
+          createNotificationEvent(
+            "Bot Updated",
+            "Bot successfully updated with your configurations",
+            "success"
+          );
+          setHasUnsavedChanges(false);
+          setInitialConfig(config);
+          return true;
+        } catch (error) {
+          console.error("Error saving settings:", error);
+          return false;
+        }
+      }
+      return false;
+    }, [isFromApp, saveSettings, config, fullBotConfig, current_project_id, keycloak.token]);
+
+  useEffect(() => {
+    registerBlocker({
+      hasUnsavedChanges,
+      handleSave 
+    });
+
+    // Unregister when component unmounts
+    return () => {
+      unregisterBlocker();
+    };
+  }, [hasUnsavedChanges, handleSave, registerBlocker, unregisterBlocker]);
+
   return (
     <>
     <div className="bot-customizer">
@@ -588,14 +856,12 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
         </div>
       ) : (
         <div className="bot-customizer-container">
-
-          
           <div className="customizer-content">
             <div className="chatbot-preview-container">
               <div 
                 className="chatbot-preview"
                 style={{
-                  backgroundColor: `${config.frameBorderColor} !important`,
+                  backgroundColor: `${config.frameBorderColor}`,
                   borderRadius: '8px',
                   overflow: 'hidden'
                 }}
@@ -639,7 +905,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                   {/* Bot Message - Clickable */}
                   <div className="bot-message-container">
                     <div className="bot-message">
-                      <div className="bot-icon">
+                      <div className="bot-icon" style={{color: config.botIconColor}}>
                         <i className="fas fa-robot"></i>
                       </div>
                       <div 
@@ -666,7 +932,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                   
                   {/* User Message - Clickable */}
                   <div className="user-message">
-                    <div className="user-icon">
+                    <div className="user-icon" style={{color: config.userIconColor}}>
                       <i className="fas fa-user"></i>
                     </div>
                     <div 
@@ -692,7 +958,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
 
                   <div className="bot-message-container">
                     <div className="bot-message">
-                      <div className="bot-icon">
+                      <div className="bot-icon" style={{color: config.botIconColor}}>
                         <i className="fas fa-robot"></i>
                       </div>
                       <div 
@@ -755,33 +1021,62 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
                   </div>
                 </div>
 
-                {/* Input Area - Now Clickable */}
+                {/* Input Area - Improved with proper styling and positioning */}
                 <div 
-                    className="input-area clickable"
-                    style={{ backgroundColor: config.inputBackgroundColor }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setActiveComponent("inputField");
-                    }}
-                  >
-                    {activeComponent === "inputField" && (
-                      <div className="section-hint">
-                        <Zap size={14} />
-                        <span>Editing input field</span>
-                      </div>
-                    )}
-                    <div className="message-input">
-                      <span style={{ opacity: 0.6 }}></span>
+                  className="input-area clickable"
+                  style={{ 
+                    backgroundColor: config.footerBackgroundColor,
+                    border: "none", // Remove default border
+                    borderTop: "none" // Remove separator line
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveComponent("inputField");
+                  }}
+                >
+                  {activeComponent === "inputField" && (
+                    <div className="section-hint">
+                      <Zap size={14} />
+                      <span>Editing input field</span>
                     </div>
-                    <button 
-                      className="send-button"
-                      style={{ backgroundColor: config.sendButtonColor }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
-                      </svg>
-                    </button>
+                  )}
+                  <div className="message-input-container">
+                    <div className="message-input" style={{ 
+                      backgroundColor: config.editFieldBackgroundColor,
+                      border: `1px solid ${config.editFieldBorderColor}`,
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "8px 12px",
+                      position: "relative" 
+                    }}>
+                      <span style={{ opacity: 0.6, flexGrow: 1 }}>Ask me anything...</span>
+                      
+                      {/* Optional microphone icon */}
+                      <div style={{ marginRight: "8px", color: config.sendButtonColor }}>
+                        <Mic size={18} />
+                      </div>
+                      
+                      {/* Send button - properly positioned */}
+                      <div 
+                        className="send-button-wrapper"
+                        style={{ 
+                          backgroundColor: config.sendButtonColor,
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "6px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center"
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="white">
+                          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                        </svg>
+                      </div>
+                    </div>
                   </div>
+                </div>
               </div>
             </div>
             
@@ -829,15 +1124,26 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
       )}          
     </div>
     <div className="customizer-header">
-              <button 
-                className="save-button"
-                onClick={handleSubmit}
-              >
-                <Save size={18} />
-                Save Settings
-              </button>
-            </div>
-          </>
+      <div className="save-status">
+        {hasUnsavedChanges && <span className="unsaved-indicator">Unsaved changes</span>}
+      </div>
+      <button 
+        className="save-button"
+        onClick={handleSubmit}
+        disabled={loading}
+      >
+        <Save size={18} />
+        Save Settings
+      </button>
+      <button
+        className="cancel-button"
+        onClick={handleCancelClick}
+        disabled={loading}
+      >
+        Cancel
+      </button>
+    </div>
+    </>
   );
 };
 

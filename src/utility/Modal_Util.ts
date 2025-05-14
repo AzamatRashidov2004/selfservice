@@ -14,22 +14,41 @@ export const createNotificationEvent = (title: string, text: string, type: Notif
     window.dispatchEvent(showNotificationEvent);
   };
 
-  export const createUploadFileModalEvent = (
-    callback: (uploadedFiles: File[]) => void,
-    uploadMode: "folder" | "file"
-  ) => {
-    const showUploadFileModalEvent = new CustomEvent("showUploadFile", {
-      detail: { callback, uploadMode }, // Include uploadMode in detail
-    });
-    window.dispatchEvent(showUploadFileModalEvent);
-  };
-  
-  
+export const createConfirmNavigationEvent = (
+  message: string, 
+  onConfirm: () => void,
+  onCancel: () => void
+) => {
+  createPopupEvent(
+    "Unsaved Changes",
+    message,
+    {
+      success: { text: "Save & Continue", type: "primary" },
+      cancel: { text: "Discard Changes", type: "danger" }
+    },
+    (confirmed) => {
+      if (confirmed) {
+        onConfirm();
+      } else {
+        onCancel();
+      }
+    }
+  );
+};
 
+export const createUploadFileModalEvent = (
+  callback: (uploadedFiles: File[]) => void,
+  uploadMode: "folder" | "file"
+) => {
+  const showUploadFileModalEvent = new CustomEvent("showUploadFile", {
+    detail: { callback, uploadMode },
+  });
+  window.dispatchEvent(showUploadFileModalEvent);
+};
+  
 export const createFolderModalEvent = (callback: (folderName: string) => void) => {
   const showCreateFolderModalEvent = new CustomEvent('showCreateFolder', { 
     detail: { callback } 
   });
   window.dispatchEvent(showCreateFolderModalEvent);
 };
-  

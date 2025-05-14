@@ -7,6 +7,7 @@ const CUSTOM_ACTION_NAMES = {
     details: "Details",
     newFolder: "New Folder",
     delete: "Delete",
+    rename: "Rename",
     download: "Download",
     clearSelection: "Clear selection",
 
