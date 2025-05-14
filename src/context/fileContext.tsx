@@ -81,6 +81,12 @@ interface FilesContextType {
   currentBotConfig: FullBotConfig | null;
   setCurrentBotConfig: React.Dispatch<React.SetStateAction<FullBotConfig | null>>;
   deleteProject: (id: number) => void;
+  renameNodeAndChildren: (
+    nodeId: number,
+    newName: string,
+    oldPath: string,
+    newPath: string
+  ) => void;
 }
 
 // Create the context with the initial value
@@ -138,6 +144,41 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     setFileStructure([]); // Transform and set the initial state
   }, []);
+
+  const renameNodeAndChildren = (
+    nodeId: number,
+    newName: string,
+    oldPath: string,
+    newPath: string
+  ) => {
+    setFilesData(prev => {
+      const deepCopy = JSON.parse(JSON.stringify(prev));
+      const node = deepCopy.find((f: FileData) => f.id === nodeId);
+      
+      if (node) {
+        // Update parent node
+        node.text = newName;
+        if (node.source_file) {
+          node.source_file = node.source_file.replace(oldPath, newPath);
+        }
+  
+        // Update all children paths
+        const updateChildrenPaths = (children: FileData[]) => {
+          children.forEach(child => {
+            if (child.source_file) {
+              child.source_file = child.source_file.replace(oldPath, newPath);
+            }
+            const childChildren = deepCopy.filter((f: FileData) => f.parent === child.id);
+            updateChildrenPaths(childChildren);
+          });
+        };
+  
+        const immediateChildren = deepCopy.filter((f: FileData) => f.parent === nodeId);
+        updateChildrenPaths(immediateChildren);
+      }
+      return deepCopy;
+    });
+  };
 
   function extractFoldersAndFile(path: string): {
     folders: string[];
@@ -534,6 +575,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
       return findParent(currentNode.parent);
     };
 
+    
+
     // Start the recursive parent search from the given nodeId
     findParent(nodeId);
 
@@ -604,6 +647,7 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     currentBotConfig,
     setCurrentBotConfig,
     deleteProject,
+    renameNodeAndChildren
   };
 
   return (

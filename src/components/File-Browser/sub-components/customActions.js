@@ -40,8 +40,6 @@ const launchProjectAction = (showContext) => {
   });
 };
 
-// test
-
 const deleteProjectAction = (showContext) => {
   return defineFileAction({
     id: 'delete',
@@ -49,6 +47,17 @@ const deleteProjectAction = (showContext) => {
       name: customActionNames.delete,
       contextMenu: showContext,
       icon: ChonkyIconName.trash,
+    },
+  });
+};
+
+const renameFolderAction = (showContext) => {
+  return defineFileAction({
+    id: 'rename',
+    button: {
+      name: customActionNames.rename,
+      contextMenu: showContext,
+      icon: ChonkyIconName.text,
     },
   });
 };
@@ -66,7 +75,7 @@ const editProjectAction = (showContext) => {
 
 const detailsAction = (context = false) => {
   return defineFileAction({
-    id: 'details',
+    id: 'custom_details',
     fileFilter: (file, fileMap) => {
       // Only show if we are inside a folder and not at the root level
       const currentFolder = fileMap[file.id];
@@ -136,7 +145,11 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
   const isSingle = selectedFiles.length === 1;
   const isProject = isSingle && firstNodeInfo && firstNodeInfo.parent === 0;
   const hasDir = selectedFiles.some((item) => item.isDir === true);
-
+  const isSubfolder = isSingle && hasDir && firstNodeInfo && firstNodeInfo.parent !== 0;
+  if (isSubfolder) {
+    // Example: add a "Rename Folder" action for subfolders
+    customActions.unshift(renameFolderAction(true));
+  }
   if (isEmpty || (hasDir && isSingle)) {
     // If selection is empty or is a single folder
     customActions.push(createFolderAction(true));
@@ -191,7 +204,8 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
 
 
 
-  } else {
+  } 
+  else {
     customActions.push(detailsAction(false));
   }
   return customActions;

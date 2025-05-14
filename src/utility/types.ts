@@ -93,6 +93,12 @@ export type ChatBotSceleton = {
   frameBorderColor: string;
   sendButtonColor: string;
   inputBackgroundColor: string;
+  // New properties for extended customization
+  botIconColor: string;
+  userIconColor: string;
+  editFieldBackgroundColor: string;
+  editFieldBorderColor: string;
+  footerBackgroundColor: string;
 };
 
 // Define Settings interface

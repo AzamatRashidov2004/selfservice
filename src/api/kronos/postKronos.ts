@@ -241,7 +241,7 @@ async function uploadBatch(
 
 export async function updatePathBulk(
   projectID: string,
-  knowledge_bases: { _id: string; project_id: string; source_file: string }[],
+  knowledge_bases: { id: string; project_id: string; source_file: string }[],
   token: string,
 ): Promise<boolean> {
   try {
@@ -252,7 +252,17 @@ export async function updatePathBulk(
     if (firstSource.trim().length > 0) {
       program_name = extractProgramName(firstSource);
     }
-
+    
+    const requestBody = {
+      knowledge_bases,
+      custom_metadata: {
+        program_name: program_name,  // Include program_name or null if not available
+      },
+    };
+    
+    // Log the exact request payload
+    console.log("Request to updatePathBulk:", JSON.stringify(requestBody, null, 2));
+    
     const projectResponse: Response = await fetch(url.toString(), {
       method: "PUT",
       headers: {
@@ -260,22 +270,18 @@ export async function updatePathBulk(
         Authorization: `Bearer ${token}`,
         "x-api-key": apiKey,
       },
-      body: JSON.stringify({
-        knowledge_bases,
-        custom_metadata: {
-          program_name: program_name,  // Include program_name or null if not available
-        },
-      }),
+      body: JSON.stringify(requestBody),
     });
-
+    
     if (!projectResponse.ok) {
+      // Get the complete error message from the response
+      const errorText = await projectResponse.text();
       console.error(
-        "Error while trying to update knowledge base paths: " +
-        projectResponse.statusText
+        `Error while trying to update knowledge base paths: Status ${projectResponse.status} ${projectResponse.statusText}`,
+        errorText
       );
       return false;
     }
-
     return true;
   } catch (e: unknown) {
     handleError({ error: e, origin: "updatePdfConfig" });
