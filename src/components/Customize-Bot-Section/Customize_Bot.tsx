@@ -7,7 +7,7 @@ import "./Customize_Bot.css";
 import { ChromePicker } from 'react-color';
 import { useFiles } from "../../context/fileContext.js";
 import { updateFile } from "../../api/kronos/postKronos.js";
-import { createNotificationEvent, createPopupEvent } from "../../utility/Modal_Util.js";
+import { createNotificationEvent  } from "../../utility/Modal_Util.js";
 import { useAuth } from "../../context/authContext.js";
 import { useNavigate } from "react-router-dom";
 import { useNavigation } from '../../context/navigationContext';
@@ -306,33 +306,6 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
   const { keycloak } = useAuth();
   const navigate = useNavigate();
 
-  // Handle navigation with unsaved changes
-  const handleBeforeNavigate = useCallback(() => {
-    if (hasUnsavedChanges) {
-      createPopupEvent(
-        "Unsaved Changes",
-        "You have unsaved customization changes. Do you want to save them before leaving?",
-        {
-          success: { text: "Save Changes", type: "primary" },
-          cancel: { text: "Discard Changes", type: "danger" }
-        },
-        (success: boolean) => {
-          if (success) {
-            // Save changes before navigating
-            handleSubmit().then(() => {
-              navigate("/dashboard");
-            });
-          } else {
-            // Discard changes and navigate
-            navigate("/dashboard");
-          }
-        }
-      );
-      return false; // Prevent immediate navigation
-    }
-    return true; // Allow navigation
-  }, [hasUnsavedChanges, navigate]);
-
   const handleSubmit = async () => {
     if (!isFromApp && saveSettings) {
       try {
@@ -380,6 +353,7 @@ const CustomizeBot: React.FC<CustomizeBotProps> = ({
 
   const promptBeforeNavigate = useNavigationPrompt(hasUnsavedChanges, handleSubmit);
    // Example navigation handler for a button
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
    const handleNavigate = (destination: any) => {
     if (promptBeforeNavigate(destination)) {
       navigate(destination);
