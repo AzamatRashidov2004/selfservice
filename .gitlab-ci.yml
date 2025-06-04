@@ -1,10 +1,8 @@
 stages:
-  - version
   - build
   - deploy
 
 variables:
-  # Keep all existing variables
   VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT: $VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
   VITE_KEYCLOAK_CLIENT_ID_PRODUCTION: $VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
   VITE_KEYCLOAK_REALM: $VITE_KEYCLOAK_REALM
@@ -15,104 +13,7 @@ variables:
   VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
   VITE_MAESTRO_URL_DEVELOPMENT: $VITE_MAESTRO_URL_DEVELOPMENT
   VITE_MAESTRO_URL_PRODUCTION: $VITE_MAESTRO_URL_PRODUCTION
-  VERSION_FILE: ".version"
-  NODE_VERSION: "18"
 
-# Version job using conventional commits with simplified shell syntax
-version:
-  stage: version
-  image: alpine:latest
-  only:
-    refs:
-      - develop
-      - tags
-  script:
-    # Install required tools
-    - apk add --no-cache git
-    
-    # Check if .version file exists, if not create it with 0.1.0
-    - |
-      if [ ! -f "$VERSION_FILE" ]; then
-        echo "0.1.0" > "$VERSION_FILE"
-        echo "Created new version file with initial version 0.1.0"
-      fi
-    
-    # Read current version
-    - CURRENT_VERSION=$(cat "$VERSION_FILE")
-    
-    # Extract version components using cut command
-    - MAJOR=$(echo $CURRENT_VERSION | cut -d. -f1)
-    - MINOR=$(echo $CURRENT_VERSION | cut -d. -f2)
-    - PATCH=$(echo $CURRENT_VERSION | cut -d. -f3)
-    
-    # For develop branch, determine version increment based on commit message
-    - |
-      if [ "$CI_COMMIT_REF_NAME" = "develop" ]; then
-        echo "Analyzing commit message: $CI_COMMIT_MESSAGE"
-        
-        if echo "$CI_COMMIT_MESSAGE" | grep -E "^feat(\(.+\))?!:" > /dev/null || echo "$CI_COMMIT_MESSAGE" | grep -E "^BREAKING[\s-]CHANGE:" > /dev/null; then
-          echo "Detected BREAKING CHANGE - incrementing MAJOR version"
-          MAJOR=$(expr $MAJOR + 1)
-          MINOR=0
-          PATCH=0
-          
-        elif echo "$CI_COMMIT_MESSAGE" | grep -E "^feat(\(.+\))?:" > /dev/null; then
-          echo "Detected feat: - incrementing MINOR version"
-          MINOR=$(expr $MINOR + 1)
-          PATCH=0
-          
-        elif echo "$CI_COMMIT_MESSAGE" | grep -E "^fix(\(.+\))?:" > /dev/null; then
-          echo "Detected fix: - incrementing PATCH version"
-          PATCH=$(expr $PATCH + 1)
-          
-        else
-          echo "No conventional commit prefix detected - incrementing PATCH version"
-          PATCH=$(expr $PATCH + 1)
-        fi
-        
-        NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
-        echo "New calculated version: $NEW_VERSION"
-        
-      elif echo "$CI_COMMIT_REF_NAME" | grep -E "^v[0-9]+\.[0-9]+\.[0-9]+$" > /dev/null; then
-        # For version tags like v1.2.3, use the tag version
-        NEW_VERSION=$(echo "$CI_COMMIT_REF_NAME" | sed 's/^v//')
-        echo "Using tag version: $NEW_VERSION"
-      else
-        # For other tags, just use current version
-        NEW_VERSION="$CURRENT_VERSION"
-        echo "Using current version: $NEW_VERSION"
-      fi
-      
-    # Output the new version
-    - echo "$NEW_VERSION" > VERSION.txt
-    
-    # Update .version file in the repo to persist the version
-    - |
-      # Skip if the version didn't change
-      if [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
-        echo "$NEW_VERSION" > "$VERSION_FILE"
-        
-        # Configure Git with project-specific token
-        git config --global user.name "GitLab CI"
-        git config --global user.email "gitlab-ci@example.com"
-        
-        # Use Personal Access Token for more reliable permissions
-        git remote set-url origin "https://oauth2:${GITLAB_ACCESS_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
-        
-        git add "$VERSION_FILE"
-        git commit -m "chore(release): bump version to $NEW_VERSION [skip ci]"
-        git push origin HEAD:${CI_COMMIT_REF_NAME}
-        
-        echo "Updated version file in repository to $NEW_VERSION"
-      else
-        echo "Version unchanged, not updating repository"
-      fi
-  artifacts:
-    paths:
-      - VERSION.txt
-    expire_in: 1 day
-
-# Build jobs remain largely the same
 build unstable:
   stage: build
   image:
@@ -124,13 +25,11 @@ build unstable:
   script:
     - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
     - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - VERSION=$(cat VERSION.txt)
     - GODEBUG="http2client=0" /kaniko/executor
       --context .
       --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-      --destination $CI_REGISTRY_IMAGE:$VERSION
       --compressed-caching=false
-      --build-arg VERSION=$VERSION
+      --build-arg VERSION=$CI_COMMIT_SHORT_SHA
       --build-arg IS_MAIN="False"
       --build-arg VITE_ENVIRONMENT="DEVELOPMENT"
       --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
@@ -140,8 +39,6 @@ build unstable:
       --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_DEVELOPMENT
       --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_DEVELOPMENT
       --force
-  dependencies:
-    - version
 
 build release:
   stage: build
@@ -156,13 +53,11 @@ build release:
   script:
     - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
     - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - VERSION=$(cat VERSION.txt)
     - GODEBUG="http2client=0" /kaniko/executor
       --context .
       --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
-      --destination $CI_REGISTRY_IMAGE:$VERSION
       --compressed-caching=false
-      --build-arg VERSION=$VERSION
+      --build-arg VERSION=$CI_COMMIT_TAG
       --build-arg IS_MAIN="True"
       --build-arg VITE_ENVIRONMENT="PRODUCTION"
       --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
@@ -171,8 +66,6 @@ build release:
       --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY_PRODUCTION
       --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_PRODUCTION
       --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_PRODUCTION
-  dependencies:
-    - version
 
 deploy unstable:
   stage: deploy
@@ -185,22 +78,19 @@ deploy unstable:
   script:
     - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
     - /bin/sh deploy/prepare-namespace.sh develop
-    - VERSION=$(cat VERSION.txt)
     - helm upgrade
       --install
       --namespace develop
       --set namespace=develop
-      --set version=$VERSION
+      --set version=$CI_COMMIT_SHORT_SHA
       --set app.image.name=$CI_REGISTRY_IMAGE
-      --set app.image.tag=$VERSION
+      --set app.image.tag=$CI_COMMIT_SHORT_SHA
       --set imagePullPolicy=Always
       --set baseDomain=promethist.dev
       --set name=$NAME
       --reset-values
       --debug
       $NAME deploy/app
-  dependencies:
-    - version
 
 deploy release:
   stage: deploy
@@ -215,19 +105,16 @@ deploy release:
   script:
     - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
     - /bin/sh deploy/prepare-namespace.sh default
-    - VERSION=$(cat VERSION.txt)
     - helm upgrade
       --install
       --namespace default
       --set namespace=default
-      --set version=$VERSION
+      --set version=$CI_COMMIT_REF_NAME
       --set app.image.name=$CI_REGISTRY_IMAGE
-      --set app.image.tag=$VERSION
+      --set app.image.tag=$CI_COMMIT_REF_NAME
       --set imagePullPolicy=Always
       --set baseDomain=promethist.ai
       --set name=$NAME
       --reset-values
       --debug
       $NAME deploy/app
-  dependencies:
-    - version
