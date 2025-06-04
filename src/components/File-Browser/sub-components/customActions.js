@@ -195,12 +195,10 @@ export const getCustomActions = (selectedFiles, firstNodeInfo = null) => {
     customActions.push(detailsAction(true));
 
     customActions.unshift(editProjectAction(true));
-    customActions.push(detailsAction(true));
 
 
     // If it is a project launch or show details
     customActions.unshift(launchProjectAction(true));
-    customActions.push(detailsAction(true));
 
 
 
