@@ -138,6 +138,9 @@ export const CustomNode = (props) => {
         { id: 'launch', label: customActionNames.launch, icon: 'symlink' },
         { id: 'edit', label: customActionNames.edit, icon: 'config' },
         { id: 'delete', label: customActionNames.delete, icon: 'trash' },
+        { id: 'create_folder', label: customActionNames.newFolder, icon: 'folderCreate' },
+        { id: 'upload_file', label: customActionNames.upload_file, icon: 'upload' },
+        { id: 'upload_folder', label: customActionNames.upload_folder, icon: 'upload' },
         { id: 'custom_details', label: customActionNames.details, icon: 'info' }
       );
     } else if (isFolder) {
@@ -160,14 +163,33 @@ export const CustomNode = (props) => {
       console.log("No actions available for this node type");
       return;
     }
-    
+
+    // Calculate menu position to avoid going off-screen
+    const menuHeight = actions.length * 40; // Approximate height per item
+    const menuWidth = 160;
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    let adjustedY = y;
+    let adjustedX = x;
+
+    // Adjust Y position if menu would go below viewport
+    if (y + menuHeight > viewportHeight) {
+      adjustedY = Math.max(10, viewportHeight - menuHeight - 10);
+    }
+
+    // Adjust X position if menu would go beyond viewport
+    if (x + menuWidth > viewportWidth) {
+      adjustedX = Math.max(10, viewportWidth - menuWidth - 10);
+    }
+
     // Create context menu
     const menu = document.createElement('div');
     menu.className = 'filetree-context-menu';
     menu.style.cssText = `
       position: fixed;
-      top: ${y}px;
-      left: ${x}px;
+      top: ${adjustedY}px;
+      left: ${adjustedX}px;
       background: white;
       border: 1px solid #ddd;
       border-radius: 6px;
@@ -178,6 +200,8 @@ export const CustomNode = (props) => {
       font-family: system-ui, -apple-system, sans-serif;
       font-size: 14px;
     `;
+    
+    
     
     // Add menu items
     actions.forEach(action => {
