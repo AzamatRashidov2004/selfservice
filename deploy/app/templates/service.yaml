@@ -11,4 +11,4 @@ spec:
       targetPort: {{ .Values.app.port }}
   selector:
     app: {{ .Release.Name }}
-  type: ClusterIP
+  type: {{ .Values.service.type }}

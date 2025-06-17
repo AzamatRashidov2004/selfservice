@@ -1,9 +1,11 @@
 namespace: develop
 name: maestro-admin
+nameSuffix: ""
 version: 0.0.1
 
 baseDomain: promethist.dev
 clusterIssuer: letsencrypt
+imagePullPolicy: Always
 ingressClassName: nginx
 replicaCount: 1
 
