@@ -9,9 +9,6 @@ spec:
     matchLabels:
       app: {{ .Release.Name }}
   strategy:
-    # rollingUpdate:
-    #   maxSurge: {{ .Values.replicaCount }}
-    #   maxUnavailable: 1
     type: RollingUpdate
   template:
     metadata:
@@ -27,10 +24,10 @@ spec:
               name: http-app
           resources:
           {{- toYaml .Values.app.resources | nindent 12 }}
-      nodeSelector:
-        kubernetes.io/os: linux
       imagePullSecrets:
         - name: promethistai-projects-registry
+      nodeSelector:
+        kubernetes.io/os: linux
       tolerations:
         - effect: NoSchedule
           key: kubernetes.azure.com/scalesetpriority

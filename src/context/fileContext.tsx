@@ -80,6 +80,13 @@ interface FilesContextType {
   setCurrentProjectId: React.Dispatch<React.SetStateAction<string>>;
   currentBotConfig: FullBotConfig | null;
   setCurrentBotConfig: React.Dispatch<React.SetStateAction<FullBotConfig | null>>;
+  deleteProject: (id: number) => void;
+  renameNodeAndChildren: (
+    nodeId: number,
+    newName: string,
+    oldPath: string,
+    newPath: string
+  ) => void;
 }
 
 // Create the context with the initial value
@@ -137,6 +144,41 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     setFileStructure([]); // Transform and set the initial state
   }, []);
+
+  const renameNodeAndChildren = (
+    nodeId: number,
+    newName: string,
+    oldPath: string,
+    newPath: string
+  ) => {
+    setFilesData(prev => {
+      const deepCopy = JSON.parse(JSON.stringify(prev));
+      const node = deepCopy.find((f: FileData) => f.id === nodeId);
+      
+      if (node) {
+        // Update parent node
+        node.text = newName;
+        if (node.source_file) {
+          node.source_file = node.source_file.replace(oldPath, newPath);
+        }
+  
+        // Update all children paths
+        const updateChildrenPaths = (children: FileData[]) => {
+          children.forEach(child => {
+            if (child.source_file) {
+              child.source_file = child.source_file.replace(oldPath, newPath);
+            }
+            const childChildren = deepCopy.filter((f: FileData) => f.parent === child.id);
+            updateChildrenPaths(childChildren);
+          });
+        };
+  
+        const immediateChildren = deepCopy.filter((f: FileData) => f.parent === nodeId);
+        updateChildrenPaths(immediateChildren);
+      }
+      return deepCopy;
+    });
+  };
 
   function extractFoldersAndFile(path: string): {
     folders: string[];
@@ -264,6 +306,43 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     });
 
     setFileStructure(newFileStructure);
+  };
+
+  const deleteProject = (id: number) => {
+    // Find the project node first
+    const projectNode = filesData.find(file => file.id === id);
+    
+    if (!projectNode) {
+      console.error("Project not found:", id);
+      return;
+    }
+    
+    // For collecting all IDs to delete
+    const idsToDelete: number[] = [id]; // Start with the project ID itself
+    
+    // Recursive function to find all children
+    const collectChildren = (parentId: number) => {
+      // Find all direct children
+      const children = filesData.filter(file => file.parent === parentId);
+      
+      // Add each child's ID to our list
+      children.forEach(child => {
+        idsToDelete.push(child.id);
+        
+        // If this child is a folder (droppable), also collect its children
+        if (child.droppable) {
+          collectChildren(child.id);
+        }
+      });
+    };
+    
+    // Collect all children of the project
+    collectChildren(id);
+    
+    console.log("Deleting project and all children:", idsToDelete);
+    
+    // Use existing deleteFiles to update state with all collected IDs
+    deleteFiles(idsToDelete);
   };
 
   const getFileStructure = (
@@ -496,6 +575,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
       return findParent(currentNode.parent);
     };
 
+    
+
     // Start the recursive parent search from the given nodeId
     findParent(nodeId);
 
@@ -565,6 +646,8 @@ export const FilesProvider: React.FC<{ children: ReactNode }> = ({
     setCurrentProjectId,
     currentBotConfig,
     setCurrentBotConfig,
+    deleteProject,
+    renameNodeAndChildren
   };
 
   return (

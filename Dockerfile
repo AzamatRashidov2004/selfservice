@@ -10,6 +10,7 @@ COPY . .
 
 # Env vars required for build
 # FixMe: Passing secrets this way is insecure.
+ARG VERSION
 ARG VITE_ENVIRONMENT
 ARG VITE_KEYCLOAK_CLIENT_ID
 ARG VITE_KEYCLOAK_REALM
@@ -26,6 +27,10 @@ RUN echo "<DEBUG_START>" \
     && echo $VITE_KRONOS_URL \
     && echo $VITE_MAESTRO_URL \
     && echo "<DEBUG_END>"
+
+# Make version available to Vite
+ENV VERSION=$VERSION
+ENV VITE_APP_VERSION=$VERSION
 
 # Build the React app
 RUN npm run build

@@ -2,119 +2,123 @@ stages:
   - build
   - deploy
 
-variables:
-  VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT: $VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
-  VITE_KEYCLOAK_CLIENT_ID_PRODUCTION: $VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
-  VITE_KEYCLOAK_REALM: $VITE_KEYCLOAK_REALM
-  VITE_KEYCLOAK_URL: $VITE_KEYCLOAK_URL
-  VITE_KRONOS_API_KEY_DEVELOPMENT: $VITE_KRONOS_API_KEY_DEVELOPMENT
-  VITE_KRONOS_API_KEY_PRODUCTION: $VITE_KRONOS_API_KEY_PRODUCTION
-  VITE_KRONOS_URL_DEVELOPMENT: $VITE_KRONOS_URL_DEVELOPMENT
-  VITE_KRONOS_URL_PRODUCTION: $VITE_KRONOS_URL_PRODUCTION
-  VITE_MAESTRO_URL_DEVELOPMENT: $VITE_MAESTRO_URL_DEVELOPMENT
-  VITE_MAESTRO_URL_PRODUCTION: $VITE_MAESTRO_URL_PRODUCTION
+.build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.8.0-debug
+    entrypoint: [ "" ]
+  variables:
+    VERSION: $CI_COMMIT_SHORT_SHA
+    IS_MAIN: "False"
+    VITE_ENVIRONMENT: "DEVELOPMENT"
+    VITE_KEYCLOAK_CLIENT_ID: $VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
+    VITE_KRONOS_API_KEY: $VITE_KRONOS_API_KEY_DEVELOPMENT
+    VITE_KRONOS_URL: $VITE_KRONOS_URL_DEVELOPMENT
+    VITE_MAESTRO_URL: $VITE_MAESTRO_URL_DEVELOPMENT
+  only:
+    refs:
+      - develop
+  script:
+    - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
+    - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - GODEBUG="http2client=0" /kaniko/executor
+      --context .
+      --compressed-caching=false
+      --destination $CI_REGISTRY_IMAGE:$VERSION
+      --build-arg VERSION=$VERSION
+      --build-arg IS_MAIN=$IS_MAIN
+      --build-arg VITE_ENVIRONMENT=$VITE_ENVIRONMENT
+      --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID
+      --build-arg VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
+      --build-arg VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
+      --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY
+      --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL
+      --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL
 
 build unstable:
-  stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.8.0-debug
-    entrypoint: [ "" ]
-  only:
-    refs:
-      - develop
-  script:
-    - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
-    - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - GODEBUG="http2client=0" /kaniko/executor
-      --context .
-      --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-      --compressed-caching=false
-      --build-arg VERSION=$CI_COMMIT_SHORT_SHA
-      --build-arg IS_MAIN="False"
-      --build-arg VITE_ENVIRONMENT="DEVELOPMENT"
-      --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
-      --build-arg VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
-      --build-arg VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
-      --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY_DEVELOPMENT
-      --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_DEVELOPMENT
-      --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_DEVELOPMENT
-      --force
+  extends: .build
 
 build release:
-  stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.8.0-debug
-    entrypoint: [ "" ]
+  extends: .build
+  variables:
+    VERSION: $CI_COMMIT_TAG
+    IS_MAIN: "True"
+    VITE_ENVIRONMENT: "PRODUCTION"
+    VITE_KEYCLOAK_CLIENT_ID: $VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
+    VITE_KRONOS_API_KEY: $VITE_KRONOS_API_KEY_PRODUCTION
+    VITE_KRONOS_URL: $VITE_KRONOS_URL_PRODUCTION
+    VITE_MAESTRO_URL: $VITE_MAESTRO_URL_PRODUCTION
   only:
     refs:
       - tags
-  except:
-    - /^(!main).+@/
-  script:
-    - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
-    - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - GODEBUG="http2client=0" /kaniko/executor
-      --context .
-      --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
-      --compressed-caching=false
-      --build-arg VERSION=$CI_COMMIT_TAG
-      --build-arg IS_MAIN="True"
-      --build-arg VITE_ENVIRONMENT="PRODUCTION"
-      --build-arg VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID_PRODUCTION
-      --build-arg VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
-      --build-arg VITE_KEYCLOAK_URL=$VITE_KEYCLOAK_URL
-      --build-arg VITE_KRONOS_API_KEY=$VITE_KRONOS_API_KEY_PRODUCTION
-      --build-arg VITE_KRONOS_URL=$VITE_KRONOS_URL_PRODUCTION
-      --build-arg VITE_MAESTRO_URL=$VITE_MAESTRO_URL_PRODUCTION
 
-deploy unstable:
+build mf:
+  extends: .build
+  variables:
+    VERSION: ${CI_COMMIT_TAG}-mf
+    IS_MAIN: "True"
+    VITE_ENVIRONMENT: "PRODUCTION"
+    VITE_KEYCLOAK_CLIENT_ID: $VITE_KEYCLOAK_CLIENT_ID_MF
+    VITE_KRONOS_API_KEY: $VITE_KRONOS_API_KEY_MF
+    VITE_KRONOS_URL: $VITE_KRONOS_URL_MF
+    VITE_MAESTRO_URL: $VITE_MAESTRO_URL_MF
+  only:
+    refs:
+      - tags
+  when: manual
+
+.deploy:
   stage: deploy
   image: registry.gitlab.com/promethistai/system/deployer:211222
   variables:
+    KUBE_CONTEXT: $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
+    NAMESPACE: develop
     NAME: maestro-admin
+    NAME_SUFFIX: ""
+    VERSION: $CI_COMMIT_SHORT_SHA
+    BASE_DOMAIN: promethist.dev
   only:
     refs:
       - develop
   script:
-    - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
-    - /bin/sh deploy/prepare-namespace.sh develop
+    - kubectl config use-context $KUBE_CONTEXT
+    - /bin/sh deploy/prepare-namespace.sh $NAMESPACE
     - helm upgrade
       --install
-      --namespace develop
-      --set namespace=develop
-      --set version=$CI_COMMIT_SHORT_SHA
-      --set app.image.name=$CI_REGISTRY_IMAGE
-      --set app.image.tag=$CI_COMMIT_SHORT_SHA
-      --set imagePullPolicy=Always
-      --set baseDomain=promethist.dev
+      --namespace $NAMESPACE
+      --set namespace=$NAMESPACE
       --set name=$NAME
+      --set nameSuffix=$NAME_SUFFIX
+      --set version=$VERSION
+      --set app.image.name=$CI_REGISTRY_IMAGE
+      --set app.image.tag=$VERSION
+      --set baseDomain=$BASE_DOMAIN
       --reset-values
       --debug
       $NAME deploy/app
 
+deploy unstable:
+  extends: .deploy
+
 deploy release:
-  stage: deploy
-  image: registry.gitlab.com/promethistai/system/deployer:211222
+  extends: .deploy
   variables:
-    NAME: maestro-admin
+    NAMESPACE: default
+    VERSION: $CI_COMMIT_TAG
+    BASE_DOMAIN: promethist.ai
   only:
     refs:
       - tags
-  except:
-    - /^(!main).+@/
-  script:
-    - kubectl config use-context $CI_PROJECT_NAMESPACE/kronos:ciirc-aks
-    - /bin/sh deploy/prepare-namespace.sh default
-    - helm upgrade
-      --install
-      --namespace default
-      --set namespace=default
-      --set version=$CI_COMMIT_REF_NAME
-      --set app.image.name=$CI_REGISTRY_IMAGE
-      --set app.image.tag=$CI_COMMIT_REF_NAME
-      --set imagePullPolicy=Always
-      --set baseDomain=promethist.ai
-      --set name=$NAME
-      --reset-values
-      --debug
-      $NAME deploy/app
+
+deploy mf:
+  extends: .deploy
+  variables:
+    KUBE_CONTEXT: $CI_PROJECT_NAMESPACE/devops:mf-aks
+    NAMESPACE: default
+    NAME_SUFFIX: mf
+    VERSION: ${CI_COMMIT_TAG}-mf
+    BASE_DOMAIN: promethist.dev
+  only:
+    refs:
+      - tags
+  when: manual

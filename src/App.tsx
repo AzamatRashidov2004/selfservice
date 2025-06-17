@@ -12,6 +12,9 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 // Import Font Awesome
 import "@fortawesome/fontawesome-free/css/all.min.css";
 
+import { NavigationProvider } from './context/navigationContext';
+
+
 // Import Pages
 import New_Project from "./pages/New-Project/New_Project";
 import Navbar from "./components/Navbar/Navbar";
@@ -30,6 +33,7 @@ import "./responsive.css";
 import Contact_Page from "./pages/Contact/Contact_Page";
 import { FilesProvider } from "./context/fileContext";
 import CustomizeBot from "./components/Customize-Bot-Section/Customize_Bot";
+import NavigationHandler from "./components/NavigationHandler";
 
 const App: React.FC = () => {
   // Window size listener for Scrollbar width styling
@@ -50,20 +54,23 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
-      <FilesProvider>
+    <FilesProvider>
+      <NavigationProvider>
         <Router>
+          <NavigationHandler />
           <Navbar />
           <Modals />
           <Routes>
-            <Route path="/" element={<Landing_Page />} />
+          <Route path="/" element={<Landing_Page />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/new-project" element={<New_Project />} />
             <Route path="/try-now" element={<Try_Now />} />
             <Route path="/contact" element={<Contact_Page />} />
             <Route path="/edit" element={<CustomizeBot />} />
-          </Routes>
-          <Footer />
-        </Router>
+            </Routes>
+            <Footer />
+          </Router>
+        </NavigationProvider>
       </FilesProvider>
     </AuthProvider>
   );

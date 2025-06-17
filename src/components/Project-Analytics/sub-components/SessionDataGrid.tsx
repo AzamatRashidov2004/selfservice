@@ -201,6 +201,7 @@ const SessionsDataGrid: React.FC<DataGridParams> = ({ session_id }) => {
         setSessionData(JSON.parse(cachedEvents));
       } else {
         const eventsResponse = await fetchSessionEvents(session_id);
+        console.log("THE EVENT RESPONSE IS : ", eventsResponse);
         sessionStorage.setItem(`session_events_${session_id}`, JSON.stringify(eventsResponse));
         setSessionData(eventsResponse);
       }
