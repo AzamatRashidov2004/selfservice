@@ -2,6 +2,12 @@
 
 Client service containing the administration console for the SelfService project.
 
+## Deployment
+
+The client is currently deployed at
+https://maestro-admin.promethist.dev/
+
+
 ## Project Structure
 
 Each component has its own folder under `src/components`, containing the JSX file and its associated CSS file.
