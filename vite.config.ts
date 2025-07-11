@@ -4,9 +4,6 @@ import react from '@vitejs/plugin-react-swc'
 // https://vitejs.dev/config/ test
 export default defineConfig({
   plugins: [react()],
-  define: {
-    'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.VERSION || "development version")
-  },
   server: {
     host: '0.0.0.0',  // Make sure the dev server listens on all interfaces
     port: 8080,        // Port for dev server

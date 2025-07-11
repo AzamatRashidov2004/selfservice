@@ -8,6 +8,9 @@ clusterIssuer: letsencrypt
 imagePullPolicy: Always
 ingressClassName: nginx
 replicaCount: 1
+secretProviderClass: azure-secret-provider
+secretsName: admin-develop
+serviceAccountName: default
 
 app:
   image:

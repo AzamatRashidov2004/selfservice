@@ -1,4 +1,5 @@
-import { kronosApiUrl as apiUrl, kronosApiKey as apiKey, handleError } from "../apiEnv";
+import { kronosApiUrl as apiUrl, kronosApiKey as apiKey } from "../../utility/config.ts";
+import {handleError} from "../handleError.ts";
 
 export async function deletePdfProject(projectID: string, token: string): Promise<boolean | null>{
   try{
@@ -9,12 +10,12 @@ export async function deletePdfProject(projectID: string, token: string): Promis
         'x-api-key': apiKey
       }
     });
-  
+
     if (!projectResponse.ok){
       console.error("Error while trying to delete project " + projectResponse.statusText);
       return null
     }
-  
+
     return true
 
   }catch (e: unknown) {
@@ -31,17 +32,17 @@ export async function deletePdf(projectID: string, docID: string, token: string)
         'x-api-key': apiKey
       }
     });
-  
+
     if (!projectResponse.ok){
       console.error("Error while trying to delete project " + projectResponse.statusText);
       return false
     }
-  
+
     return true
 
   }catch (e: unknown) {
     handleError({error: e, origin: "deletePdf"})
-    return false 
+    return false
   }
 }
 
@@ -57,16 +58,16 @@ export async function deleteBulkPdf(projectID: string, docIds: string[], token:s
       },
       body: JSON.stringify(docIds)
     });
-  
+
     if (!projectResponse.ok){
       console.error("Error while trying to delete files " + projectResponse.statusText);
       return false
     }
-  
+
     return true
 
   }catch (e: unknown) {
     handleError({error: e, origin: "deleteBulkPdf"})
-    return false 
+    return false
   }
 }

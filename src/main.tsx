@@ -1,7 +1,13 @@
 import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
 import './index.css'
+import {loadConfig} from "./utility/config.ts";
 
-createRoot(document.getElementById('root')!).render(
-  <App />
-)
+async function bootstrap() {
+    await loadConfig();
+    const { default: App } = await import('./App')
+    createRoot(document.getElementById('root')!).render(<App />);
+}
+
+bootstrap();
+
+

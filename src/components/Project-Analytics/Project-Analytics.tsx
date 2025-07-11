@@ -14,7 +14,7 @@ import {
   TotalProjectUsers,
 } from "../../api/maestro/getMaestro";
 import Loader from "../Loader/Loader";
-import { maestroApiUrl } from "../../api/apiEnv";
+import { maestroApiUrl } from "../../utility/config.ts";
 
 type ProjectDetails = {
   setOpenDetails: () => void;
@@ -78,8 +78,8 @@ const ProjectAnalytics: React.FC<ProjectDetails> = ({
           setSessionInfoErrors(response);
         }
       );
-      
-      // For all time data 
+
+      // For all time data
       fetchProjectSessions(
         selectedProjectData.projectId,
         "all"

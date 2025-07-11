@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom"; // Import Link component
 import "./Navbar.css";
 import { useAuth } from "../../context/authContext";
+import {version} from "../../utility/config.ts";
 
 const Navbar: React.FC = () => {
   const { logout, login, authenticated } = useAuth();
@@ -26,7 +27,7 @@ const Navbar: React.FC = () => {
             marginTop: "4px",
             fontSize:"12px"
           }}>
-            {import.meta.env.VITE_APP_VERSION}
+            {version}
           </p>
 
           {/* Right-aligned buttons */}

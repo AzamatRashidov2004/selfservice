@@ -24,12 +24,24 @@ spec:
               name: http-app
           resources:
           {{- toYaml .Values.app.resources | nindent 12 }}
+          volumeMounts:
+            - name: secrets
+              mountPath: /app/.env
+              subPath: {{ .Values.secretsName }}
       imagePullSecrets:
         - name: promethistai-projects-registry
       nodeSelector:
         kubernetes.io/os: linux
+      serviceAccountName: {{ .Values.serviceAccountName }}
       tolerations:
         - effect: NoSchedule
           key: kubernetes.azure.com/scalesetpriority
           operator: Equal
           value: spot
+      volumes:
+        - name: secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Values.secretProviderClass }}
