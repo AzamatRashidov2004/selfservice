@@ -3,7 +3,7 @@
 /deploy
 /node_modules
 
-*.env
+*.env*
 *.log
 .dockerignore
 .gitignore

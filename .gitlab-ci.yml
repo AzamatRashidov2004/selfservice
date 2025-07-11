@@ -2,21 +2,11 @@ stages:
   - build
   - deploy
 
-.build:
+build unstable:
   stage: build
   image:
     name: gcr.io/kaniko-project/executor:v1.8.0-debug
     entrypoint: [ "" ]
-  variables:
-    VERSION: $CI_COMMIT_SHORT_SHA
-    IS_MAIN: "False"
-    ENVIRONMENT: "DEVELOPMENT"
-    KEYCLOAK_CLIENT_ID: $VITE_KEYCLOAK_CLIENT_ID_DEVELOPMENT
-    KEYCLOAK_REALM: $VITE_KEYCLOAK_REALM_DEVELOPMENT
-    KEYCLOAK_URL: $VITE_KEYCLOAK_URL_DEVELOPMENT
-    KRONOS_API_KEY: $VITE_KRONOS_API_KEY_DEVELOPMENT
-    KRONOS_URL: $VITE_KRONOS_URL_DEVELOPMENT
-    MAESTRO_URL: $VITE_MAESTRO_URL_DEVELOPMENT
   only:
     refs:
       - develop
@@ -26,52 +16,28 @@ stages:
     - GODEBUG="http2client=0" /kaniko/executor
       --context .
       --compressed-caching=false
-      --destination $CI_REGISTRY_IMAGE:$VERSION
-      --build-arg VERSION=$VERSION
-      --build-arg IS_MAIN=$IS_MAIN
-      --build-arg ENVIRONMENT=$ENVIRONMENT
-      --build-arg KEYCLOAK_CLIENT_ID=$KEYCLOAK_CLIENT_ID
-      --build-arg KEYCLOAK_REALM=$KEYCLOAK_REALM
-      --build-arg KEYCLOAK_URL=$KEYCLOAK_URL
-      --build-arg KRONOS_API_KEY=$KRONOS_API_KEY
-      --build-arg KRONOS_URL=$KRONOS_URL
-      --build-arg MAESTRO_URL=$MAESTRO_URL
-
-build unstable:
-  extends: .build
+      --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+      --build-arg VERSION=$CI_COMMIT_SHORT_SHA
+      --build-arg IS_MAIN="False"
+      --force
 
 build release:
-  extends: .build
-  variables:
-    VERSION: $CI_COMMIT_TAG
-    IS_MAIN: "True"
-    ENVIRONMENT: "PRODUCTION"
-    KEYCLOAK_CLIENT_ID: $KEYCLOAK_CLIENT_ID_PRODUCTION
-    KEYCLOAK_REALM: $KEYCLOAK_REALM_PRODUCTION
-    KEYCLOAK_URL: $KEYCLOAK_URL_PRODUCTION
-    KRONOS_API_KEY: $KRONOS_API_KEY_PRODUCTION
-    KRONOS_URL: $KRONOS_URL_PRODUCTION
-    MAESTRO_URL: $MAESTRO_URL_PRODUCTION
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.8.0-debug
+    entrypoint: [ "" ]
   only:
     refs:
       - tags
-
-build mf:
-  extends: .build
-  variables:
-    VERSION: ${CI_COMMIT_TAG}-mf
-    IS_MAIN: "True"
-    ENVIRONMENT: "PRODUCTION"
-    KEYCLOAK_CLIENT_ID: $KEYCLOAK_CLIENT_ID_MF
-    KEYCLOAK_REALM: $KEYCLOAK_REALM_MF
-    KEYCLOAK_URL: $KEYCLOAK_URL_MF
-    KRONOS_API_KEY: $KRONOS_API_KEY_MF
-    KRONOS_URL: $KRONOS_URL_MF
-    MAESTRO_URL: $MAESTRO_URL_MF
-  only:
-    refs:
-      - tags
-  when: manual
+  script:
+    - if [ -z "$TARGET" ]; then DOCKERFILE=Dockerfile; SUFFIX=""; else DOCKERFILE="$TARGET.Dockerfile"; SUFFIX="-$TARGET"; fi;
+    - mkdir -p /kaniko/.docker && echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - GODEBUG="http2client=0" /kaniko/executor
+      --context .
+      --compressed-caching=false
+      --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+      --build-arg VERSION=$CI_COMMIT_TAG
+      --build-arg IS_MAIN="True"
 
 .deploy:
   stage: deploy
@@ -83,6 +49,9 @@ build mf:
     NAME_SUFFIX: ""
     VERSION: $CI_COMMIT_SHORT_SHA
     BASE_DOMAIN: promethist.dev
+    SECRET_PROVIDER_CLASS: azure-secret-provider
+    SECRETS_NAME: admin-develop
+    SERVICE_ACCOUNT_NAME: default
   only:
     refs:
       - develop
@@ -99,6 +68,9 @@ build mf:
       --set app.image.name=$CI_REGISTRY_IMAGE
       --set app.image.tag=$VERSION
       --set baseDomain=$BASE_DOMAIN
+      --set secretProviderClass=$SECRET_PROVIDER_CLASS
+      --set secretsName=$SECRETS_NAME
+      --set serviceAccountName=$SERVICE_ACCOUNT_NAME
       --reset-values
       --debug
       $NAME deploy/app
@@ -112,6 +84,7 @@ deploy release:
     NAMESPACE: default
     VERSION: $CI_COMMIT_TAG
     BASE_DOMAIN: promethist.ai
+    SECRETS_NAME: admin
   only:
     refs:
       - tags
@@ -122,8 +95,25 @@ deploy mf:
     KUBE_CONTEXT: promethistai-projects/ciirc-projects/selfservice/devops:mf-aks
     NAMESPACE: default
     NAME_SUFFIX: mf
-    VERSION: ${CI_COMMIT_TAG}-mf
+    VERSION: $CI_COMMIT_TAG
     BASE_DOMAIN: promethist.dev
+    SECRETS_NAME: admin
+  only:
+    refs:
+      - tags
+  when: manual
+
+deploy smart-sop:
+  extends: .deploy
+  variables:
+    KUBE_CONTEXT: promethistai-projects/ciirc-projects/selfservice/devops:smart-sop
+    NAMESPACE: smart-sop
+    NAME: admin
+    VERSION: $CI_COMMIT_TAG
+    BASE_DOMAIN: k8s-sop.czech-itc.cz
+    SECRET_PROVIDER_CLASS: vault-secret-provider
+    SECRETS_NAME: $NAME
+    SERVICE_ACCOUNT_NAME: smart-sop-secrets-test
   only:
     refs:
       - tags
