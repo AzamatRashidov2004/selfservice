@@ -11,6 +11,10 @@ COPY . .
 # Build the React app
 RUN npm run build
 
+# Make version globally available
+ARG VERSION
+ENV VERSION=$VERSION
+
 # Serve the built app
 CMD ["npm", "run", "preview"]
 
