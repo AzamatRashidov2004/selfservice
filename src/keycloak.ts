@@ -1,6 +1,5 @@
 import Keycloak from 'keycloak-js';
-
-export const kronosApiUrl: string = import.meta.env.VITE_KRONOS_URL;
+import {keycloakClientId, keycloakClientIdLocal, keycloakRealm, keycloakUrl} from "./utility/config.ts";
 
 // Function to determine if the app is running on localhost
 const isLocalhost = () => {
@@ -8,9 +7,9 @@ const isLocalhost = () => {
 };
 
 const keycloak = new Keycloak({
-  url: import.meta.env.VITE_KEYCLOAK_URL,
-  realm: import.meta.env.VITE_KEYCLOAK_REALM,
-  clientId: isLocalhost() ? import.meta.env.VITE_KEYCLOAK_CLIENT_ID_LOCAL : import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
+  url: keycloakUrl,
+  realm: keycloakRealm,
+  clientId: isLocalhost() ? keycloakClientIdLocal : keycloakClientId,
 });
 
 export default keycloak;

@@ -1,4 +1,4 @@
-import { maestroApiUrl } from "../apiEnv";
+import { maestroApiUrl } from "../../utility/config.ts";
 
 const BASE_URL = maestroApiUrl;
 //const BASE_URL = "http://localhost:8020";

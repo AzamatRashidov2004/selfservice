@@ -33,7 +33,7 @@ import {
 } from '../../../utility/Session_Storage';
 
 import { getCustomActions } from './customActions';
-import { maestroApiUrl } from '../../../api/apiEnv';
+import { maestroApiUrl } from '../../../utility/config.ts';
 
 
 
@@ -278,7 +278,7 @@ async function handleAction(
       );
       return;
     }
-  
+
     const selectedFile = selectedFiles[0];
     const nodeInfo = getNodeInfo(parseInt(selectedFile.id));
     if (!nodeInfo) {
@@ -290,7 +290,7 @@ async function handleAction(
       );
       return;
     }
-    
+
     // Get project information
     const projectInfo = getProjectForNode(parseInt(selectedFile.id));
     if (!projectInfo || !projectInfo.kronosProjectId) {
@@ -302,9 +302,9 @@ async function handleAction(
       );
       return;
     }
-    
+
     const currentName = nodeInfo.text;
-    
+
     // Important: Get ONLY the directory part of the path
     let parentPath = "";
     if (nodeInfo.parent !== 0) { // Not root
@@ -313,11 +313,11 @@ async function handleAction(
         parentPath = getPathFromProject(parentNode.id);
       }
     }
-  
+
     // Create modal for renaming
     createFolderModalEvent(async (newName) => {
       if (!newName || newName.trim() === currentName) return;
-  
+
       // Ensure the new name doesn't contain any forbidden characters
       const forbiddenChars = ['\\', '/', ':', '*', '?', '"', '<', '>', '|'];
       if (forbiddenChars.some(char => newName.includes(char))) {
@@ -329,35 +329,35 @@ async function handleAction(
         );
         return;
       }
-  
+
       const isDirectory = selectedFile.isDir;
-      
+
       // Calculate correct paths
       const oldPath = parentPath + currentName; // Old complete path
       const newPath = parentPath + newName;     // New complete path
-      
+
       console.log("Debug paths:", {
-        parentPath, 
+        parentPath,
         currentName,
         newName,
         oldPath,
         newPath,
         isDirectory
       });
-  
+
       try {
         const payload = [];
         const projectId = projectInfo.kronosProjectId;
-  
+
         if (isDirectory) {
           // For directories, add trailing slash to paths
           const oldDirPath = oldPath + '/';
           const newDirPath = newPath + '/';
-          
+
           // Handle directory rename - we need to update this folder and all nested files
           const allChildren = getAllChildren(nodeInfo.id);
           console.log(`Found ${allChildren.length} children of the directory`);
-          
+
           // First add the folder itself (if it has a KB ID)
           if (nodeInfo.kronosKB_id) {
             payload.push({
@@ -366,7 +366,7 @@ async function handleAction(
               source_file: newDirPath
             });
           }
-          
+
           // Then add all children with updated paths
           allChildren.forEach(child => {
             if (child.kronosKB_id) {
@@ -380,13 +380,13 @@ async function handleAction(
                 const childParentPath = getPathFromProject(child.parent);
                 childRelativePath = childParentPath + child.text;
               }
-              
+
               console.log(`Child ${child.id} (${child.text}) original path:`, childRelativePath);
-              
+
               // Replace the old directory prefix with the new one
               const childNewPath = childRelativePath.replace(oldDirPath, newDirPath);
               console.log(`Child ${child.id} new path:`, childNewPath);
-              
+
               payload.push({
                 id: child.kronosKB_id,
                 project_id: projectId,
@@ -402,26 +402,26 @@ async function handleAction(
             source_file: newPath
           });
         }
-  
+
         // Log the payload for debugging
         console.log("Rename payload:", JSON.stringify(payload, null, 2));
-        
+
         // Try a simpler approach with just the file being renamed
         const simplifiedPayload = [{
           id: nodeInfo.kronosKB_id,
           project_id: projectId,
           source_file: isDirectory ? newPath + '/' : newPath
         }];
-        
+
         console.log("Simplified payload attempt:", JSON.stringify(simplifiedPayload, null, 2));
-  
+
         // Use bulk update endpoint with simplified payload first
         const result = await updatePathBulk(
           projectId,
           payload, // Start with just renaming the single item
           keycloak.token
         );
-  
+
         if (result) {
           // On success, update UI only for the renamed file/folder
           fileContext.renameNodeAndChildren(
@@ -430,14 +430,14 @@ async function handleAction(
             oldPath + (isDirectory ? '/' : ''),
             newPath + (isDirectory ? '/' : '')
           );
-  
+
           createNotificationEvent(
             'Success',
             'Item renamed successfully!',
             'success',
             4000
           );
-          
+
           // If this was a directory with children, we can handle the children in a follow-up request
           // to simplify debugging
           if (isDirectory && allChildren.length > 0 && payload.length > 1) {
@@ -519,7 +519,7 @@ async function handleAction(
       margin-bottom: 8px;
       animation: scaleIn 0.3s ease-out;
     `;
-    
+
     const warningIcon = document.createElement('div');
     warningIcon.innerHTML = `
       <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -628,7 +628,7 @@ async function handleAction(
       // Add a nice fade-out effect
       confirmDialog.style.animation = 'fadeIn 0.2s ease-in reverse';
       overlay.style.animation = 'fadeIn 0.2s ease-in reverse';
-      
+
       // Remove after animation completes
       setTimeout(() => {
         document.body.removeChild(confirmDialog);
@@ -648,7 +648,7 @@ async function handleAction(
       // Add a nice fade-out effect
       confirmDialog.style.animation = 'fadeIn 0.2s ease-in reverse';
       overlay.style.animation = 'fadeIn 0.2s ease-in reverse';
-      
+
       // Remove after animation completes
       setTimeout(() => {
         document.body.removeChild(confirmDialog);

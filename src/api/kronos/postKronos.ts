@@ -1,8 +1,5 @@
-import {
-  kronosApiUrl as apiUrl,
-  kronosApiKey as apiKey,
-  handleError,
-} from "../apiEnv";
+import { kronosApiUrl as apiUrl, kronosApiKey as apiKey } from "../../utility/config.ts";
+import { handleError } from "../handleError.ts";
 import {
   SettingsType,
   ChatBotSceleton,
@@ -246,23 +243,23 @@ export async function updatePathBulk(
 ): Promise<boolean> {
   try {
     const url = new URL(`${apiUrl}/projects/${projectID}/knowledge_base/bulk`);
-    
+
     let program_name = null;
     const firstSource = knowledge_bases[0].source_file;
     if (firstSource.trim().length > 0) {
       program_name = extractProgramName(firstSource);
     }
-    
+
     const requestBody = {
       knowledge_bases,
       custom_metadata: {
         program_name: program_name,  // Include program_name or null if not available
       },
     };
-    
+
     // Log the exact request payload
     console.log("Request to updatePathBulk:", JSON.stringify(requestBody, null, 2));
-    
+
     const projectResponse: Response = await fetch(url.toString(), {
       method: "PUT",
       headers: {
@@ -272,7 +269,7 @@ export async function updatePathBulk(
       },
       body: JSON.stringify(requestBody),
     });
-    
+
     if (!projectResponse.ok) {
       // Get the complete error message from the response
       const errorText = await projectResponse.text();

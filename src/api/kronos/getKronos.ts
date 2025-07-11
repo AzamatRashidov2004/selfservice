@@ -1,8 +1,5 @@
-import {
-  kronosApiUrl as apiUrl,
-  kronosApiKey as apiKey,
-  handleError,
-} from "../apiEnv";
+import { kronosApiUrl as apiUrl, kronosApiKey as apiKey } from "../../utility/config.ts";
+import { handleError } from "../handleError.ts";
 import {
   KronosProjectType,
   kronosKnowledgeBaseType,
