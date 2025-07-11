@@ -14,6 +14,7 @@ const config = {
     KRONOS_API_KEY: process.env.KRONOS_API_KEY,
     KRONOS_URL: process.env.KRONOS_URL,
     MAESTRO_URL: process.env.MAESTRO_URL,
+    VERSION: process.env.VERSION
 }
 fs.writeFileSync(path.join(outDir, 'config.json'), JSON.stringify(config, null, 2), 'utf-8');
 console.log(`✔ runtime config written to ${outDir}/config.json`)

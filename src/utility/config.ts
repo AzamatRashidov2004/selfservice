@@ -7,6 +7,7 @@ export interface Config {
     KRONOS_API_KEY: string;
     KRONOS_URL: string;
     MAESTRO_URL: string;
+    VERSION: string;
 }
 
 export let environment: string;
@@ -17,6 +18,7 @@ export let keycloakUrl: string;
 export let kronosApiKey: string;
 export let kronosApiUrl: string;
 export let maestroApiUrl: string;
+export let version: string;
 
 export const loadConfig = async () => {
     const res = await fetch('/config.json', { cache: 'no-store' })
@@ -29,4 +31,5 @@ export const loadConfig = async () => {
     kronosApiKey = data.KRONOS_API_KEY;
     kronosApiUrl = data.KRONOS_URL;
     maestroApiUrl = data.MAESTRO_URL;
+    version = data.VERSION || 'dev';
 }
