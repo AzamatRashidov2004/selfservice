@@ -1,0 +1,10 @@
+{
+  "ENVIRONMENT": "DEVELOPMENT",
+  "KEYCLOAK_CLIENT_ID": "selfservice-development",
+  "KEYCLOAK_CLIENT_ID_LOCAL": "selfservice-local",
+  "KEYCLOAK_REALM": "alquist",
+  "KEYCLOAK_URL": "https://keycloak.promethist.dev",
+  "KRONOS_API_KEY": "sk-nmzhtr8qLPZvmAAvMY1n",
+  "KRONOS_URL": "https://kronos.promethist.dev",
+  "MAESTRO_URL": "https://maestro.promethist.dev"
+}
